@@ -76,12 +76,24 @@ L.tileLayer(
     attribution: "&copy; OpenStreetMap contributors"
   }
 ).addTo(map);
+let markers = [];
 
-fetch(DATA_URL)
-  .then(response => response.json())
-  .then(employees => {
+async function loadEmployees() {
 
-    const markers = [];
+  try {
+
+    const response = await fetch(
+      DATA_URL + "&t=" + Date.now()
+    );
+
+    const employees = await response.json();
+
+    // Эски markerларни ўчириш
+    markers.forEach(marker => {
+      map.removeLayer(marker);
+    });
+
+    markers = [];
 
     employees.forEach(employee => {
 
@@ -132,9 +144,11 @@ fetch(DATA_URL)
       markers.push(marker);
     });
 
+    // Ходимлар бор бўлса, карта уларга мослашади
     if (markers.length > 0) {
 
-      const group = L.featureGroup(markers);
+      const group =
+        L.featureGroup(markers);
 
       map.fitBounds(
         group.getBounds().pad(0.2)
@@ -146,20 +160,28 @@ fetch(DATA_URL)
         [41.2995, 69.2401],
         11
       );
+
     }
 
-  })
-  .catch(error => {
+  } catch (error) {
 
-    console.error(error);
-
-    map.setView(
-      [41.2995, 69.2401],
-      11
+    console.error(
+      "Xodimlar ma'lumotini yangilashda xato:",
+      error
     );
 
-  });
+  }
 
+}
+
+// Биринчи марта дарҳол юклайди
+loadEmployees();
+
+// Ҳар 30 секундда автоматик янгилайди
+setInterval(
+  loadEmployees,
+  30000
+);
 </script>
 
 </body>
