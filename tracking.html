@@ -39,7 +39,9 @@ async function sendLocation(position) {
   try {
 
     const telegramId =
-      window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+  new URLSearchParams(
+    window.location.search
+  ).get("telegram_id");
 
     if (!telegramId) {
 
