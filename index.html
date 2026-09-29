@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  >
 
   <title>Xodimlar kartasi</title>
 
-  <!-- Leaflet -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  >
 
   <style>
     * {
@@ -60,7 +60,33 @@
       padding: 12px;
     }
 
-    /* STATISTICS */
+    /* =========================
+       ERROR
+    ========================= */
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    /* =========================
+       STATISTICS
+    ========================= */
 
     .stats {
       display: grid;
@@ -89,7 +115,9 @@
       margin-top: 4px;
     }
 
-    /* MAP */
+    /* =========================
+       MAP
+    ========================= */
 
     .map-wrapper {
       background: white;
@@ -107,13 +135,15 @@
     }
 
     .map-status {
-      padding: 8px 5px 2px;
+      padding: 10px 5px 3px;
       font-size: 12px;
       color: #64748b;
       text-align: center;
     }
 
-    /* EMPLOYEES */
+    /* =========================
+       EMPLOYEES
+    ========================= */
 
     .employees-title {
       font-size: 19px;
@@ -147,8 +177,9 @@
 
     .row {
       font-size: 13px;
-      margin: 5px 0;
+      margin: 6px 0;
       color: #475569;
+      line-height: 1.4;
     }
 
     .status {
@@ -197,12 +228,20 @@
       color: #334155;
     }
 
-    .btn-map:hover,
-    .btn-google:hover {
+    .btn-refresh {
+      background: #0f766e;
+      color: white;
+      margin-top: 8px;
+    }
+
+    button:hover,
+    .map-link:hover {
       opacity: 0.9;
     }
 
-    /* LEAFLET */
+    /* =========================
+       LEAFLET
+    ========================= */
 
     .leaflet-container {
       font-family: Arial, sans-serif;
@@ -217,8 +256,8 @@
     }
 
     .employee-marker {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 3px solid white;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
@@ -226,7 +265,7 @@
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 16px;
+      font-size: 17px;
       font-weight: bold;
     }
 
@@ -246,7 +285,8 @@
 
     .popup-row {
       font-size: 12px;
-      margin: 4px 0;
+      margin: 5px 0;
+      line-height: 1.4;
     }
 
     .popup-button {
@@ -264,15 +304,33 @@
       text-align: center;
       padding: 30px;
       color: #64748b;
+      background: white;
+      border-radius: 14px;
     }
 
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      font-size: 13px;
+    .loading-spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #dbeafe;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 7px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .last-update {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      margin-top: 5px;
     }
 
     @media (max-width: 700px) {
@@ -329,7 +387,9 @@
     <div id="errorBox"></div>
 
     <!-- STATISTICS -->
+
     <div class="stats">
+
       <div class="stat">
         <div class="stat-number" id="totalEmployees">0</div>
         <div class="stat-label">Jami xodim</div>
@@ -344,79 +404,87 @@
         <div class="stat-number" id="gpsEmployees">0</div>
         <div class="stat-label">GPS mavjud</div>
       </div>
+
     </div>
 
     <!-- MAP -->
+
     <div class="map-wrapper">
 
       <div id="map"></div>
 
       <div class="map-status" id="mapStatus">
+        <span class="loading-spinner"></span>
         Ma'lumotlar yuklanmoqda...
       </div>
 
     </div>
 
     <!-- EMPLOYEES -->
+
     <div class="employees-title">
       👥 Xodimlar
     </div>
 
-    <div id="employees" class="employees">
+    <div id="employees">
+
       <div class="loading">
+        <span class="loading-spinner"></span>
         Xodimlar yuklanmoqda...
       </div>
+
     </div>
 
   </div>
 
-  <!-- LEAFLET JS -->
+  <!-- LEAFLET -->
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
 
     /*
-      ==========================================
-      SUPABASE EDGE FUNCTION
-      ==========================================
+    =====================================================
+    SUPABASE EDGE FUNCTION
+    =====================================================
     */
 
     const ENDPOINT =
-  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+      "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
 
     /*
-      ==========================================
-      GLOBAL VARIABLES
-      ==========================================
+    =====================================================
+    GLOBAL VARIABLES
+    =====================================================
     */
 
     let map = null;
 
-    // employee_id -> Leaflet marker
     const markers = new Map();
 
-    // employee_id -> employee data
     const employeesCache = new Map();
 
     let firstMapLoad = true;
 
-    let lastEmployeeIds = new Set();
+    let loading = false;
+
+    let refreshTimer = null;
 
 
     /*
-      ==========================================
-      MAP INITIALIZATION
-      ==========================================
+    =====================================================
+    MAP INITIALIZATION
+    =====================================================
     */
 
     function initMap() {
 
       map = L.map("map", {
 
-        center: [40.5124, 69.8783],
+        center: [40.2273, 69.2630],
 
-        zoom: 12,
+        zoom: 13,
 
         zoomControl: true,
 
@@ -435,10 +503,6 @@
       });
 
 
-      /*
-        OpenStreetMap
-      */
-
       L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
@@ -450,24 +514,23 @@
       ).addTo(map);
 
 
-      /*
-        Telegram/WebView ichida
-        karta o'lchamini qayta hisoblash
-      */
-
-      setTimeout(function () {
+      setTimeout(function() {
 
         if (map) {
+
           map.invalidateSize(true);
+
         }
 
       }, 500);
 
 
-      setTimeout(function () {
+      setTimeout(function() {
 
         if (map) {
+
           map.invalidateSize(true);
+
         }
 
       }, 1500);
@@ -476,51 +539,15 @@
 
 
     /*
-      ==========================================
-      CREATE MARKER ICON
-      ==========================================
-    */
-
-    function createEmployeeIcon(employee) {
-
-      const working = isWorking(employee);
-
-      const html =
-        '<div class="employee-marker ' +
-        (working
-          ? "marker-working"
-          : "marker-not-working") +
-        '">' +
-        "👤" +
-        "</div>";
-
-
-      return L.divIcon({
-
-        html: html,
-
-        className: "",
-
-        iconSize: [34, 34],
-
-        iconAnchor: [17, 17],
-
-        popupAnchor: [0, -18]
-
-      });
-
-    }
-
-
-    /*
-      ==========================================
-      CHECK WORK STATUS
-      ==========================================
+    =====================================================
+    WORK STATUS
+    =====================================================
     */
 
     function isWorking(employee) {
 
-      return (
+      return Boolean(
+        employee &&
         employee.work_started_at &&
         !employee.work_ended_at
       );
@@ -529,60 +556,120 @@
 
 
     /*
-      ==========================================
-      DATE FORMAT
-      ==========================================
+    =====================================================
+    DATE FORMAT
+    =====================================================
     */
 
     function formatDate(value) {
 
       if (!value) {
+
         return "—";
+
       }
 
-      try {
+      const date = new Date(value);
 
-        const date = new Date(value);
+      if (isNaN(date.getTime())) {
 
-        if (isNaN(date.getTime())) {
-          return "—";
+        return "—";
+
+      }
+
+      return date.toLocaleString(
+        "uz-UZ",
+        {
+          dateStyle: "short",
+          timeStyle: "medium"
         }
-
-        return date.toLocaleString("uz-UZ");
-
-      } catch (e) {
-
-        return "—";
-
-      }
+      );
 
     }
 
 
     /*
-      ==========================================
-      POPUP
-      ==========================================
+    =====================================================
+    ESCAPE HTML
+    =====================================================
+    */
+
+    function escapeHtml(value) {
+
+      return String(value ?? "")
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    /*
+    =====================================================
+    CREATE MARKER ICON
+    =====================================================
+    */
+
+    function createEmployeeIcon(employee) {
+
+      const working = isWorking(employee);
+
+      return L.divIcon({
+
+        html:
+          '<div class="employee-marker ' +
+          (working
+            ? "marker-working"
+            : "marker-not-working") +
+          '">' +
+          "👤" +
+          "</div>",
+
+        className: "",
+
+        iconSize: [36, 36],
+
+        iconAnchor: [18, 18],
+
+        popupAnchor: [0, -20]
+
+      });
+
+    }
+
+
+    /*
+    =====================================================
+    CREATE POPUP
+    =====================================================
     */
 
     function createPopup(employee) {
 
       const working = isWorking(employee);
 
-      const statusText =
-        working
-          ? "🟢 Ishlayapti"
-          : "⚪ Ishlamayapti";
+      const statusText = working
+        ? "🟢 Ishlayapti"
+        : "⚪ Ishlamayapti";
 
 
       let gpsText = "GPS mavjud emas";
 
-      if (
+      const hasGps =
         employee.latitude !== null &&
         employee.latitude !== undefined &&
         employee.longitude !== null &&
-        employee.longitude !== undefined
-      ) {
+        employee.longitude !== undefined;
+
+
+      if (hasGps) {
 
         gpsText =
           Number(employee.latitude).toFixed(6) +
@@ -594,41 +681,51 @@
 
       let googleButton = "";
 
-      if (
-        employee.latitude !== null &&
-        employee.latitude !== undefined &&
-        employee.longitude !== null &&
-        employee.longitude !== undefined
-      ) {
+
+      if (hasGps) {
 
         const lat = Number(employee.latitude);
 
         const lon = Number(employee.longitude);
 
-        googleButton =
-          '<a class="popup-button" target="_blank" href="' +
-          "https://www.google.com/maps?q=" +
-          lat +
-          "," +
-          lon +
-          '">' +
-          "📍 Google Maps" +
-          "</a>";
+
+        if (
+          Number.isFinite(lat) &&
+          Number.isFinite(lon)
+        ) {
+
+          googleButton =
+            '<a class="popup-button" ' +
+            'target="_blank" ' +
+            'rel="noopener" ' +
+            'href="https://www.google.com/maps?q=' +
+            lat +
+            ',' +
+            lon +
+            '">' +
+            "📍 Google Maps" +
+            "</a>";
+
+        }
 
       }
 
 
       return (
 
-        '<div>' +
+        "<div>" +
 
           '<div class="popup-title">' +
-            escapeHtml(employee.full_name || "Noma'lum") +
+            escapeHtml(
+              employee.full_name || "Noma'lum"
+            ) +
           "</div>" +
 
           '<div class="popup-row">' +
             "🏢 Filial: " +
-            escapeHtml(employee.branch_name || "—") +
+            escapeHtml(
+              employee.branch_name || "—"
+            ) +
           "</div>" +
 
           '<div class="popup-row">' +
@@ -661,72 +758,56 @@
 
 
     /*
-      ==========================================
-      ESCAPE HTML
-      ==========================================
-    */
-
-    function escapeHtml(value) {
-
-      return String(value)
-
-        .replace(/&/g, "&amp;")
-
-        .replace(/</g, "&lt;")
-
-        .replace(/>/g, "&gt;")
-
-        .replace(/"/g, "&quot;")
-
-        .replace(/'/g, "&#039;");
-
-    }
-
-
-    /*
-      ==========================================
-      UPDATE MARKER
-      ==========================================
+    =====================================================
+    UPDATE MARKER
+    =====================================================
     */
 
     function updateMarker(employee) {
 
-      const id = String(employee.employee_id);
-
-
-      if (
-        employee.latitude === null ||
-        employee.longitude === null ||
-        employee.latitude === undefined ||
-        employee.longitude === undefined
-      ) {
-
-        /*
-          GPS yo'q bo'lsa marker kerak emas
-        */
-
-        if (markers.has(id)) {
-
-          map.removeLayer(markers.get(id));
-
-          markers.delete(id);
-
-        }
+      if (!map) {
 
         return;
 
       }
 
 
-      const lat = Number(employee.latitude);
+      const id =
+        String(employee.employee_id);
 
-      const lon = Number(employee.longitude);
+
+      const lat =
+        Number(employee.latitude);
 
 
-      if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon)
-      ) {
+      const lon =
+        Number(employee.longitude);
+
+
+      const validGps =
+        Number.isFinite(lat) &&
+        Number.isFinite(lon) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lon >= -180 &&
+        lon <= 180;
+
+
+      /*
+      GPS YO'Q
+      */
+
+      if (!validGps) {
+
+        if (markers.has(id)) {
+
+          map.removeLayer(
+            markers.get(id)
+          );
+
+          markers.delete(id);
+
+        }
 
         return;
 
@@ -734,302 +815,150 @@
 
 
       /*
-        MARKER AVVAL BOR BO'LSA
-        uni o'chirmaymiz.
+      MARKER BOR
       */
 
       if (markers.has(id)) {
 
-        const marker = markers.get(id);
+        const marker =
+          markers.get(id);
 
 
-        /*
-          Faqat koordinatasini yangilaymiz
-        */
+        marker.setLatLng([
+          lat,
+          lon
+        ]);
 
-        marker.setLatLng([lat, lon]);
-
-
-        /*
-          Ish holati o'zgargan bo'lsa
-          iconni yangilaymiz
-        */
 
         marker.setIcon(
           createEmployeeIcon(employee)
         );
 
 
-        /*
-          Popupni yangilaymiz
-        */
-
         marker.setPopupContent(
           createPopup(employee)
         );
 
 
-      } else {
+        return;
 
-        /*
-          Yangi marker
-        */
+      }
 
-        const marker = L.marker(
+
+      /*
+      YANGI MARKER
+      */
+
+      const marker =
+        L.marker(
           [lat, lon],
           {
-            icon: createEmployeeIcon(employee)
+            icon:
+              createEmployeeIcon(employee)
           }
         );
 
 
-        marker.bindPopup(
-          createPopup(employee)
-        );
+      marker.bindPopup(
+        createPopup(employee)
+      );
 
 
-        marker.addTo(map);
+      marker.addTo(map);
 
 
-        markers.set(id, marker);
-
-      }
+      markers.set(
+        id,
+        marker
+      );
 
     }
 
 
     /*
-      ==========================================
-      REMOVE OLD MARKERS
-      ==========================================
+    =====================================================
+    REMOVE OLD MARKERS
+    =====================================================
     */
 
     function removeOldMarkers(currentIds) {
 
-      markers.forEach(function(marker, id) {
+      if (!map) {
 
-        if (!currentIds.has(id)) {
-
-          map.removeLayer(marker);
-
-          markers.delete(id);
-
-        }
-
-      });
-
-    }
-
-
-    /*
-      ==========================================
-      LOAD EMPLOYEES
-      ==========================================
-    */
-
-    async function loadEmployees() {
-
-      try {
-
-        const response = await fetch(
-          ENDPOINT +
-          "?view=data&t=" +
-          Date.now(),
-          {
-            cache: "no-store"
-          }
-        );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            "Server xatosi: " +
-            response.status
-          );
-
-        }
-
-
-        const data = await response.json();
-
-
-        /*
-          API response array bo'lishi kerak
-        */
-
-        let employees = [];
-
-
-        if (Array.isArray(data)) {
-
-          employees = data;
-
-        } else if (Array.isArray(data.employees)) {
-
-          employees = data.employees;
-
-        } else if (Array.isArray(data.data)) {
-
-          employees = data.data;
-
-        }
-
-
-        /*
-          CACHE
-        */
-
-        employeesCache.clear();
-
-
-        employees.forEach(function(employee) {
-
-          employeesCache.set(
-            String(employee.employee_id),
-            employee
-          );
-
-        });
-
-
-        /*
-          STATISTICS
-        */
-
-        updateStatistics(employees);
-
-
-        /*
-          CARDS
-        */
-
-        renderEmployeeCards(employees);
-
-
-        /*
-          CURRENT IDS
-        */
-
-        const currentIds = new Set(
-
-          employees.map(function(employee) {
-
-            return String(employee.employee_id);
-
-          })
-
-        );
-
-
-        /*
-          Eski markerlarni olib tashlash
-        */
-
-        removeOldMarkers(currentIds);
-
-
-        /*
-          Markerlarni update qilish
-        */
-
-        employees.forEach(function(employee) {
-
-          updateMarker(employee);
-
-        });
-
-
-        /*
-          MUHIM:
-          MAP FAQAT BIRINCHI MARTA
-          markerlarga moslashtiriladi.
-          
-          Har 30 sekundda mapni
-          qayta markazlashtirmaymiz.
-        */
-
-        if (
-          firstMapLoad &&
-          markers.size > 0
-        ) {
-
-          fitMapToMarkers();
-
-          firstMapLoad = false;
-
-        }
-
-
-        /*
-          Agar xodimlar soni o'zgargan bo'lsa,
-          yangi markerlarni ko'rsatish mumkin.
-          
-          Lekin foydalanuvchining zoom/pan
-          holatini buzmaymiz.
-        */
-
-        lastEmployeeIds = currentIds;
-
-
-        /*
-          STATUS
-        */
-
-        document.getElementById("mapStatus").textContent =
-          "🔄 Oxirgi yangilanish: " +
-          new Date().toLocaleTimeString("uz-UZ");
-
-
-        /*
-          Leaflet o'lchamini tekshirish
-        */
-
-        setTimeout(function() {
-
-          if (map) {
-            map.invalidateSize(true);
-          }
-
-        }, 100);
-
-
-        hideError();
-
-
-      } catch (error) {
-
-        console.error(error);
-
-        showError(
-          "❌ Ma'lumotlarni olishda xato: " +
-          error.message
-        );
+        return;
 
       }
 
+
+      markers.forEach(
+        function(marker, id) {
+
+          if (!currentIds.has(id)) {
+
+            map.removeLayer(marker);
+
+            markers.delete(id);
+
+          }
+
+        }
+      );
+
     }
 
 
     /*
-      ==========================================
-      FIT MAP
-      ==========================================
+    =====================================================
+    FIT MAP ONLY FIRST TIME
+    =====================================================
     */
 
     function fitMapToMarkers() {
 
-      if (!map || markers.size === 0) {
+      if (
+        !map ||
+        markers.size === 0
+      ) {
+
         return;
+
       }
 
 
-      const group = L.featureGroup(
-        Array.from(markers.values())
-      );
+      const markerArray =
+        Array.from(
+          markers.values()
+        );
 
 
-      const bounds = group.getBounds();
+      if (markerArray.length === 1) {
+
+        const position =
+          markerArray[0].getLatLng();
+
+
+        map.setView(
+          [
+            position.lat,
+            position.lng
+          ],
+          15
+        );
+
+
+        return;
+
+      }
+
+
+      const group =
+        L.featureGroup(
+          markerArray
+        );
+
+
+      const bounds =
+        group.getBounds();
 
 
       if (bounds.isValid()) {
@@ -1037,12 +966,11 @@
         map.fitBounds(
           bounds,
           {
-            padding: [40, 40],
+            padding: [50, 50],
 
-            maxZoom: 14,
+            maxZoom: 15,
 
-            animate: true
-
+            animate: false
           }
         );
 
@@ -1052,9 +980,9 @@
 
 
     /*
-      ==========================================
-      STATISTICS
-      ==========================================
+    =====================================================
+    STATISTICS
+    =====================================================
     */
 
     function updateStatistics(employees) {
@@ -1064,56 +992,69 @@
       let gps = 0;
 
 
-      employees.forEach(function(employee) {
+      employees.forEach(
+        function(employee) {
 
-        if (isWorking(employee)) {
+          if (isWorking(employee)) {
 
-          working++;
+            working++;
+
+          }
+
+
+          const lat =
+            Number(employee.latitude);
+
+
+          const lon =
+            Number(employee.longitude);
+
+
+          if (
+            Number.isFinite(lat) &&
+            Number.isFinite(lon)
+          ) {
+
+            gps++;
+
+          }
 
         }
-
-
-        if (
-          employee.latitude !== null &&
-          employee.latitude !== undefined &&
-          employee.longitude !== null &&
-          employee.longitude !== undefined
-        ) {
-
-          gps++;
-
-        }
-
-      });
+      );
 
 
       document.getElementById(
         "totalEmployees"
-      ).textContent = employees.length;
+      ).textContent =
+        employees.length;
 
 
       document.getElementById(
         "workingEmployees"
-      ).textContent = working;
+      ).textContent =
+        working;
 
 
       document.getElementById(
         "gpsEmployees"
-      ).textContent = gps;
+      ).textContent =
+        gps;
 
     }
 
 
     /*
-      ==========================================
-      EMPLOYEE CARDS
-      ==========================================
+    =====================================================
+    EMPLOYEE CARDS
+    =====================================================
     */
 
     function renderEmployeeCards(employees) {
 
       const container =
-        document.getElementById("employees");
+        document.getElementById(
+          "employees"
+        );
 
 
       if (!employees.length) {
@@ -1131,160 +1072,168 @@
       container.innerHTML = "";
 
 
-      employees.forEach(function(employee) {
+      employees.forEach(
+        function(employee) {
 
-        const working =
-          isWorking(employee);
-
-
-        const hasGps =
-          employee.latitude !== null &&
-          employee.latitude !== undefined &&
-          employee.longitude !== null &&
-          employee.longitude !== undefined;
+          const working =
+            isWorking(employee);
 
 
-        const card =
-          document.createElement("div");
+          const lat =
+            Number(employee.latitude);
 
 
-        card.className =
-          "employee-card" +
-          (working ? " working" : "");
+          const lon =
+            Number(employee.longitude);
 
 
-        const status =
-          working
-
-            ? '<span class="status status-working">🟢 Ishlayapti</span>'
-
-            : '<span class="status status-not-working">⚪ Ishlamayapti</span>';
+          const hasGps =
+            Number.isFinite(lat) &&
+            Number.isFinite(lon);
 
 
-        let gpsText = "GPS mavjud emas";
+          const card =
+            document.createElement(
+              "div"
+            );
 
 
-        if (hasGps) {
-
-          gpsText =
-            Number(employee.latitude).toFixed(6) +
-            ", " +
-            Number(employee.longitude).toFixed(6);
-
-        }
-
-
-        let googleButton = "";
+          card.className =
+            "employee-card" +
+            (
+              working
+                ? " working"
+                : ""
+            );
 
 
-        if (hasGps) {
+          const status =
+            working
 
-          googleButton =
-            '<a class="map-link btn-google" target="_blank" href="' +
-            "https://www.google.com/maps?q=" +
-            Number(employee.latitude) +
-            "," +
-            Number(employee.longitude) +
-            '">' +
-            "📍 Google Maps" +
-            "</a>";
+              ? '<span class="status status-working">🟢 Ishlayapti</span>'
 
-        }
+              : '<span class="status status-not-working">⚪ Ishlamayapti</span>';
 
 
-        card.innerHTML =
+          const gpsText =
+            hasGps
 
-          '<div class="employee-name">' +
-            escapeHtml(
-              employee.full_name || "Noma'lum"
-            ) +
-          "</div>" +
+              ? lat.toFixed(6) +
+                ", " +
+                lon.toFixed(6)
 
-          '<div class="row">' +
-            "🏢 " +
-            escapeHtml(
-              employee.branch_name || "Filial yo'q"
-            ) +
-          "</div>" +
-
-          '<div class="row">' +
-            status +
-          "</div>" +
-
-          '<div class="row">' +
-            "🕐 Ish boshlagan: " +
-            formatDate(employee.work_started_at) +
-          "</div>" +
-
-          '<div class="row">' +
-            "📍 GPS: " +
-            gpsText +
-          "</div>" +
-
-          '<div class="row">' +
-            "🕒 Oxirgi GPS: " +
-            formatDate(employee.last_location_at) +
-          "</div>" +
-
-          '<div class="buttons">' +
-
-            '<button type="button" class="btn-map">' +
-              "📍 Xaritada ko‘rsatish" +
-            "</button>" +
-
-            googleButton +
-
-          "</div>";
+              : "GPS mavjud emas";
 
 
-        /*
-          MAP BUTTON
-        */
-
-        const mapButton =
-          card.querySelector(".btn-map");
+          let googleButton = "";
 
 
-        mapButton.addEventListener(
-          "click",
-          function() {
+          if (hasGps) {
 
-            showEmployeeOnMap(employee);
+            googleButton =
+              '<a ' +
+              'class="map-link btn-google" ' +
+              'target="_blank" ' +
+              'rel="noopener" ' +
+              'href="https://www.google.com/maps?q=' +
+              lat +
+              ',' +
+              lon +
+              '">' +
+              "📍 Google Maps" +
+              "</a>";
 
           }
-        );
 
 
-        container.appendChild(card);
+          card.innerHTML =
 
-      });
+            '<div class="employee-name">' +
+              escapeHtml(
+                employee.full_name ||
+                "Noma'lum"
+              ) +
+            "</div>" +
+
+            '<div class="row">' +
+              "🏢 " +
+              escapeHtml(
+                employee.branch_name ||
+                "Filial yo'q"
+              ) +
+            "</div>" +
+
+            '<div class="row">' +
+              status +
+            "</div>" +
+
+            '<div class="row">' +
+              "🕐 Ish boshlagan: " +
+              formatDate(
+                employee.work_started_at
+              ) +
+            "</div>" +
+
+            '<div class="row">' +
+              "📍 GPS: " +
+              gpsText +
+            "</div>" +
+
+            '<div class="row">' +
+              "🕒 Oxirgi GPS: " +
+              formatDate(
+                employee.last_location_at
+              ) +
+            "</div>" +
+
+            '<div class="buttons">' +
+
+              '<button ' +
+              'type="button" ' +
+              'class="btn-map">' +
+              "📍 Xaritada ko‘rsatish" +
+              "</button>" +
+
+              googleButton +
+
+            "</div>";
+
+
+          const mapButton =
+            card.querySelector(
+              ".btn-map"
+            );
+
+
+          mapButton.addEventListener(
+            "click",
+            function() {
+
+              showEmployeeOnMap(
+                employee
+              );
+
+            }
+          );
+
+
+          container.appendChild(
+            card
+          );
+
+        }
+      );
 
     }
 
 
     /*
-      ==========================================
-      SHOW EMPLOYEE ON MAP
-      ==========================================
+    =====================================================
+    SHOW EMPLOYEE ON MAP
+    =====================================================
     */
 
     function showEmployeeOnMap(employee) {
-
-      if (
-        employee.latitude === null ||
-        employee.longitude === null ||
-        employee.latitude === undefined ||
-        employee.longitude === undefined
-      ) {
-
-        alert(
-          "Bu xodimda GPS ma'lumoti mavjud emas."
-        );
-
-        return;
-
-      }
-
 
       const lat =
         Number(employee.latitude);
@@ -1300,7 +1249,7 @@
       ) {
 
         alert(
-          "GPS koordinatasi noto'g'ri."
+          "Bu xodimda GPS ma'lumoti mavjud emas."
         );
 
         return;
@@ -1308,9 +1257,12 @@
       }
 
 
-      /*
-        Mapni xodim joylashuviga olib boramiz.
-      */
+      if (!map) {
+
+        return;
+
+      }
+
 
       map.flyTo(
         [lat, lon],
@@ -1321,26 +1273,26 @@
       );
 
 
-      /*
-        Marker popup
-        ochiladi
-      */
-
       const id =
-        String(employee.employee_id);
+        String(
+          employee.employee_id
+        );
 
 
-      if (markers.has(id)) {
-
-        const marker =
-          markers.get(id);
+      const marker =
+        markers.get(id);
 
 
-        setTimeout(function() {
+      if (marker) {
 
-          marker.openPopup();
+        setTimeout(
+          function() {
 
-        }, 500);
+            marker.openPopup();
+
+          },
+          800
+        );
 
       }
 
@@ -1348,15 +1300,17 @@
 
 
     /*
-      ==========================================
-      ERROR
-      ==========================================
+    =====================================================
+    ERROR
+    =====================================================
     */
 
     function showError(message) {
 
       const box =
-        document.getElementById("errorBox");
+        document.getElementById(
+          "errorBox"
+        );
 
 
       box.innerHTML =
@@ -1377,43 +1331,464 @@
 
 
     /*
-      ==========================================
-      START
-      ==========================================
+    =====================================================
+    LOADING STATUS
+    =====================================================
     */
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      function() {
+    function setLoadingStatus() {
+
+      document.getElementById(
+        "mapStatus"
+      ).innerHTML =
+        '<span class="loading-spinner"></span>' +
+        "Ma'lumotlar yuklanmoqda...";
+
+    }
+
+
+    /*
+    =====================================================
+    LOAD EMPLOYEES
+    =====================================================
+    */
+
+    async function loadEmployees() {
+
+      /*
+      Bir vaqtning o'zida
+      2 ta request yubormaymiz.
+      */
+
+      if (loading) {
+
+        return;
+
+      }
+
+
+      loading = true;
+
+
+      try {
+
+        setLoadingStatus();
+
 
         /*
-          Mapni faqat bir marta yaratamiz
+        ABORT CONTROLLER
+
+        10 sekunddan ko'p
+        kutib qolmaydi.
         */
 
-        initMap();
+        const controller =
+          new AbortController();
+
+
+        const timeout =
+          setTimeout(
+            function() {
+
+              controller.abort();
+
+            },
+            10000
+          );
+
+
+        const url =
+          ENDPOINT +
+          "?view=data&t=" +
+          Date.now();
+
+
+        console.log(
+          "API request:",
+          url
+        );
+
+
+        const response =
+          await fetch(
+            url,
+            {
+              method: "GET",
+
+              cache: "no-store",
+
+              headers: {
+                "Accept":
+                  "application/json"
+              },
+
+              signal:
+                controller.signal
+            }
+          );
+
+
+        clearTimeout(
+          timeout
+        );
+
+
+        console.log(
+          "API status:",
+          response.status
+        );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Server xatosi: HTTP " +
+            response.status
+          );
+
+        }
+
+
+        const data =
+          await response.json();
+
+
+        console.log(
+          "API data:",
+          data
+        );
 
 
         /*
-          Birinchi ma'lumot
+        API ARRAY
         */
 
-        loadEmployees();
+        let employees = [];
+
+
+        if (
+          Array.isArray(data)
+        ) {
+
+          employees = data;
+
+        }
+
+        else if (
+          data &&
+          Array.isArray(
+            data.employees
+          )
+        ) {
+
+          employees =
+            data.employees;
+
+        }
+
+        else if (
+          data &&
+          Array.isArray(
+            data.data
+          )
+        ) {
+
+          employees =
+            data.data;
+
+        }
+
+        else {
+
+          throw new Error(
+            "API noto‘g‘ri formatda ma'lumot qaytardi."
+          );
+
+        }
 
 
         /*
-          HAR 30 SEKUNDDA
-          faqat ma'lumot va markerlar update.
-          
-          MAP VIEW O'ZGARMAYDI.
+        CACHE
         */
 
+        employeesCache.clear();
+
+
+        employees.forEach(
+          function(employee) {
+
+            employeesCache.set(
+              String(
+                employee.employee_id
+              ),
+              employee
+            );
+
+          }
+        );
+
+
+        /*
+        STATISTICS
+        */
+
+        updateStatistics(
+          employees
+        );
+
+
+        /*
+        CARDS
+        */
+
+        renderEmployeeCards(
+          employees
+        );
+
+
+        /*
+        CURRENT IDS
+        */
+
+        const currentIds =
+          new Set(
+            employees.map(
+              function(employee) {
+
+                return String(
+                  employee.employee_id
+                );
+
+              }
+            )
+          );
+
+
+        /*
+        OLD MARKERS
+        */
+
+        removeOldMarkers(
+          currentIds
+        );
+
+
+        /*
+        UPDATE MARKERS
+        */
+
+        employees.forEach(
+          function(employee) {
+
+            updateMarker(
+              employee
+            );
+
+          }
+        );
+
+
+        /*
+        FIRST LOAD ONLY
+
+        Har 30 sekundda
+        mapni markazlashtirmaymiz.
+        */
+
+        if (
+          firstMapLoad &&
+          markers.size > 0
+        ) {
+
+          fitMapToMarkers();
+
+          firstMapLoad = false;
+
+        }
+
+
+        /*
+        STATUS
+        */
+
+        const now =
+          new Date()
+            .toLocaleTimeString(
+              "uz-UZ"
+            );
+
+
+        document.getElementById(
+          "mapStatus"
+        ).innerHTML =
+          "🟢 Ma'lumotlar yangilandi";
+
+
+        document.getElementById(
+          "mapStatus"
+        ).innerHTML +=
+          '<div class="last-update">' +
+          "Oxirgi yangilanish: " +
+          now +
+          " • Keyingi yangilanish: 30 sek." +
+          "</div>";
+
+
+        hideError();
+
+
+        /*
+        LEAFLET SIZE
+        */
+
+        setTimeout(
+          function() {
+
+            if (map) {
+
+              map.invalidateSize(
+                true
+              );
+
+            }
+
+          },
+          100
+        );
+
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "LOAD ERROR:",
+          error
+        );
+
+
+        let message =
+          "Ma'lumotlarni olishda xato.";
+
+
+        if (
+          error &&
+          error.name ===
+          "AbortError"
+        ) {
+
+          message =
+            "❌ Serverdan javob 10 sekund ichida kelmadi.";
+
+        }
+
+        else if (
+          error &&
+          error.message
+        ) {
+
+          message =
+            "❌ Ma'lumotlarni olishda xato: " +
+            error.message;
+
+        }
+
+
+        showError(
+          message
+        );
+
+
+        document.getElementById(
+          "mapStatus"
+        ).innerHTML =
+          "🔴 Ma'lumotlarni yuklashda xato";
+
+
+      }
+
+      finally {
+
+        loading = false;
+
+      }
+
+    }
+
+
+    /*
+    =====================================================
+    START APPLICATION
+    =====================================================
+    */
+
+    function startApplication() {
+
+      console.log(
+        "Employee Map started"
+      );
+
+
+      console.log(
+        "Endpoint:",
+        ENDPOINT
+      );
+
+
+      /*
+      MAP
+      */
+
+      initMap();
+
+
+      /*
+      FIRST LOAD
+      */
+
+      loadEmployees();
+
+
+      /*
+      EVERY 30 SECONDS
+      */
+
+      refreshTimer =
         setInterval(
-          loadEmployees,
+          function() {
+
+            loadEmployees();
+
+          },
           30000
         );
 
-      }
-    );
+    }
+
+
+    /*
+    =====================================================
+    DOM READY
+    =====================================================
+    */
+
+    if (
+      document.readyState ===
+      "loading"
+    ) {
+
+      document.addEventListener(
+        "DOMContentLoaded",
+        startApplication
+      );
+
+    }
+
+    else {
+
+      startApplication();
+
+    }
 
   </script>
 
