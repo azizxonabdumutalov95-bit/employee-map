@@ -4,194 +4,341 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Xodimlar kartasi</title>
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
+  <title>Xodimlar GPS</title>
 
   <style>
-    html,
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
       font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #222;
     }
 
-    #map {
-      width: 100%;
-      height: 100%;
+    header {
+      background: #ffffff;
+      padding: 18px;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .title {
-      position: absolute;
-      z-index: 1000;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      background: white;
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      font-size: 16px;
-      font-weight: bold;
-      text-align: center;
+    h2 {
+      margin: 0 0 8px 0;
     }
 
-    .employee-popup {
+    #status {
+      color: #666;
       font-size: 14px;
-      line-height: 1.6;
     }
 
-    .employee-popup strong {
-      font-size: 17px;
+    #employees {
+      padding: 12px;
+    }
+
+    .employee {
+      background: #ffffff;
+      margin-bottom: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+    }
+
+    .name {
+      font-size: 19px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .branch {
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .gps {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      margin-top: 8px;
+    }
+
+    .time {
+      margin-top: 8px;
+      color: #777;
+      font-size: 13px;
+    }
+
+    .map-button {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 11px 15px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .no-gps {
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .error {
+      margin: 12px;
+      padding: 15px;
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 10px;
+    }
+
+    .loading {
+      padding: 20px;
+      text-align: center;
+      color: #666;
     }
   </style>
 </head>
 
 <body>
 
-<div class="title">
-  XODIMLAR KARTASI
-  <div
-    id="updateTime"
-    style="
-      font-size: 12px;
-      font-weight: normal;
-      margin-top: 5px;
-    "
-  >
-    🔄 Yangilanmoqda...
+<header>
+  <h2>Xodimlar GPS</h2>
+  <div id="status">
+    Ma'lumotlar yuklanmoqda...
+  </div>
+</header>
+
+<div id="employees">
+  <div class="loading">
+    Yuklanmoqda...
   </div>
 </div>
 
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
 
-const DATA_URL =
-  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint?view=data";
+const ENDPOINT =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
-const map = L.map("map");
+const employeesContainer =
+  document.getElementById("employees");
 
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
-  }
-).addTo(map);
-let markers = [];
+const statusElement =
+  document.getElementById("status");
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
 
 async function loadEmployees() {
 
   try {
 
-    const response = await fetch(
-      DATA_URL + "&t=" + Date.now()
-    );
+    statusElement.textContent =
+      "GPS ma'lumotlari yuklanmoqda...";
 
-    const employees = await response.json();
-
-    // Эски markerларни ўчириш
-    markers.forEach(marker => {
-      map.removeLayer(marker);
-    });
-
-    markers = [];
-
-    employees.forEach(employee => {
-
-      const marker = L.marker([
-        employee.latitude,
-        employee.longitude
-      ]).addTo(map);
-
-      const lastTime =
-        employee.lastLocation
-          ? new Date(employee.lastLocation)
-              .toLocaleString("uz-UZ", {
-                timeZone: "Asia/Tashkent"
-              })
-          : "Noma'lum";
-
-      marker.bindPopup(`
-        <div class="employee-popup">
-
-          <strong>
-            ${employee.name}
-          </strong>
-
-          <br>
-
-          Filial:
-          ${employee.branch}
-
-          <br>
-
-          Obyekt:
-          ${employee.object}
-
-          <br>
-
-          Oxirgi GPS:
-          ${lastTime}
-
-          <br>
-
-          Koordinata:
-          ${employee.latitude.toFixed(6)},
-          ${employee.longitude.toFixed(6)}
-
-        </div>
-      `);
-
-      markers.push(marker);
-    });
-
-    // Ходимлар бор бўлса, карта уларга мослашади
-    if (markers.length > 0) {
-
-      const group =
-        L.featureGroup(markers);
-
-      map.fitBounds(
-        group.getBounds().pad(0.2)
+    const response =
+      await fetch(
+        ENDPOINT + "?view=data&t=" + Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
+        }
       );
 
-    } else {
+    const data =
+      await response.json();
 
-      map.setView(
-        [41.2995, 69.2401],
-        11
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Server xatosi"
       );
 
     }
 
+    if (!Array.isArray(data)) {
+
+      throw new Error(
+        "Server noto'g'ri ma'lumot qaytardi."
+      );
+
+    }
+
+    employeesContainer.innerHTML = "";
+
+    let gpsCount = 0;
+
+    for (
+      const employee of data
+    ) {
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "employee";
+
+
+      const name =
+        employee.full_name ||
+        "Noma'lum xodim";
+
+
+      const branch =
+        employee.branch_name ||
+        "Filial ko'rsatilmagan";
+
+
+      const latitude =
+        Number(employee.latitude);
+
+
+      const longitude =
+        Number(employee.longitude);
+
+
+      const hasGps =
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude);
+
+
+      let html = "";
+
+
+      html +=
+        '<div class="name">' +
+        escapeHtml(name) +
+        '</div>';
+
+
+      html +=
+        '<div class="branch">' +
+        'Filial: ' +
+        escapeHtml(branch) +
+        '</div>';
+
+
+      if (hasGps) {
+
+        gpsCount++;
+
+
+        html +=
+          '<div class="gps">' +
+          'Latitude: ' +
+          latitude.toFixed(6) +
+          '<br>' +
+          'Longitude: ' +
+          longitude.toFixed(6) +
+          '</div>';
+
+
+        html +=
+          '<div class="time">' +
+          'Oxirgi GPS: ' +
+          escapeHtml(
+            employee.last_location_at || "-"
+          ) +
+          '</div>';
+
+
+        const mapUrl =
+          "https://www.google.com/maps?q=" +
+          latitude +
+          "," +
+          longitude;
+
+
+        html +=
+          '<a class="map-button" ' +
+          'href="' +
+          mapUrl +
+          '" ' +
+          'target="_blank" ' +
+          'rel="noopener noreferrer">' +
+          'Google Maps da ochish' +
+          '</a>';
+
+
+      } else {
+
+        html +=
+          '<div class="no-gps">' +
+          'GPS ma\'lumoti hali mavjud emas.' +
+          '</div>';
+
+      }
+
+
+      card.innerHTML =
+        html;
+
+
+      employeesContainer.appendChild(
+        card
+      );
+
+    }
+
+
+    statusElement.textContent =
+      "Jami xodimlar: " +
+      data.length +
+      " | GPS mavjud: " +
+      gpsCount +
+      " | Har 30 sekundda yangilanadi";
+
+
   } catch (error) {
 
     console.error(
-      "Xodimlar ma'lumotini yangilashda xato:",
+      "GPS ERROR:",
       error
     );
+
+
+    statusElement.textContent =
+      "Xatolik yuz berdi";
+
+
+    employeesContainer.innerHTML =
+      '<div class="error">' +
+      '<b>Xodimlar ma\'lumotini olishda xato</b>' +
+      '<br><br>' +
+      escapeHtml(
+        error.message ||
+        String(error)
+      ) +
+      '</div>';
 
   }
 
 }
 
-// Биринчи марта дарҳол юклайди
+
 loadEmployees();
 
-// Ҳар 30 секундда автоматик янгилайди
+
 setInterval(
   loadEmployees,
   30000
 );
+
 </script>
 
 </body>
