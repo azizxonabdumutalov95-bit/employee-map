@@ -38,11 +38,15 @@ async function sendLocation(position) {
 
   try {
 
-    const telegramId =
-  new URLSearchParams(
-    window.location.search
-  ).get("telegram_id");
+   const params =
+  new URLSearchParams(window.location.search);
 
+const telegramId =
+  params.get("telegram_id");
+
+document.getElementById("status").textContent =
+  "🔎 URL: " + window.location.href;
+    
     if (!telegramId) {
 
       document.getElementById("status").textContent =
