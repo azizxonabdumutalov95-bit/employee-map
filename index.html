@@ -14,38 +14,82 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #222;
+      background: #f1f5f9;
+      color: #172033;
     }
 
     header {
       background: #ffffff;
       padding: 18px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #e2e8f0;
       position: sticky;
       top: 0;
       z-index: 10;
     }
 
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     h2 {
-      margin: 0 0 8px 0;
+      margin: 0;
+      font-size: 23px;
     }
 
     #status {
-      color: #666;
-      font-size: 14px;
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 4px;
     }
 
     #employees {
-      padding: 12px;
+      padding: 0 12px 20px 12px;
     }
 
     .employee {
       background: #ffffff;
       margin-bottom: 12px;
       padding: 16px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
+      border-radius: 15px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .employee-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
     }
 
     .name {
@@ -55,51 +99,136 @@
     }
 
     .branch {
-      color: #555;
-      margin-bottom: 10px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .status-badge {
+      padding: 6px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    .working {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .not-working {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .info {
+      margin-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 12px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    .info-label {
+      color: #64748b;
+    }
+
+    .info-value {
+      font-weight: 600;
+      text-align: right;
     }
 
     .gps {
-      background: #f1f5f9;
-      padding: 10px;
-      border-radius: 8px;
+      background: #f8fafc;
+      padding: 11px;
+      border-radius: 9px;
+      margin-top: 10px;
       font-family: monospace;
-      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.6;
     }
 
-    .time {
-      margin-top: 8px;
-      color: #777;
-      font-size: 13px;
+    .gps-title {
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      margin-bottom: 3px;
     }
 
     .map-button {
-      display: inline-block;
+      display: block;
+      text-align: center;
       margin-top: 12px;
-      padding: 11px 15px;
+      padding: 12px 15px;
       background: #2563eb;
       color: white;
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: 9px;
+      font-weight: bold;
+    }
+
+    .map-button:hover {
+      background: #1d4ed8;
     }
 
     .no-gps {
-      color: #999;
-      margin-top: 8px;
+      background: #f8fafc;
+      color: #94a3b8;
+      padding: 11px;
+      border-radius: 9px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .loading {
+      padding: 30px;
+      text-align: center;
+      color: #64748b;
     }
 
     .error {
-      margin: 12px;
+      margin: 12px 0;
       padding: 15px;
       background: #fee2e2;
       color: #991b1b;
       border-radius: 10px;
     }
 
-    .loading {
-      padding: 20px;
-      text-align: center;
-      color: #666;
+    @media (max-width: 600px) {
+
+      .stats {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 7px;
+      }
+
+      .stat {
+        padding: 10px 5px;
+      }
+
+      .stat-number {
+        font-size: 19px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+
+      .employee-header {
+        align-items: flex-start;
+      }
+
+      .name {
+        font-size: 17px;
+      }
+
+      .info-row {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -107,28 +236,93 @@
 <body>
 
 <header>
-  <h2>Xodimlar GPS</h2>
+
+  <div class="header-top">
+    <h2>🗺 Xodimlar GPS</h2>
+  </div>
+
   <div id="status">
     Ma'lumotlar yuklanmoqda...
   </div>
+
 </header>
 
-<div id="employees">
-  <div class="loading">
-    Yuklanmoqda...
+
+<div class="stats">
+
+  <div class="stat">
+    <div
+      class="stat-number"
+      id="totalCount"
+    >
+      0
+    </div>
+
+    <div class="stat-label">
+      👤 Jami xodim
+    </div>
   </div>
+
+
+  <div class="stat">
+    <div
+      class="stat-number"
+      id="workingCount"
+    >
+      0
+    </div>
+
+    <div class="stat-label">
+      🟢 Ishda
+    </div>
+  </div>
+
+
+  <div class="stat">
+    <div
+      class="stat-number"
+      id="gpsCount"
+    >
+      0
+    </div>
+
+    <div class="stat-label">
+      📍 GPS
+    </div>
+  </div>
+
 </div>
+
+
+<div id="employees">
+
+  <div class="loading">
+    ⏳ Yuklanmoqda...
+  </div>
+
+</div>
+
 
 <script>
 
 const ENDPOINT =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
+
 const employeesContainer =
   document.getElementById("employees");
 
 const statusElement =
   document.getElementById("status");
+
+const totalCount =
+  document.getElementById("totalCount");
+
+const workingCount =
+  document.getElementById("workingCount");
+
+const gpsCountElement =
+  document.getElementById("gpsCount");
 
 
 function escapeHtml(value) {
@@ -143,24 +337,66 @@ function escapeHtml(value) {
 }
 
 
+function formatDateTime(value) {
+
+  if (!value) {
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if (isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString(
+    "uz-UZ",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
+
+}
+
+
+function isWorking(employee) {
+
+  return Boolean(
+    employee.work_started_at &&
+    !employee.work_ended_at
+  );
+
+}
+
+
 async function loadEmployees() {
 
   try {
 
     statusElement.textContent =
-      "GPS ma'lumotlari yuklanmoqda...";
+      "🔄 GPS ma'lumotlari yangilanmoqda...";
+
 
     const response =
       await fetch(
-        ENDPOINT + "?view=data&t=" + Date.now(),
+        ENDPOINT +
+        "?view=data&t=" +
+        Date.now(),
         {
           method: "GET",
           cache: "no-store"
         }
       );
 
+
     const data =
       await response.json();
+
 
     if (!response.ok) {
 
@@ -171,6 +407,7 @@ async function loadEmployees() {
 
     }
 
+
     if (!Array.isArray(data)) {
 
       throw new Error(
@@ -179,9 +416,13 @@ async function loadEmployees() {
 
     }
 
+
     employeesContainer.innerHTML = "";
 
+
     let gpsCount = 0;
+    let workingCountValue = 0;
+
 
     for (
       const employee of data
@@ -217,43 +458,129 @@ async function loadEmployees() {
         Number.isFinite(longitude);
 
 
+      const working =
+        isWorking(employee);
+
+
+      if (hasGps) {
+        gpsCount++;
+      }
+
+
+      if (working) {
+        workingCountValue++;
+      }
+
+
       let html = "";
 
 
       html +=
+        '<div class="employee-header">';
+
+
+      html +=
+        '<div>' +
+
         '<div class="name">' +
+        '👤 ' +
         escapeHtml(name) +
+        '</div>' +
+
+        '<div class="branch">' +
+        '🏢 ' +
+        escapeHtml(branch) +
+        '</div>' +
+
+        '</div>';
+
+
+      if (working) {
+
+        html +=
+          '<div class="status-badge working">' +
+          '🟢 Ishda' +
+          '</div>';
+
+      } else {
+
+        html +=
+          '<div class="status-badge not-working">' +
+          '⚪ Ishda emas' +
+          '</div>';
+
+      }
+
+
+      html +=
         '</div>';
 
 
       html +=
-        '<div class="branch">' +
-        'Filial: ' +
-        escapeHtml(branch) +
-        '</div>';
+        '<div class="info">';
+
+
+      if (employee.work_started_at) {
+
+        html +=
+          '<div class="info-row">' +
+
+          '<span class="info-label">' +
+          '🕐 Ish boshlangan:' +
+          '</span>' +
+
+          '<span class="info-value">' +
+          escapeHtml(
+            formatDateTime(
+              employee.work_started_at
+            )
+          ) +
+          '</span>' +
+
+          '</div>';
+
+      }
+
+
+      if (employee.last_location_at) {
+
+        html +=
+          '<div class="info-row">' +
+
+          '<span class="info-label">' +
+          '📍 Oxirgi GPS:' +
+          '</span>' +
+
+          '<span class="info-value">' +
+          escapeHtml(
+            formatDateTime(
+              employee.last_location_at
+            )
+          ) +
+          '</span>' +
+
+          '</div>';
+
+      }
 
 
       if (hasGps) {
 
-        gpsCount++;
-
-
         html +=
           '<div class="gps">' +
+
+          '<div class="gps-title">' +
+          '📌 Joylashuv' +
+          '</div>' +
+
           'Latitude: ' +
           latitude.toFixed(6) +
+
           '<br>' +
+
           'Longitude: ' +
           longitude.toFixed(6) +
-          '</div>';
 
-
-        html +=
-          '<div class="time">' +
-          'Oxirgi GPS: ' +
-          escapeHtml(
-            employee.last_location_at || "-"
-          ) +
           '</div>';
 
 
@@ -266,23 +593,31 @@ async function loadEmployees() {
 
         html +=
           '<a class="map-button" ' +
+
           'href="' +
           mapUrl +
           '" ' +
-          'target="_blank" ' +
-          'rel="noopener noreferrer">' +
-          'Google Maps da ochish' +
-          '</a>';
 
+          'target="_blank" ' +
+
+          'rel="noopener noreferrer">' +
+
+          '🗺 Google Maps da ochish' +
+
+          '</a>';
 
       } else {
 
         html +=
           '<div class="no-gps">' +
-          'GPS ma\'lumoti hali mavjud emas.' +
+          '📍 GPS ma\'lumoti hali mavjud emas.' +
           '</div>';
 
       }
+
+
+      html +=
+        '</div>';
 
 
       card.innerHTML =
@@ -296,12 +631,24 @@ async function loadEmployees() {
     }
 
 
+    totalCount.textContent =
+      data.length;
+
+
+    workingCount.textContent =
+      workingCountValue;
+
+
+    gpsCountElement.textContent =
+      gpsCount;
+
+
     statusElement.textContent =
-      "Jami xodimlar: " +
-      data.length +
-      " | GPS mavjud: " +
-      gpsCount +
-      " | Har 30 sekundda yangilanadi";
+      "✅ Yangilandi: " +
+      new Date().toLocaleTimeString(
+        "uz-UZ"
+      ) +
+      " | Автоматик янгиланиш: 30 сек.";
 
 
   } catch (error) {
@@ -313,17 +660,21 @@ async function loadEmployees() {
 
 
     statusElement.textContent =
-      "Xatolik yuz berdi";
+      "❌ Xatolik yuz berdi";
 
 
     employeesContainer.innerHTML =
       '<div class="error">' +
-      '<b>Xodimlar ma\'lumotini olishda xato</b>' +
+
+      '<b>❌ Xodimlar ma\'lumotini olishda xato</b>' +
+
       '<br><br>' +
+
       escapeHtml(
         error.message ||
         String(error)
       ) +
+
       '</div>';
 
   }
