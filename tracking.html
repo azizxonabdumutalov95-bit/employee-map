@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>GPS Tracking</title>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
@@ -25,6 +26,11 @@ const EDGE_FUNCTION =
   SUPABASE_URL +
   "/functions/v1/smart-endpoint";
 
+const tg = window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
 async function sendLocation(position) {
 
   const latitude =
@@ -38,15 +44,9 @@ async function sendLocation(position) {
 
   try {
 
-   const params =
-  new URLSearchParams(window.location.search);
+    const telegramId =
+      tg.initDataUnsafe?.user?.id;
 
-const telegramId =
-  params.get("telegram_id");
-
-document.getElementById("status").textContent =
-  "🔎 URL: " + window.location.href;
-    
     if (!telegramId) {
 
       document.getElementById("status").textContent =
@@ -96,12 +96,12 @@ document.getElementById("status").textContent =
       "❌ " + error.message;
   }
 }
+
 function locationError(error) {
 
   document.getElementById("status").textContent =
     "❌ GPS олишда хато: " +
     error.message;
-
 }
 
 function getLocation() {
@@ -115,7 +115,6 @@ function getLocation() {
       maximumAge: 0
     }
   );
-
 }
 
 getLocation();
