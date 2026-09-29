@@ -24,7 +24,7 @@ const EDGE_FUNCTION =
   SUPABASE_URL +
   "/functions/v1/smart-endpoint";
 
-function sendLocation(position) {
+async function sendLocation(position) {
 
   const latitude =
     position.coords.latitude;
@@ -33,18 +33,62 @@ function sendLocation(position) {
     position.coords.longitude;
 
   document.getElementById("status").textContent =
-    "📍 Локация: " +
-    latitude.toFixed(6) +
-    ", " +
-    longitude.toFixed(6);
+    "📍 Локация юборилмоқда...";
 
-  console.log(
-    "GPS:",
-    latitude,
-    longitude
-  );
+  try {
+
+    const telegramId =
+      window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
+    if (!telegramId) {
+
+      document.getElementById("status").textContent =
+        "❌ Telegram ID топилмади";
+
+      return;
+    }
+
+    const response = await fetch(
+      EDGE_FUNCTION + "?view=location",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          telegram_id: telegramId,
+          latitude: latitude,
+          longitude: longitude
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        result.error || "GPS юборишда хато"
+      );
+    }
+
+    document.getElementById("status").textContent =
+      "✅ GPS янгиланди: " +
+      latitude.toFixed(6) +
+      ", " +
+      longitude.toFixed(6);
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("status").textContent =
+      "❌ " + error.message;
+  }
 }
-
 function locationError(error) {
 
   document.getElementById("status").textContent =
