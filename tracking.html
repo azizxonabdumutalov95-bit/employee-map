@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>GPS Tracking</title>
+</head>
+
+<body>
+
+<h2>📍 GPS кузатув</h2>
+
+<p id="status">
+  Локация аниқланмоқда...
+</p>
+
+<script>
+
+const SUPABASE_URL =
+  "https://qyvglgcjsqifyubmpahw.supabase.co";
+
+const EDGE_FUNCTION =
+  SUPABASE_URL +
+  "/functions/v1/smart-endpoint";
+
+const TELEGRAM =
+  window.Telegram.WebApp;
+
+TELEGRAM.ready();
+
+function sendLocation(position) {
+
+  const latitude =
+    position.coords.latitude;
+
+  const longitude =
+    position.coords.longitude;
+
+  document.getElementById("status").textContent =
+    "📍 Локация: " +
+    latitude.toFixed(6) +
+    ", " +
+    longitude.toFixed(6);
+
+  console.log(
+    "GPS:",
+    latitude,
+    longitude
+  );
+}
+
+function locationError(error) {
+
+  document.getElementById("status").textContent =
+    "❌ GPS олишда хато: " +
+    error.message;
+
+}
+
+function getLocation() {
+
+  navigator.geolocation.getCurrentPosition(
+    sendLocation,
+    locationError,
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+
+}
+
+getLocation();
+
+setInterval(
+  getLocation,
+  30000
+);
+
+</script>
+
+</body>
+</html>
