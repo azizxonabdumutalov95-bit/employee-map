@@ -2,11 +2,23 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Xodimlar GPS</title>
 
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3mKQ6M2JQhQJ3kJ5J5J5J5J5J5J5J="
+    crossorigin=""
+  >
+
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -19,12 +31,12 @@
     }
 
     header {
-      background: #ffffff;
-      padding: 18px;
+      background: white;
+      padding: 16px;
       border-bottom: 1px solid #e2e8f0;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 1000;
     }
 
     .header-top {
@@ -37,52 +49,69 @@
 
     h2 {
       margin: 0;
-      font-size: 23px;
+      font-size: 22px;
     }
 
     #status {
+      margin-top: 7px;
       color: #64748b;
       font-size: 13px;
-      margin-top: 7px;
     }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      padding: 12px;
+      gap: 8px;
+      padding: 10px;
+      background: #f1f5f9;
     }
 
     .stat {
       background: white;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
-      padding: 14px;
+      padding: 10px;
       text-align: center;
     }
 
     .stat-number {
-      font-size: 23px;
+      font-size: 21px;
       font-weight: bold;
     }
 
     .stat-label {
       color: #64748b;
-      font-size: 12px;
-      margin-top: 4px;
+      font-size: 11px;
+      margin-top: 3px;
     }
 
+    /*
+      MAIN MAP
+    */
+
+    #map {
+      width: 100%;
+      height: 58vh;
+      min-height: 420px;
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    /*
+      EMPLOYEE LIST
+    */
+
     #employees {
-      padding: 0 12px 20px 12px;
+      padding: 12px;
     }
 
     .employee {
-      background: #ffffff;
+      background: white;
       margin-bottom: 12px;
-      padding: 16px;
+      padding: 15px;
       border-radius: 15px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+      box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.05);
     }
 
     .employee-header {
@@ -93,22 +122,22 @@
     }
 
     .name {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: bold;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .branch {
       color: #64748b;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .status-badge {
       padding: 6px 9px;
       border-radius: 20px;
-      font-size: 12px;
-      white-space: nowrap;
+      font-size: 11px;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     .working {
@@ -122,17 +151,17 @@
     }
 
     .info {
-      margin-top: 14px;
+      margin-top: 12px;
       border-top: 1px solid #f1f5f9;
-      padding-top: 12px;
+      padding-top: 10px;
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
       gap: 10px;
-      padding: 6px 0;
-      font-size: 14px;
+      padding: 5px 0;
+      font-size: 13px;
     }
 
     .info-label {
@@ -146,40 +175,49 @@
 
     .gps {
       background: #f8fafc;
-      padding: 11px;
+      padding: 10px;
       border-radius: 9px;
       margin-top: 10px;
       font-family: monospace;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.6;
-    }
-
-    .gps-title {
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      margin-bottom: 3px;
     }
 
     .map-button {
       display: block;
       text-align: center;
-      margin-top: 12px;
-      padding: 12px 15px;
+      margin-top: 10px;
+      padding: 11px;
       background: #2563eb;
       color: white;
       text-decoration: none;
       border-radius: 9px;
       font-weight: bold;
+      font-size: 13px;
     }
 
     .map-button:hover {
       background: #1d4ed8;
     }
 
+    .focus-button {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: #0f172a;
+      color: white;
+      border: 0;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
     .no-gps {
       background: #f8fafc;
       color: #94a3b8;
-      padding: 11px;
+      padding: 10px;
       border-radius: 9px;
       margin-top: 10px;
       font-size: 13px;
@@ -192,57 +230,118 @@
     }
 
     .error {
-      margin: 12px 0;
+      margin: 12px;
       padding: 15px;
       background: #fee2e2;
       color: #991b1b;
       border-radius: 10px;
     }
 
+    /*
+      CUSTOM MARKER
+    */
+
+    .employee-marker {
+      width: 34px;
+      height: 34px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 3px solid white;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    .employee-marker span {
+      transform: rotate(45deg);
+      font-size: 16px;
+    }
+
+    .marker-working {
+      background: #16a34a;
+    }
+
+    .marker-not-working {
+      background: #64748b;
+    }
+
+    /*
+      POPUP
+    */
+
+    .popup-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .popup-line {
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .popup-map {
+      display: block;
+      margin-top: 9px;
+      padding: 8px;
+      background: #2563eb;
+      color: white !important;
+      text-align: center;
+      border-radius: 7px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
 
+      #map {
+        height: 52vh;
+        min-height: 350px;
+      }
+
       .stats {
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 7px;
+        gap: 6px;
       }
 
       .stat {
-        padding: 10px 5px;
+        padding: 9px 4px;
       }
 
       .stat-number {
-        font-size: 19px;
+        font-size: 18px;
       }
 
       .stat-label {
         font-size: 10px;
       }
 
-      .employee-header {
-        align-items: flex-start;
-      }
-
       .name {
         font-size: 17px;
       }
 
-      .info-row {
-        font-size: 13px;
-      }
     }
+
   </style>
 </head>
 
+
 <body>
+
 
 <header>
 
   <div class="header-top">
-    <h2>🗺 Xodimlar GPS</h2>
+
+    <h2>
+      🗺 Xodimlar GPS
+    </h2>
+
   </div>
 
   <div id="status">
-    Ma'lumotlar yuklanmoqda...
+    ⏳ Ma'lumotlar yuklanmoqda...
   </div>
 
 </header>
@@ -251,6 +350,7 @@
 <div class="stats">
 
   <div class="stat">
+
     <div
       class="stat-number"
       id="totalCount"
@@ -259,12 +359,14 @@
     </div>
 
     <div class="stat-label">
-      👤 Jami xodim
+      👤 Jami
     </div>
+
   </div>
 
 
   <div class="stat">
+
     <div
       class="stat-number"
       id="workingCount"
@@ -275,10 +377,12 @@
     <div class="stat-label">
       🟢 Ishda
     </div>
+
   </div>
 
 
   <div class="stat">
+
     <div
       class="stat-number"
       id="gpsCount"
@@ -289,18 +393,35 @@
     <div class="stat-label">
       📍 GPS
     </div>
+
   </div>
 
 </div>
 
+
+<!-- MAP -->
+
+<div id="map"></div>
+
+
+<!-- EMPLOYEE LIST -->
 
 <div id="employees">
 
   <div class="loading">
-    ⏳ Yuklanmoqda...
+    ⏳ Xodimlar yuklanmoqda...
   </div>
 
 </div>
+
+
+<!-- Leaflet -->
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
 
 
 <script>
@@ -325,6 +446,56 @@ const gpsCountElement =
   document.getElementById("gpsCount");
 
 
+/*
+  MAP
+*/
+
+const map =
+  L.map("map");
+
+
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution:
+      '&copy; OpenStreetMap contributors'
+  }
+).addTo(map);
+
+
+map.setView(
+  [41.3111, 69.2797],
+  11
+);
+
+
+/*
+  MARKERS
+*/
+
+let markers = [];
+
+
+function clearMarkers() {
+
+  for (
+    const marker of markers
+  ) {
+
+    map.removeLayer(marker);
+
+  }
+
+  markers = [];
+
+}
+
+
+/*
+  HTML PROTECTION
+*/
+
 function escapeHtml(value) {
 
   return String(value ?? "")
@@ -337,6 +508,10 @@ function escapeHtml(value) {
 }
 
 
+/*
+  DATE
+*/
+
 function formatDateTime(value) {
 
   if (!value) {
@@ -346,7 +521,11 @@ function formatDateTime(value) {
   const date =
     new Date(value);
 
-  if (isNaN(date.getTime())) {
+  if (
+    isNaN(
+      date.getTime()
+    )
+  ) {
     return value;
   }
 
@@ -364,6 +543,10 @@ function formatDateTime(value) {
 }
 
 
+/*
+  WORK STATUS
+*/
+
 function isWorking(employee) {
 
   return Boolean(
@@ -373,6 +556,476 @@ function isWorking(employee) {
 
 }
 
+
+/*
+  CREATE MARKER
+*/
+
+function createEmployeeMarker(
+  employee
+) {
+
+  const latitude =
+    Number(employee.latitude);
+
+  const longitude =
+    Number(employee.longitude);
+
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+    return null;
+  }
+
+
+  const working =
+    isWorking(employee);
+
+
+  const markerHtml =
+    '<div class="employee-marker ' +
+    (
+      working
+        ? "marker-working"
+        : "marker-not-working"
+    ) +
+    '">' +
+    '<span>👤</span>' +
+    '</div>';
+
+
+  const icon =
+    L.divIcon({
+      html: markerHtml,
+      className: "",
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -32]
+    });
+
+
+  const marker =
+    L.marker(
+      [latitude, longitude],
+      {
+        icon
+      }
+    );
+
+
+  const name =
+    employee.full_name ||
+    "Noma'lum xodim";
+
+
+  const branch =
+    employee.branch_name ||
+    "Filial ko'rsatilmagan";
+
+
+  const mapUrl =
+    "https://www.google.com/maps?q=" +
+    latitude +
+    "," +
+    longitude;
+
+
+  let popup = "";
+
+
+  popup +=
+    '<div class="popup-title">' +
+    '👤 ' +
+    escapeHtml(name) +
+    '</div>';
+
+
+  popup +=
+    '<div class="popup-line">' +
+    '🏢 ' +
+    escapeHtml(branch) +
+    '</div>';
+
+
+  if (working) {
+
+    popup +=
+      '<div class="popup-line">' +
+      '🟢 <b>Ishda</b>' +
+      '</div>';
+
+  } else {
+
+    popup +=
+      '<div class="popup-line">' +
+      '⚪ Ishda emas' +
+      '</div>';
+
+  }
+
+
+  if (
+    employee.work_started_at
+  ) {
+
+    popup +=
+      '<div class="popup-line">' +
+      '🕐 Ish boshlangan: ' +
+      escapeHtml(
+        formatDateTime(
+          employee.work_started_at
+        )
+      ) +
+      '</div>';
+
+  }
+
+
+  if (
+    employee.last_location_at
+  ) {
+
+    popup +=
+      '<div class="popup-line">' +
+      '📍 GPS: ' +
+      escapeHtml(
+        formatDateTime(
+          employee.last_location_at
+        )
+      ) +
+      '</div>';
+
+  }
+
+
+  popup +=
+    '<a class="popup-map" ' +
+    'href="' +
+    mapUrl +
+    '" ' +
+    'target="_blank" ' +
+    'rel="noopener noreferrer">' +
+    '🗺 Google Maps' +
+    '</a>';
+
+
+  marker.bindPopup(
+    popup
+  );
+
+
+  marker.addTo(map);
+
+
+  markers.push(marker);
+
+
+  return marker;
+
+}
+
+
+/*
+  CREATE EMPLOYEE CARD
+*/
+
+function createEmployeeCard(
+  employee
+) {
+
+  const card =
+    document.createElement("div");
+
+  card.className =
+    "employee";
+
+
+  const name =
+    employee.full_name ||
+    "Noma'lum xodim";
+
+
+  const branch =
+    employee.branch_name ||
+    "Filial ko'rsatilmagan";
+
+
+  const latitude =
+    Number(employee.latitude);
+
+
+  const longitude =
+    Number(employee.longitude);
+
+
+  const hasGps =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude);
+
+
+  const working =
+    isWorking(employee);
+
+
+  let html = "";
+
+
+  html +=
+    '<div class="employee-header">';
+
+
+  html +=
+    '<div>' +
+
+    '<div class="name">' +
+    '👤 ' +
+    escapeHtml(name) +
+    '</div>' +
+
+    '<div class="branch">' +
+    '🏢 ' +
+    escapeHtml(branch) +
+    '</div>' +
+
+    '</div>';
+
+
+  html +=
+    '<div class="status-badge ' +
+    (
+      working
+        ? "working"
+        : "not-working"
+    ) +
+    '">' +
+    (
+      working
+        ? "🟢 Ishda"
+        : "⚪ Ishda emas"
+    ) +
+    '</div>';
+
+
+  html +=
+    '</div>';
+
+
+  html +=
+    '<div class="info">';
+
+
+  if (
+    employee.work_started_at
+  ) {
+
+    html +=
+      '<div class="info-row">' +
+
+      '<span class="info-label">' +
+      '🕐 Ish boshlangan:' +
+      '</span>' +
+
+      '<span class="info-value">' +
+      escapeHtml(
+        formatDateTime(
+          employee.work_started_at
+        )
+      ) +
+      '</span>' +
+
+      '</div>';
+
+  }
+
+
+  if (
+    employee.last_location_at
+  ) {
+
+    html +=
+      '<div class="info-row">' +
+
+      '<span class="info-label">' +
+      '📍 Oxirgi GPS:' +
+      '</span>' +
+
+      '<span class="info-value">' +
+      escapeHtml(
+        formatDateTime(
+          employee.last_location_at
+        )
+      ) +
+      '</span>' +
+
+      '</div>';
+
+  }
+
+
+  if (hasGps) {
+
+    html +=
+      '<div class="gps">' +
+
+      'Latitude: ' +
+      latitude.toFixed(6) +
+
+      '<br>' +
+
+      'Longitude: ' +
+      longitude.toFixed(6) +
+
+      '</div>';
+
+
+    const mapUrl =
+      "https://www.google.com/maps?q=" +
+      latitude +
+      "," +
+      longitude;
+
+
+    html +=
+      '<a class="map-button" ' +
+      'href="' +
+      mapUrl +
+      '" ' +
+      'target="_blank" ' +
+      'rel="noopener noreferrer">' +
+      '🗺 Google Maps da ochish' +
+      '</a>';
+
+
+    html +=
+      '<button ' +
+      'class="focus-button" ' +
+      'type="button" ' +
+      'data-lat="' +
+      latitude +
+      '" ' +
+      'data-lon="' +
+      longitude +
+      '">' +
+      '📍 Xaritada ko‘rsatish' +
+      '</button>';
+
+  } else {
+
+    html +=
+      '<div class="no-gps">' +
+      '📍 GPS ma\'lumoti hali mavjud emas.' +
+      '</div>';
+
+  }
+
+
+  html +=
+    '</div>';
+
+
+  card.innerHTML =
+    html;
+
+
+  /*
+    FOCUS BUTTON
+  */
+
+  const focusButton =
+    card.querySelector(
+      ".focus-button"
+    );
+
+
+  if (focusButton) {
+
+    focusButton.addEventListener(
+      "click",
+      function() {
+
+        const lat =
+          Number(
+            this.dataset.lat
+          );
+
+        const lon =
+          Number(
+            this.dataset.lon
+          );
+
+
+        map.setView(
+          [lat, lon],
+          17
+        );
+
+
+        /*
+          Find nearest marker
+        */
+
+        let nearest = null;
+
+        let minDistance =
+          Infinity;
+
+
+        for (
+          const marker of markers
+        ) {
+
+          const position =
+            marker.getLatLng();
+
+
+          const distance =
+            Math.pow(
+              position.lat - lat,
+              2
+            ) +
+            Math.pow(
+              position.lng - lon,
+              2
+            );
+
+
+          if (
+            distance <
+            minDistance
+          ) {
+
+            minDistance =
+              distance;
+
+            nearest =
+              marker;
+
+          }
+
+        }
+
+
+        if (nearest) {
+
+          nearest.openPopup();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  return card;
+
+}
+
+
+/*
+  LOAD DATA
+*/
 
 async function loadEmployees() {
 
@@ -417,40 +1070,41 @@ async function loadEmployees() {
     }
 
 
-    employeesContainer.innerHTML = "";
+    /*
+      CLEAR OLD MARKERS
+    */
+
+    clearMarkers();
 
 
-    let gpsCount = 0;
-    let workingCountValue = 0;
+    employeesContainer.innerHTML =
+      "";
 
+
+    let gpsTotal =
+      0;
+
+    let workingTotal =
+      0;
+
+
+    /*
+      ADD EMPLOYEES
+    */
 
     for (
       const employee of data
     ) {
 
-      const card =
-        document.createElement("div");
-
-      card.className =
-        "employee";
-
-
-      const name =
-        employee.full_name ||
-        "Noma'lum xodim";
-
-
-      const branch =
-        employee.branch_name ||
-        "Filial ko'rsatilmagan";
-
-
       const latitude =
-        Number(employee.latitude);
-
+        Number(
+          employee.latitude
+        );
 
       const longitude =
-        Number(employee.longitude);
+        Number(
+          employee.longitude
+        );
 
 
       const hasGps =
@@ -463,165 +1117,28 @@ async function loadEmployees() {
 
 
       if (hasGps) {
-        gpsCount++;
+
+        gpsTotal++;
+
+
+        createEmployeeMarker(
+          employee
+        );
+
       }
 
 
       if (working) {
-        workingCountValue++;
-      }
 
-
-      let html = "";
-
-
-      html +=
-        '<div class="employee-header">';
-
-
-      html +=
-        '<div>' +
-
-        '<div class="name">' +
-        '👤 ' +
-        escapeHtml(name) +
-        '</div>' +
-
-        '<div class="branch">' +
-        '🏢 ' +
-        escapeHtml(branch) +
-        '</div>' +
-
-        '</div>';
-
-
-      if (working) {
-
-        html +=
-          '<div class="status-badge working">' +
-          '🟢 Ishda' +
-          '</div>';
-
-      } else {
-
-        html +=
-          '<div class="status-badge not-working">' +
-          '⚪ Ishda emas' +
-          '</div>';
+        workingTotal++;
 
       }
 
 
-      html +=
-        '</div>';
-
-
-      html +=
-        '<div class="info">';
-
-
-      if (employee.work_started_at) {
-
-        html +=
-          '<div class="info-row">' +
-
-          '<span class="info-label">' +
-          '🕐 Ish boshlangan:' +
-          '</span>' +
-
-          '<span class="info-value">' +
-          escapeHtml(
-            formatDateTime(
-              employee.work_started_at
-            )
-          ) +
-          '</span>' +
-
-          '</div>';
-
-      }
-
-
-      if (employee.last_location_at) {
-
-        html +=
-          '<div class="info-row">' +
-
-          '<span class="info-label">' +
-          '📍 Oxirgi GPS:' +
-          '</span>' +
-
-          '<span class="info-value">' +
-          escapeHtml(
-            formatDateTime(
-              employee.last_location_at
-            )
-          ) +
-          '</span>' +
-
-          '</div>';
-
-      }
-
-
-      if (hasGps) {
-
-        html +=
-          '<div class="gps">' +
-
-          '<div class="gps-title">' +
-          '📌 Joylashuv' +
-          '</div>' +
-
-          'Latitude: ' +
-          latitude.toFixed(6) +
-
-          '<br>' +
-
-          'Longitude: ' +
-          longitude.toFixed(6) +
-
-          '</div>';
-
-
-        const mapUrl =
-          "https://www.google.com/maps?q=" +
-          latitude +
-          "," +
-          longitude;
-
-
-        html +=
-          '<a class="map-button" ' +
-
-          'href="' +
-          mapUrl +
-          '" ' +
-
-          'target="_blank" ' +
-
-          'rel="noopener noreferrer">' +
-
-          '🗺 Google Maps da ochish' +
-
-          '</a>';
-
-      } else {
-
-        html +=
-          '<div class="no-gps">' +
-          '📍 GPS ma\'lumoti hali mavjud emas.' +
-          '</div>';
-
-      }
-
-
-      html +=
-        '</div>';
-
-
-      card.innerHTML =
-        html;
+      const card =
+        createEmployeeCard(
+          employee
+        );
 
 
       employeesContainer.appendChild(
@@ -631,16 +1148,50 @@ async function loadEmployees() {
     }
 
 
+    /*
+      UPDATE STATS
+    */
+
     totalCount.textContent =
       data.length;
 
 
     workingCount.textContent =
-      workingCountValue;
+      workingTotal;
 
 
     gpsCountElement.textContent =
-      gpsCount;
+      gpsTotal;
+
+
+    /*
+      AUTO ZOOM
+    */
+
+    if (markers.length > 0) {
+
+      const group =
+        L.featureGroup(
+          markers
+        );
+
+
+      map.fitBounds(
+        group.getBounds(),
+        {
+          padding: [40, 40],
+          maxZoom: 15
+        }
+      );
+
+    } else {
+
+      map.setView(
+        [41.3111, 69.2797],
+        11
+      );
+
+    }
 
 
     statusElement.textContent =
@@ -648,7 +1199,7 @@ async function loadEmployees() {
       new Date().toLocaleTimeString(
         "uz-UZ"
       ) +
-      " | Автоматик янгиланиш: 30 сек.";
+      " | 🔄 30 sekundda yangilanadi";
 
 
   } catch (error) {
@@ -682,8 +1233,16 @@ async function loadEmployees() {
 }
 
 
+/*
+  START
+*/
+
 loadEmployees();
 
+
+/*
+  EVERY 30 SECONDS
+*/
 
 setInterval(
   loadEmployees,
