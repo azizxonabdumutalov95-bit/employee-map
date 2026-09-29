@@ -1,1 +1,981 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
+  <title>Xodim GPS</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #222;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+    }
+
+    .name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .telegram {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .status {
+      padding: 14px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .status.success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status.warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .gps {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: monospace;
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .start {
+      background: #16a34a;
+      color: white;
+    }
+
+    .stop {
+      background: #dc2626;
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #222;
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .small {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>📍 Xodim GPS</h2>
+
+    <div id="employeeName" class="name">
+      Xodim aniqlanmoqda...
+    </div>
+
+    <div id="telegramId" class="telegram">
+      Telegram ID: aniqlanmoqda...
+    </div>
+
+    <div id="status" class="status">
+      GPS tizimi tayyorlanmoqda...
+    </div>
+
+    <div class="gps">
+      <b>Latitude:</b>
+      <span id="latitude">-</span>
+      <br>
+
+      <b>Longitude:</b>
+      <span id="longitude">-</span>
+      <br>
+
+      <b>Accuracy:</b>
+      <span id="accuracy">-</span>
+      m
+      <br>
+
+      <b>Oxirgi yuborilgan:</b>
+      <span id="lastSent">-</span>
+    </div>
+
+    <button
+      id="startButton"
+      class="button start"
+      type="button"
+    >
+      📍 GPS'ni yoqish
+    </button>
+
+    <button
+      id="stopButton"
+      class="button stop"
+      type="button"
+      disabled
+    >
+      ⛔ GPS'ni to'xtatish
+    </button>
+
+    <button
+      id="retryButton"
+      class="button secondary"
+      type="button"
+    >
+      🔄 Qayta tekshirish
+    </button>
+
+    <div class="small">
+      GPS yoqilgandan keyin joylashuvingiz avtomatik ravishda
+      har 30 sekundda serverga yuboriladi.
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const ENDPOINT =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+const GPS_INTERVAL = 30000;
+
+let telegramId = null;
+let telegramUser = null;
+
+let gpsTimer = null;
+let gpsActive = false;
+let lastCoordinates = null;
+
+
+/* =========================
+   ELEMENTLAR
+========================= */
+
+const employeeNameElement =
+  document.getElementById("employeeName");
+
+const telegramIdElement =
+  document.getElementById("telegramId");
+
+const statusElement =
+  document.getElementById("status");
+
+const latitudeElement =
+  document.getElementById("latitude");
+
+const longitudeElement =
+  document.getElementById("longitude");
+
+const accuracyElement =
+  document.getElementById("accuracy");
+
+const lastSentElement =
+  document.getElementById("lastSent");
+
+const startButton =
+  document.getElementById("startButton");
+
+const stopButton =
+  document.getElementById("stopButton");
+
+const retryButton =
+  document.getElementById("retryButton");
+
+
+/* =========================
+   STATUS
+========================= */
+
+function setStatus(
+  message,
+  type = ""
+) {
+
+  statusElement.textContent =
+    message;
+
+  statusElement.className =
+    "status " + type;
+}
+
+
+/* =========================
+   TELEGRAM WEB APP
+========================= */
+
+function getTelegramUser() {
+
+  try {
+
+    if (
+      window.Telegram &&
+      window.Telegram.WebApp
+    ) {
+
+      const webApp =
+        window.Telegram.WebApp;
+
+      webApp.ready();
+
+      webApp.expand();
+
+      if (
+        webApp.initDataUnsafe &&
+        webApp.initDataUnsafe.user
+      ) {
+
+        telegramUser =
+          webApp.initDataUnsafe.user;
+
+        telegramId =
+          telegramUser.id;
+
+        return true;
+      }
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Telegram WebApp error:",
+      error
+    );
+
+  }
+
+  return false;
+}
+
+
+/* =========================
+   URL'DAN TELEGRAM ID
+========================= */
+
+function getTelegramIdFromUrl() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const id =
+    params.get("telegram_id");
+
+  if (!id) {
+    return null;
+  }
+
+  const numberId =
+    Number(id);
+
+  if (
+    !Number.isSafeInteger(numberId) ||
+    numberId <= 0
+  ) {
+    return null;
+  }
+
+  return numberId;
+}
+
+
+/* =========================
+   XODIMNI ANIQLASH
+========================= */
+
+async function loadEmployee() {
+
+  if (!telegramId) {
+
+    setStatus(
+      "Telegram ID aniqlanmadi. GPS sahifasini Telegram botdagi tugma orqali oching.",
+      "error"
+    );
+
+    employeeNameElement.textContent =
+      "Xodim aniqlanmadi";
+
+    return false;
+  }
+
+  telegramIdElement.textContent =
+    "Telegram ID: " + telegramId;
+
+  try {
+
+    setStatus(
+      "Xodim ma'lumotlari tekshirilmoqda..."
+    );
+
+    const response =
+      await fetch(
+        ENDPOINT +
+        "?view=data&t=" +
+        Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Server xatosi"
+      );
+
+    }
+
+    if (!Array.isArray(data)) {
+
+      throw new Error(
+        "Server noto'g'ri ma'lumot qaytardi."
+      );
+
+    }
+
+    const employee =
+      data.find(
+        item =>
+          Number(item.telegram_id) ===
+          Number(telegramId)
+      );
+
+    if (!employee) {
+
+      setStatus(
+        "Siz tizimda ro'yxatdan o'tmagansiz.",
+        "error"
+      );
+
+      employeeNameElement.textContent =
+        "Xodim topilmadi";
+
+      return false;
+    }
+
+    employeeNameElement.textContent =
+      employee.full_name ||
+      "Noma'lum xodim";
+
+    setStatus(
+      "Xodim topildi. GPS'ni yoqishingiz mumkin.",
+      "success"
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "EMPLOYEE ERROR:",
+      error
+    );
+
+    setStatus(
+      "Xodim ma'lumotlarini olishda xato: " +
+      error.message,
+      "error"
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================
+   GPS QO'LLAB-QUVVATLANISHI
+========================= */
+
+function checkGpsSupport() {
+
+  if (!navigator.geolocation) {
+
+    setStatus(
+      "Bu qurilmada GPS/geolocation qo'llab-quvvatlanmaydi.",
+      "error"
+    );
+
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================
+   GPS OLISH
+========================= */
+
+function getGpsPosition() {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      if (!navigator.geolocation) {
+
+        reject(
+          new Error(
+            "Geolocation qo'llab-quvvatlanmaydi."
+          )
+        );
+
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+
+          resolve(
+            position
+          );
+
+        },
+
+        error => {
+
+          let message =
+            "GPS xatosi.";
+
+          switch (error.code) {
+
+            case error.PERMISSION_DENIED:
+
+              message =
+                "GPS ruxsati berilmadi. Telefoningizda Location/GPS ruxsatini yoqing.";
+
+              break;
+
+            case error.POSITION_UNAVAILABLE:
+
+              message =
+                "GPS joylashuvni aniqlay olmadi. Ochiq joyga chiqing va GPS'ni tekshiring.";
+
+              break;
+
+            case error.TIMEOUT:
+
+              message =
+                "GPS javob berishiga vaqt tugadi. Qayta urinilmoqda.";
+
+              break;
+
+          }
+
+          reject(
+            new Error(message)
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0
+        }
+      );
+
+    }
+  );
+}
+
+
+/* =========================
+   GPS'NI SERVERGA YUBORISH
+========================= */
+
+async function sendLocation(
+  position
+) {
+
+  if (!telegramId) {
+
+    throw new Error(
+      "Telegram ID mavjud emas."
+    );
+  }
+
+  const latitude =
+    Number(
+      position.coords.latitude
+    );
+
+  const longitude =
+    Number(
+      position.coords.longitude
+    );
+
+  const accuracy =
+    Number(
+      position.coords.accuracy
+    );
+
+
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+
+    throw new Error(
+      "GPS koordinatalari noto'g'ri."
+    );
+  }
+
+
+  if (
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+
+    throw new Error(
+      "GPS koordinatalari noto'g'ri diapazonda."
+    );
+  }
+
+
+  const payload = {
+
+    telegram_id:
+      Number(telegramId),
+
+    latitude:
+      latitude,
+
+    longitude:
+      longitude
+
+  };
+
+
+  const response =
+    await fetch(
+      ENDPOINT + "?view=location",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(payload)
+      }
+    );
+
+
+  const text =
+    await response.text();
+
+
+  let result = {};
+
+  try {
+
+    result =
+      JSON.parse(text);
+
+  } catch {
+
+    result = {
+      raw: text
+    };
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      result.error ||
+      result.message ||
+      text ||
+      "GPS yuborishda server xatosi"
+    );
+
+  }
+
+
+  latitudeElement.textContent =
+    latitude.toFixed(6);
+
+  longitudeElement.textContent =
+    longitude.toFixed(6);
+
+  accuracyElement.textContent =
+    Number.isFinite(accuracy)
+      ? accuracy.toFixed(1)
+      : "-";
+
+
+  const now =
+    new Date();
+
+  lastSentElement.textContent =
+    now.toLocaleTimeString(
+      "uz-UZ"
+    );
+
+
+  lastCoordinates =
+    position;
+
+
+  return result;
+}
+
+
+/* =========================
+   BIR MARTA GPS
+========================= */
+
+async function sendGpsOnce() {
+
+  if (!telegramId) {
+
+    setStatus(
+      "Telegram ID topilmadi.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    setStatus(
+      "📍 GPS aniqlanmoqda..."
+    );
+
+
+    const position =
+      await getGpsPosition();
+
+
+    setStatus(
+      "📡 GPS serverga yuborilmoqda..."
+    );
+
+
+    await sendLocation(
+      position
+    );
+
+
+    setStatus(
+      "🟢 GPS ishlayapti. Keyingi yuborish 30 sekunddan keyin.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "GPS SEND ERROR:",
+      error
+    );
+
+
+    setStatus(
+      error.message ||
+      "GPS yuborishda xato.",
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =========================
+   GPS START
+========================= */
+
+async function startGps() {
+
+  if (gpsActive) {
+    return;
+  }
+
+
+  if (!checkGpsSupport()) {
+    return;
+  }
+
+
+  if (!telegramId) {
+
+    setStatus(
+      "Telegram ID aniqlanmadi.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  gpsActive = true;
+
+  startButton.disabled =
+    true;
+
+  stopButton.disabled =
+    false;
+
+
+  setStatus(
+    "📍 GPS ishga tushmoqda..."
+  );
+
+
+  await sendGpsOnce();
+
+
+  if (!gpsActive) {
+    return;
+  }
+
+
+  gpsTimer =
+    setInterval(
+      async () => {
+
+        if (!gpsActive) {
+          return;
+        }
+
+        await sendGpsOnce();
+
+      },
+      GPS_INTERVAL
+    );
+
+}
+
+
+/* =========================
+   GPS STOP
+========================= */
+
+function stopGps() {
+
+  gpsActive = false;
+
+
+  if (gpsTimer) {
+
+    clearInterval(
+      gpsTimer
+    );
+
+    gpsTimer = null;
+
+  }
+
+
+  startButton.disabled =
+    false;
+
+  stopButton.disabled =
+    true;
+
+
+  setStatus(
+    "GPS kuzatuvi to'xtatildi.",
+    "warning"
+  );
+
+}
+
+
+/* =========================
+   TUGMALAR
+========================= */
+
+startButton.addEventListener(
+  "click",
+  startGps
+);
+
+
+stopButton.addEventListener(
+  "click",
+  stopGps
+);
+
+
+retryButton.addEventListener(
+  "click",
+  async () => {
+
+    const success =
+      await loadEmployee();
+
+    if (success) {
+
+      setStatus(
+        "Xodim topildi. GPS'ni yoqishingiz mumkin.",
+        "success"
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================
+   SAHIFADAN CHIQISH
+========================= */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    if (gpsTimer) {
+
+      clearInterval(
+        gpsTimer
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================
+   BOSHLANG'ICH ISHGA TUSHIRISH
+========================= */
+
+async function init() {
+
+  setStatus(
+    "Telegram ma'lumotlari olinmoqda..."
+  );
+
+
+  const telegramOk =
+    getTelegramUser();
+
+
+  if (!telegramOk) {
+
+    const urlId =
+      getTelegramIdFromUrl();
+
+    if (urlId) {
+
+      telegramId =
+        urlId;
+
+    }
+
+  }
+
+
+  if (!telegramId) {
+
+    employeeNameElement.textContent =
+      "Telegram orqali oching";
+
+    telegramIdElement.textContent =
+      "Telegram ID topilmadi";
+
+    setStatus(
+      "Bu sahifani Telegram botdagi 📍 GPS tugmasi orqali oching.",
+      "warning"
+    );
+
+    return;
+  }
+
+
+  await loadEmployee();
+
+}
+
+
+init();
+
+</script>
+
+</body>
+</html>
