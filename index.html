@@ -60,10 +60,6 @@
       padding: 12px;
     }
 
-    /* =========================
-       ERROR
-    ========================= */
-
     .error {
       background: #fee2e2;
       color: #991b1b;
@@ -74,10 +70,6 @@
       line-height: 1.5;
       word-break: break-word;
     }
-
-    /* =========================
-       STATISTICS
-    ========================= */
 
     .stats {
       display: grid;
@@ -118,10 +110,6 @@
       color: #dc2626;
     }
 
-    /* =========================
-       MAP
-    ========================= */
-
     .map-wrapper {
       background: white;
       border-radius: 16px;
@@ -144,10 +132,6 @@
       text-align: center;
     }
 
-    /* =========================
-       EMPLOYEES
-    ========================= */
-
     .employees-title {
       font-size: 19px;
       font-weight: bold;
@@ -155,6 +139,12 @@
     }
 
     .employees {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    #employees {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
@@ -195,6 +185,21 @@
       margin: 6px 0;
       color: #475569;
       line-height: 1.4;
+    }
+
+    .work-time-row {
+      margin-top: 9px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-weight: bold;
+    }
+
+    .work-duration {
+      font-size: 17px;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
     .status {
@@ -269,10 +274,6 @@
     .map-link:hover {
       opacity: 0.9;
     }
-
-    /* =========================
-       LEAFLET
-    ========================= */
 
     .leaflet-container {
       font-family: Arial, sans-serif;
@@ -397,7 +398,7 @@
         height: 430px;
       }
 
-      .employees {
+      #employees {
         grid-template-columns: 1fr;
       }
 
@@ -429,8 +430,6 @@
 
     <div id="errorBox"></div>
 
-    <!-- STATISTICS -->
-
     <div class="stats">
 
       <div class="stat">
@@ -455,8 +454,6 @@
 
     </div>
 
-    <!-- MAP -->
-
     <div class="map-wrapper">
 
       <div id="map"></div>
@@ -467,8 +464,6 @@
       </div>
 
     </div>
-
-    <!-- EMPLOYEES -->
 
     <div class="employees-title">
       👥 Xodimlar
@@ -489,21 +484,8 @@
 
   <script>
 
-    /*
-    =====================================================
-    SUPABASE EDGE FUNCTION
-    =====================================================
-    */
-
     const ENDPOINT =
       "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
-
-
-    /*
-    =====================================================
-    GLOBAL VARIABLES
-    =====================================================
-    */
 
     let map = null;
 
@@ -517,15 +499,275 @@
 
     let refreshTimer = null;
 
+    let workTimer = null;
+
+
+    /*
+    =====================================================
+    WORK STATUS
+    =====================================================
+    */
+
+    function isWorking(employee) {
+
+      return Boolean(
+        employee &&
+        employee.work_started_at &&
+        !employee.work_ended_at
+      );
+
+    }
+
+
+    /*
+    =====================================================
+    WORK TIME
+    =====================================================
+    */
+
+    function getWorkSeconds(employee) {
+
+      if (!employee) {
+
+        return 0;
+
+      }
+
+
+      /*
+      ACTIVE SESSION
+      */
+
+      if (
+        employee.work_started_at &&
+        !employee.work_ended_at
+      ) {
+
+        const started =
+          new Date(
+            employee.work_started_at
+          ).getTime();
+
+
+        if (
+          !Number.isFinite(started)
+        ) {
+
+          return 0;
+
+        }
+
+
+        return Math.max(
+          0,
+          Math.floor(
+            (
+              Date.now() -
+              started
+            ) / 1000
+          )
+        );
+
+      }
+
+
+      /*
+      FINISHED SESSION
+      */
+
+      const savedDuration =
+        Number(
+          employee.work_duration_seconds
+        );
+
+
+      if (
+        Number.isFinite(savedDuration) &&
+        savedDuration >= 0
+      ) {
+
+        return Math.floor(
+          savedDuration
+        );
+
+      }
+
+
+      /*
+      START + END
+      */
+
+      if (
+        employee.work_started_at &&
+        employee.work_ended_at
+      ) {
+
+        const started =
+          new Date(
+            employee.work_started_at
+          ).getTime();
+
+
+        const ended =
+          new Date(
+            employee.work_ended_at
+          ).getTime();
+
+
+        if (
+          Number.isFinite(started) &&
+          Number.isFinite(ended)
+        ) {
+
+          return Math.max(
+            0,
+            Math.floor(
+              (
+                ended -
+                started
+              ) / 1000
+            )
+          );
+
+        }
+
+      }
+
+
+      return 0;
+
+    }
+
+
+    function formatDuration(
+      totalSeconds
+    ) {
+
+      let seconds =
+        Number(
+          totalSeconds
+        );
+
+
+      if (
+        !Number.isFinite(seconds) ||
+        seconds < 0
+      ) {
+
+        seconds = 0;
+
+      }
+
+
+      seconds =
+        Math.floor(
+          seconds
+        );
+
+
+      const hours =
+        Math.floor(
+          seconds / 3600
+        );
+
+
+      const minutes =
+        Math.floor(
+          (
+            seconds % 3600
+          ) / 60
+        );
+
+
+      const secs =
+        seconds % 60;
+
+
+      return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+      );
+
+    }
+
+
+    function updateWorkTimers() {
+
+      document
+        .querySelectorAll(
+          ".work-duration"
+        )
+        .forEach(
+          function(element) {
+
+            const employeeId =
+              element.dataset.employeeId;
+
+
+            const employee =
+              employeesCache.get(
+                String(
+                  employeeId
+                )
+              );
+
+
+            if (!employee) {
+
+              element.textContent =
+                "00:00:00";
+
+              return;
+
+            }
+
+
+            element.textContent =
+              formatDuration(
+                getWorkSeconds(
+                  employee
+                )
+              );
+
+          }
+        );
+
+    }
+
+
+    function startWorkTimer() {
+
+      if (workTimer) {
+
+        clearInterval(
+          workTimer
+        );
+
+      }
+
+
+      updateWorkTimers();
+
+
+      workTimer =
+        setInterval(
+          function() {
+
+            updateWorkTimers();
+
+          },
+          1000
+        );
+
+    }
+
 
     /*
     =====================================================
     GPS STATUS
-    =====================================================
-
-    0 - 60 sekund   = ONLINE
-    1 - 5 minut     = DELAYED
-    5+ minut        = OFFLINE
     =====================================================
     */
 
@@ -556,33 +798,34 @@
       }
 
 
-      const now =
-        Date.now();
-
-
       const ageSeconds =
-        (now - gpsTime) / 1000;
+        (
+          Date.now() -
+          gpsTime
+        ) / 1000;
 
 
-      /*
-      Kelajakdagi noto'g'ri vaqt
-      */
-
-      if (ageSeconds < 0) {
-
-        return "online";
-
-      }
-
-
-      if (ageSeconds <= 60) {
+      if (
+        ageSeconds < 0
+      ) {
 
         return "online";
 
       }
 
 
-      if (ageSeconds <= 300) {
+      if (
+        ageSeconds <= 60
+      ) {
+
+        return "online";
+
+      }
+
+
+      if (
+        ageSeconds <= 300
+      ) {
 
         return "delayed";
 
@@ -594,46 +837,45 @@
     }
 
 
-    /*
-    =====================================================
-    GPS STATUS TEXT
-    =====================================================
-    */
-
     function getGpsStatusText(employee) {
 
       const status =
-        getGpsStatus(employee);
+        getGpsStatus(
+          employee
+        );
 
 
-      if (status === "online") {
+      if (
+        status === "online"
+      ) {
 
         return "🟢 Online";
 
       }
 
-      if (status === "delayed") {
+
+      if (
+        status === "delayed"
+      ) {
 
         return "🟡 Kechikkan";
 
       }
 
-      if (status === "offline") {
+
+      if (
+        status === "offline"
+      ) {
 
         return "🔴 Offline";
 
       }
 
+
       return "⚪ GPS yo‘q";
 
     }
 
-
-    /*
-    =====================================================
-    GPS AGE TEXT
-    =====================================================
-    */
 
     function getGpsAgeText(employee) {
 
@@ -664,20 +906,30 @@
 
       let seconds =
         Math.floor(
-          (Date.now() - gpsTime) / 1000
+          (
+            Date.now() -
+            gpsTime
+          ) / 1000
         );
 
 
-      if (seconds < 0) {
+      if (
+        seconds < 0
+      ) {
 
         seconds = 0;
 
       }
 
 
-      if (seconds < 60) {
+      if (
+        seconds < 60
+      ) {
 
-        return seconds + " soniya oldin";
+        return (
+          seconds +
+          " soniya oldin"
+        );
 
       }
 
@@ -688,9 +940,14 @@
         );
 
 
-      if (minutes < 60) {
+      if (
+        minutes < 60
+      ) {
 
-        return minutes + " daqiqa oldin";
+        return (
+          minutes +
+          " daqiqa oldin"
+        );
 
       }
 
@@ -701,9 +958,14 @@
         );
 
 
-      if (hours < 24) {
+      if (
+        hours < 24
+      ) {
 
-        return hours + " soat oldin";
+        return (
+          hours +
+          " soat oldin"
+        );
 
       }
 
@@ -714,89 +976,9 @@
         );
 
 
-      return days + " kun oldin";
-
-    }
-
-
-    /*
-    =====================================================
-    MAP INITIALIZATION
-    =====================================================
-    */
-
-    function initMap() {
-
-      map = L.map("map", {
-
-        center: [40.2273, 69.2630],
-
-        zoom: 13,
-
-        zoomControl: true,
-
-        dragging: true,
-
-        touchZoom: true,
-
-        scrollWheelZoom: true,
-
-        doubleClickZoom: true,
-
-        boxZoom: true,
-
-        keyboard: true
-
-      });
-
-
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-          maxZoom: 19,
-
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-        }
-      ).addTo(map);
-
-
-      setTimeout(function() {
-
-        if (map) {
-
-          map.invalidateSize(true);
-
-        }
-
-      }, 500);
-
-
-      setTimeout(function() {
-
-        if (map) {
-
-          map.invalidateSize(true);
-
-        }
-
-      }, 1500);
-
-    }
-
-
-    /*
-    =====================================================
-    WORK STATUS
-    =====================================================
-    */
-
-    function isWorking(employee) {
-
-      return Boolean(
-        employee &&
-        employee.work_started_at &&
-        !employee.work_ended_at
+      return (
+        days +
+        " kun oldin"
       );
 
     }
@@ -804,7 +986,94 @@
 
     /*
     =====================================================
-    DATE FORMAT
+    MAP
+    =====================================================
+    */
+
+    function initMap() {
+
+      map =
+        L.map(
+          "map",
+          {
+
+            center: [
+              40.2273,
+              69.2630
+            ],
+
+            zoom: 13,
+
+            zoomControl: true,
+
+            dragging: true,
+
+            touchZoom: true,
+
+            scrollWheelZoom: true,
+
+            doubleClickZoom: true,
+
+            boxZoom: true,
+
+            keyboard: true
+
+          }
+        );
+
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+
+          maxZoom: 19,
+
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+
+        }
+      ).addTo(
+        map
+      );
+
+
+      setTimeout(
+        function() {
+
+          if (map) {
+
+            map.invalidateSize(
+              true
+            );
+
+          }
+
+        },
+        500
+      );
+
+
+      setTimeout(
+        function() {
+
+          if (map) {
+
+            map.invalidateSize(
+              true
+            );
+
+          }
+
+        },
+        1500
+      );
+
+    }
+
+
+    /*
+    =====================================================
+    DATE
     =====================================================
     */
 
@@ -816,8 +1085,11 @@
 
       }
 
+
       const date =
-        new Date(value);
+        new Date(
+          value
+        );
 
 
       if (
@@ -834,23 +1106,22 @@
       return date.toLocaleString(
         "uz-UZ",
         {
+
           dateStyle: "short",
+
           timeStyle: "medium"
+
         }
       );
 
     }
 
 
-    /*
-    =====================================================
-    ESCAPE HTML
-    =====================================================
-    */
-
     function escapeHtml(value) {
 
-      return String(value ?? "")
+      return String(
+        value ?? ""
+      )
 
         .replace(
           /&/g,
@@ -882,14 +1153,16 @@
 
     /*
     =====================================================
-    CREATE MARKER ICON
+    MARKER
     =====================================================
     */
 
     function createEmployeeIcon(employee) {
 
       const gpsStatus =
-        getGpsStatus(employee);
+        getGpsStatus(
+          employee
+        );
 
 
       let markerClass =
@@ -935,11 +1208,20 @@
 
         className: "",
 
-        iconSize: [36, 36],
+        iconSize: [
+          36,
+          36
+        ],
 
-        iconAnchor: [18, 18],
+        iconAnchor: [
+          18,
+          18
+        ],
 
-        popupAnchor: [0, -20]
+        popupAnchor: [
+          0,
+          -20
+        ]
 
       });
 
@@ -948,14 +1230,16 @@
 
     /*
     =====================================================
-    CREATE POPUP
+    POPUP
     =====================================================
     */
 
     function createPopup(employee) {
 
       const working =
-        isWorking(employee);
+        isWorking(
+          employee
+        );
 
 
       const workStatus =
@@ -965,61 +1249,67 @@
 
 
       const gpsStatus =
-        getGpsStatusText(employee);
+        getGpsStatusText(
+          employee
+        );
+
+
+      const workTime =
+        formatDuration(
+          getWorkSeconds(
+            employee
+          )
+        );
 
 
       let gpsText =
         "GPS mavjud emas";
 
 
+      const lat =
+        Number(
+          employee.latitude
+        );
+
+
+      const lon =
+        Number(
+          employee.longitude
+        );
+
+
       const hasGps =
-        employee.latitude !== null &&
-        employee.latitude !== undefined &&
-        employee.longitude !== null &&
-        employee.longitude !== undefined;
+        Number.isFinite(lat) &&
+        Number.isFinite(lon);
 
 
       if (hasGps) {
 
         gpsText =
-          Number(employee.latitude).toFixed(6) +
+          lat.toFixed(6) +
           ", " +
-          Number(employee.longitude).toFixed(6);
+          lon.toFixed(6);
 
       }
 
 
-      let googleButton = "";
+      let googleButton =
+        "";
 
 
       if (hasGps) {
 
-        const lat =
-          Number(employee.latitude);
-
-
-        const lon =
-          Number(employee.longitude);
-
-
-        if (
-          Number.isFinite(lat) &&
-          Number.isFinite(lon)
-        ) {
-
-          googleButton =
-            '<a class="popup-button" ' +
-            'target="_blank" ' +
-            'rel="noopener" ' +
-            'href="https://www.google.com/maps?q=' +
-            lat +
-            ',' +
-            lon +
-            '">' +
-            "📍 Google Maps" +
-            "</a>";
-
-        }
+        googleButton =
+          '<a class="popup-button" ' +
+          'target="_blank" ' +
+          'rel="noopener" ' +
+          'href="https://www.google.com/maps?q=' +
+          lat +
+          ',' +
+          lon +
+          '">' +
+          "📍 Google Maps" +
+          "</a>";
 
       }
 
@@ -1060,6 +1350,11 @@
             ) +
           "</div>" +
 
+          '<div class="popup-row"><b>' +
+            "⏳ Ish vaqti: " +
+            workTime +
+          "</b></div>" +
+
           '<div class="popup-row">' +
             "📍 GPS: " +
             gpsText +
@@ -1074,7 +1369,9 @@
 
           '<div class="popup-row">' +
             "⏱ GPS: " +
-            getGpsAgeText(employee) +
+            getGpsAgeText(
+              employee
+            ) +
           "</div>" +
 
           googleButton +
@@ -1085,12 +1382,6 @@
 
     }
 
-
-    /*
-    =====================================================
-    UPDATE MARKER
-    =====================================================
-    */
 
     function updateMarker(employee) {
 
@@ -1128,21 +1419,23 @@
         lon <= 180;
 
 
-      /*
-      GPS YO'Q
-      */
-
       if (!validGps) {
 
         if (
-          markers.has(id)
+          markers.has(
+            id
+          )
         ) {
 
           map.removeLayer(
-            markers.get(id)
+            markers.get(
+              id
+            )
           );
 
-          markers.delete(id);
+          markers.delete(
+            id
+          );
 
         }
 
@@ -1151,16 +1444,16 @@
       }
 
 
-      /*
-      MARKER BOR
-      */
-
       if (
-        markers.has(id)
+        markers.has(
+          id
+        )
       ) {
 
         const marker =
-          markers.get(id);
+          markers.get(
+            id
+          );
 
 
         marker.setLatLng([
@@ -1188,18 +1481,19 @@
       }
 
 
-      /*
-      YANGI MARKER
-      */
-
       const marker =
         L.marker(
-          [lat, lon],
+          [
+            lat,
+            lon
+          ],
           {
+
             icon:
               createEmployeeIcon(
                 employee
               )
+
           }
         );
 
@@ -1211,7 +1505,9 @@
       );
 
 
-      marker.addTo(map);
+      marker.addTo(
+        map
+      );
 
 
       markers.set(
@@ -1221,12 +1517,6 @@
 
     }
 
-
-    /*
-    =====================================================
-    REMOVE OLD MARKERS
-    =====================================================
-    */
 
     function removeOldMarkers(
       currentIds
@@ -1240,17 +1530,24 @@
 
 
       markers.forEach(
-        function(marker, id) {
+        function(
+          marker,
+          id
+        ) {
 
           if (
-            !currentIds.has(id)
+            !currentIds.has(
+              id
+            )
           ) {
 
             map.removeLayer(
               marker
             );
 
-            markers.delete(id);
+            markers.delete(
+              id
+            );
 
           }
 
@@ -1259,12 +1556,6 @@
 
     }
 
-
-    /*
-    =====================================================
-    FIT MAP ONLY FIRST TIME
-    =====================================================
-    */
 
     function fitMapToMarkers() {
 
@@ -1289,7 +1580,8 @@
       ) {
 
         const position =
-          markerArray[0].getLatLng();
+          markerArray[0]
+            .getLatLng();
 
 
         map.setView(
@@ -1323,11 +1615,16 @@
         map.fitBounds(
           bounds,
           {
-            padding: [50, 50],
+
+            padding: [
+              50,
+              50
+            ],
 
             maxZoom: 15,
 
             animate: false
+
           }
         );
 
@@ -1446,7 +1743,8 @@
       }
 
 
-      container.innerHTML = "";
+      container.innerHTML =
+        "";
 
 
       employees.forEach(
@@ -1500,7 +1798,8 @@
               : '<span class="status status-not-working">⚪ Ishlamayapti</span>';
 
 
-          let gpsStatusHtml = "";
+          let gpsStatusHtml =
+            "";
 
 
           if (
@@ -1556,10 +1855,13 @@
               : "GPS mavjud emas";
 
 
-          let googleButton = "";
+          let googleButton =
+            "";
 
 
-          if (hasGps) {
+          if (
+            hasGps
+          ) {
 
             googleButton =
               '<a ' +
@@ -1575,6 +1877,12 @@
               "</a>";
 
           }
+
+
+          const employeeId =
+            escapeHtml(
+              employee.employee_id
+            );
 
 
           card.innerHTML =
@@ -1604,6 +1912,20 @@
               formatDate(
                 employee.work_started_at
               ) +
+            "</div>" +
+
+            '<div class="row work-time-row">' +
+              "⏳ Ish vaqti: " +
+              '<span class="work-duration" ' +
+              'data-employee-id="' +
+              employeeId +
+              '">' +
+              formatDuration(
+                getWorkSeconds(
+                  employee
+                )
+              ) +
+              "</span>" +
             "</div>" +
 
             '<div class="row">' +
@@ -1663,12 +1985,15 @@
         }
       );
 
+
+      updateWorkTimers();
+
     }
 
 
     /*
     =====================================================
-    SHOW EMPLOYEE ON MAP
+    SHOW ON MAP
     =====================================================
     */
 
@@ -1710,10 +2035,15 @@
 
 
       map.flyTo(
-        [lat, lon],
+        [
+          lat,
+          lon
+        ],
         16,
         {
+
           duration: 0.8
+
         }
       );
 
@@ -1725,13 +2055,21 @@
 
 
       const marker =
-        markers.get(id);
+        markers.get(
+          id
+        );
 
 
       if (marker) {
 
         setTimeout(
           function() {
+
+            marker.setPopupContent(
+              createPopup(
+                employee
+              )
+            );
 
             marker.openPopup();
 
@@ -1774,16 +2112,11 @@
 
       document.getElementById(
         "errorBox"
-      ).innerHTML = "";
+      ).innerHTML =
+        "";
 
     }
 
-
-    /*
-    =====================================================
-    LOADING STATUS
-    =====================================================
-    */
 
     function setLoadingStatus() {
 
@@ -1811,7 +2144,8 @@
       }
 
 
-      loading = true;
+      loading =
+        true;
 
 
       try {
@@ -1850,17 +2184,21 @@
           await fetch(
             url,
             {
+
               method: "GET",
 
               cache: "no-store",
 
               headers: {
+
                 "Accept":
                   "application/json"
+
               },
 
               signal:
                 controller.signal
+
             }
           );
 
@@ -1876,7 +2214,9 @@
         );
 
 
-        if (!response.ok) {
+        if (
+          !response.ok
+        ) {
 
           throw new Error(
             "Server xatosi: HTTP " +
@@ -1896,14 +2236,18 @@
         );
 
 
-        let employees = [];
+        let employees =
+          [];
 
 
         if (
-          Array.isArray(data)
+          Array.isArray(
+            data
+          )
         ) {
 
-          employees = data;
+          employees =
+            data;
 
         }
 
@@ -1962,7 +2306,7 @@
 
 
         /*
-        STATISTICS
+        STATS
         */
 
         updateStatistics(
@@ -1980,7 +2324,7 @@
 
 
         /*
-        CURRENT IDS
+        IDS
         */
 
         const currentIds =
@@ -1997,18 +2341,10 @@
           );
 
 
-        /*
-        OLD MARKERS
-        */
-
         removeOldMarkers(
           currentIds
         );
 
-
-        /*
-        UPDATE MARKERS
-        */
 
         employees.forEach(
           function(employee) {
@@ -2021,10 +2357,6 @@
         );
 
 
-        /*
-        FIRST LOAD ONLY
-        */
-
         if (
           firstMapLoad &&
           markers.size > 0
@@ -2032,14 +2364,11 @@
 
           fitMapToMarkers();
 
-          firstMapLoad = false;
+          firstMapLoad =
+            false;
 
         }
 
-
-        /*
-        STATUS
-        */
 
         const now =
           new Date()
@@ -2051,25 +2380,19 @@
         document.getElementById(
           "mapStatus"
         ).innerHTML =
-          "🟢 Ma'lumotlar yangilandi";
+          "🟢 Ma'lumotlar yangilandi" +
 
-
-        document.getElementById(
-          "mapStatus"
-        ).innerHTML +=
           '<div class="last-update">' +
+
           "Oxirgi yangilanish: " +
           now +
           " • Keyingi yangilanish: 30 sek." +
+
           "</div>";
 
 
         hideError();
 
-
-        /*
-        LEAFLET SIZE
-        */
 
         setTimeout(
           function() {
@@ -2137,7 +2460,8 @@
 
       finally {
 
-        loading = false;
+        loading =
+          false;
 
       }
 
@@ -2146,7 +2470,7 @@
 
     /*
     =====================================================
-    START APPLICATION
+    START
     =====================================================
     */
 
@@ -2170,7 +2494,14 @@
 
 
       /*
-      HAR 30 SEKUNDDA YANGILANADI
+      WORK TIMER - 1 SECOND
+      */
+
+      startWorkTimer();
+
+
+      /*
+      API REFRESH - 30 SECOND
       */
 
       refreshTimer =
@@ -2185,12 +2516,6 @@
 
     }
 
-
-    /*
-    =====================================================
-    DOM READY
-    =====================================================
-    */
 
     if (
       document.readyState ===
