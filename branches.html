@@ -1,0 +1,968 @@
+```html
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Филиаллар бошқаруви</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .add-btn {
+      background: #198754;
+      color: white;
+    }
+
+    .form-box {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .form-box.show {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .save-btn {
+      background: #0d6efd;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .cancel-btn {
+      background: #6c757d;
+      color: white;
+      margin-top: 15px;
+      margin-left: 8px;
+    }
+
+    .message {
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .success {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .search-box {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .search-box input {
+      max-width: 500px;
+    }
+
+    .table-box {
+      background: white;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f3f5;
+    }
+
+    .edit-btn {
+      background: #ffc107;
+      color: #222;
+      margin-right: 5px;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top">
+
+    <h1>🏢 Филиаллар бошқаруви</h1>
+
+    <button
+      class="add-btn"
+      onclick="openAddForm()"
+    >
+      ➕ Филиал қўшиш
+    </button>
+
+  </div>
+
+
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+
+  <!-- FORM -->
+
+  <div
+    id="formBox"
+    class="form-box"
+  >
+
+    <h2 id="formTitle">
+      Янги филиал қўшиш
+    </h2>
+
+
+    <input
+      id="editId"
+      type="hidden"
+    >
+
+
+    <div class="form-grid">
+
+      <div>
+
+        <label>
+          Филиал номи
+        </label>
+
+        <input
+          id="branchName"
+          type="text"
+          placeholder="Масалан: Тошкент"
+        >
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="save-btn"
+      onclick="saveBranch()"
+    >
+      💾 Сақлаш
+    </button>
+
+
+    <button
+      class="cancel-btn"
+      onclick="closeForm()"
+    >
+      Бекор қилиш
+    </button>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <div class="search-box">
+
+    <label>
+      🔎 Филиал қидириш
+    </label>
+
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Филиал номини ёзинг..."
+      oninput="filterBranches()"
+    >
+
+  </div>
+
+
+  <!-- TABLE -->
+
+  <div class="table-box">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+
+          <th>Филиал</th>
+
+          <th>Ходимлар сони</th>
+
+          <th>Амаллар</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody id="branchTable">
+
+        <tr>
+
+          <td
+            colspan="4"
+            class="loading"
+          >
+            Маълумотлар юкланмоқда...
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const API =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+
+let branchesList = [];
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(
+  text,
+  type
+) {
+
+  const box =
+    document.getElementById(
+      "message"
+    );
+
+  box.textContent =
+    text;
+
+  box.className =
+    "message " +
+    type;
+
+  box.style.display =
+    "block";
+
+}
+
+
+/* =====================================================
+   ADD FORM
+===================================================== */
+
+function openAddForm() {
+
+  document
+    .getElementById(
+      "formTitle"
+    )
+    .textContent =
+    "Янги филиал қўшиш";
+
+
+  document
+    .getElementById(
+      "editId"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "branchName"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .add("show");
+
+}
+
+
+/* =====================================================
+   CLOSE FORM
+===================================================== */
+
+function closeForm() {
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .remove("show");
+
+}
+
+
+/* =====================================================
+   LOAD BRANCHES
+===================================================== */
+
+async function loadBranches() {
+
+  const table =
+    document.getElementById(
+      "branchTable"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=branches"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "BRANCHES:",
+      data
+    );
+
+
+    const branches =
+      Array.isArray(data)
+        ? data
+        : (
+          Array.isArray(
+            data.branches
+          )
+            ? data.branches
+            : []
+        );
+
+
+    const employeesResponse =
+      await fetch(
+        API +
+        "?view=employees"
+      );
+
+
+    const employeesData =
+      await employeesResponse.json();
+
+
+    const employees =
+      Array.isArray(
+        employeesData
+      )
+        ? employeesData
+        : (
+          Array.isArray(
+            employeesData.employees
+          )
+            ? employeesData.employees
+            : []
+        );
+
+
+    branchesList =
+      branches.map(
+        function(branch) {
+
+          const count =
+            employees.filter(
+              function(employee) {
+
+                return Number(
+                  employee.branch_id
+                ) === Number(
+                  branch.id
+                );
+
+              }
+            ).length;
+
+
+          return {
+            id:
+              branch.id,
+
+            name:
+              branch.name,
+
+            employee_count:
+              count
+          };
+
+        }
+      );
+
+
+    renderBranches(
+      branchesList
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "BRANCH ERROR:",
+      error
+    );
+
+
+    table.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="4"
+          class="loading"
+        >
+          Филиалларни олишда хато
+        </td>
+      </tr>
+      `;
+
+  }
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderBranches(
+  branches
+) {
+
+  const table =
+    document.getElementById(
+      "branchTable"
+    );
+
+
+  table.innerHTML =
+    "";
+
+
+  if (
+    branches.length === 0
+  ) {
+
+    table.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="4"
+          class="loading"
+        >
+          Филиаллар топилмади
+        </td>
+      </tr>
+      `;
+
+    return;
+
+  }
+
+
+  branches.forEach(
+    function(branch) {
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      row.innerHTML =
+        `
+        <td>${branch.id}</td>
+
+        <td>${branch.name}</td>
+
+        <td>${branch.employee_count}</td>
+
+        <td></td>
+        `;
+
+
+      const actionCell =
+        row.children[3];
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.className =
+        "edit-btn";
+
+      editButton.textContent =
+        "✏️ Таҳрир";
+
+      editButton.onclick =
+        function() {
+
+          editBranch(
+            branch
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        editButton
+      );
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.className =
+        "delete-btn";
+
+      deleteButton.textContent =
+        "🗑 Ўчириш";
+
+      deleteButton.onclick =
+        function() {
+
+          deleteBranch(
+            branch
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        deleteButton
+      );
+
+    }
+  );
+
+
+  branches.forEach(
+    function(branch) {
+
+      const rows =
+        table.querySelectorAll(
+          "tr"
+        );
+
+      const row =
+        Array.from(rows).find(
+          function(item) {
+
+            return item.children[0] &&
+              Number(
+                item.children[0].textContent
+              ) === Number(
+                branch.id
+              );
+
+          }
+        );
+
+
+      if (row) {
+
+        table.appendChild(
+          row
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function filterBranches() {
+
+  const search =
+    document
+      .getElementById(
+        "searchInput"
+      )
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  if (!search) {
+
+    renderBranches(
+      branchesList
+    );
+
+    return;
+
+  }
+
+
+  const filtered =
+    branchesList.filter(
+      function(branch) {
+
+        return String(
+          branch.name || ""
+        )
+        .toLowerCase()
+        .includes(search);
+
+      }
+    );
+
+
+  renderBranches(
+    filtered
+  );
+
+}
+
+
+/* =====================================================
+   EDIT BRANCH
+===================================================== */
+
+function editBranch(
+  branch
+) {
+
+  document
+    .getElementById(
+      "formTitle"
+    )
+    .textContent =
+    "✏️ Филиални таҳрирлаш";
+
+
+  document
+    .getElementById(
+      "editId"
+    )
+    .value =
+    branch.id;
+
+
+  document
+    .getElementById(
+      "branchName"
+    )
+    .value =
+    branch.name || "";
+
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .add("show");
+
+
+  window.scrollTo(
+    {
+      top: 0,
+      behavior: "smooth"
+    }
+  );
+
+}
+
+
+/* =====================================================
+   SAVE BRANCH
+===================================================== */
+
+async function saveBranch() {
+
+  const editId =
+    document
+      .getElementById(
+        "editId"
+      )
+      .value;
+
+
+  const name =
+    document
+      .getElementById(
+        "branchName"
+      )
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    showMessage(
+      "Филиал номини киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    if (editId) {
+
+      showMessage(
+        "⚠️ Таҳрирлаш API ҳали қўшилмаган",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const response =
+      await fetch(
+        API +
+        "?view=branch_add",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              {
+                name:
+                  name
+              }
+            )
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "ADD BRANCH:",
+      data
+    );
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Филиал қўшилмади"
+      );
+
+    }
+
+
+    showMessage(
+      "✅ Филиал муваффақиятли қўшилди",
+      "success"
+    );
+
+
+    closeForm();
+
+    loadBranches();
+
+  } catch (error) {
+
+    console.error(
+      "ADD BRANCH ERROR:",
+      error
+    );
+
+
+    showMessage(
+      "❌ " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+async function deleteBranch(
+  branch
+) {
+
+  if (
+    Number(
+      branch.employee_count
+    ) > 0
+  ) {
+
+    showMessage(
+      "❌ Бу филиалда ходимлар бор. Аввал ходимларни бошқа филиалга ўтказинг.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "⚠️ " +
+      branch.name +
+      "\n\nУшбу филиални ўчиришни тасдиқлайсизми?"
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  showMessage(
+    "⚠️ Филиални ўчириш API ҳали қўшилмаган",
+    "error"
+  );
+
+}
+
+
+loadBranches();
+
+</script>
+
+</body>
+</html>
+```
