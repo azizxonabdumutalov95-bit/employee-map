@@ -511,6 +511,7 @@ function filterAlerts() {
 }
 
 
+```javascript
 /* =====================================================
    RENDER
 ===================================================== */
@@ -536,7 +537,7 @@ function renderAlerts(
     table.innerHTML = `
       <tr>
         <td
-          colspan="5"
+          colspan="6"
           class="empty"
         >
           ✅ Ҳозирча огоҳлантиришлар йўқ
@@ -558,6 +559,10 @@ function renderAlerts(
         );
 
 
+      /* =====================================================
+         EMPLOYEE
+      ===================================================== */
+
       const employeeCell =
         document.createElement(
           "td"
@@ -567,6 +572,10 @@ function renderAlerts(
         alert.employee_name ||
         "Номаълум ходим";
 
+
+      /* =====================================================
+         MESSAGE
+      ===================================================== */
 
       const messageCell =
         document.createElement(
@@ -578,6 +587,10 @@ function renderAlerts(
         "";
 
 
+      /* =====================================================
+         CREATED
+      ===================================================== */
+
       const createdCell =
         document.createElement(
           "td"
@@ -588,6 +601,10 @@ function renderAlerts(
           alert.created_at
         );
 
+
+      /* =====================================================
+         STATUS
+      ===================================================== */
 
       const statusCell =
         document.createElement(
@@ -623,6 +640,10 @@ function renderAlerts(
       );
 
 
+      /* =====================================================
+         RESOLVED TIME
+      ===================================================== */
+
       const resolvedCell =
         document.createElement(
           "td"
@@ -635,6 +656,60 @@ function renderAlerts(
             )
           : "—";
 
+
+      /* =====================================================
+         ACTION
+      ===================================================== */
+
+      const actionCell =
+        document.createElement(
+          "td"
+        );
+
+
+      if (
+        alert.status ===
+        "active"
+      ) {
+
+        const resolveButton =
+          document.createElement(
+            "button"
+          );
+
+        resolveButton.type =
+          "button";
+
+        resolveButton.textContent =
+          "✅ Ёпиш";
+
+        resolveButton.style.cursor =
+          "pointer";
+
+        resolveButton.onclick =
+          function() {
+
+            resolveAlert(
+              alert.id
+            );
+
+          };
+
+        actionCell.appendChild(
+          resolveButton
+        );
+
+      } else {
+
+        actionCell.textContent =
+          "—";
+
+      }
+
+
+      /* =====================================================
+         APPEND ROW
+      ===================================================== */
 
       row.appendChild(
         employeeCell
@@ -656,6 +731,10 @@ function renderAlerts(
         resolvedCell
       );
 
+      row.appendChild(
+        actionCell
+      );
+
 
       table.appendChild(
         row
@@ -663,6 +742,85 @@ function renderAlerts(
 
     }
   );
+
+}
+
+
+/* =====================================================
+   RESOLVE ALERT
+===================================================== */
+
+async function resolveAlert(
+  alertId
+) {
+
+  if (!alertId) {
+
+    alert(
+      "Alert ID топилмади"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=alert_resolve",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              id: alertId
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+
+      throw new Error(
+        result.error ||
+        "Alertни ёпишда хато"
+      );
+
+    }
+
+
+    await loadAlerts();
+
+
+  } catch (error) {
+
+    console.error(
+      "RESOLVE ALERT ERROR:",
+      error
+    );
+
+
+    alert(
+      "❌ Alertни ёпишда хато:\n" +
+      error.message
+    );
+
+  }
 
 }
 
@@ -753,8 +911,7 @@ function escapeHtml(
 ===================================================== */
 
 loadAlerts();
-
-</script>
+```
 
 </body>
 </html>
