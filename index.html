@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <title>Xodimlar kartasi</title>
+  <title>Xodimlar boshqaruvi</title>
 
   <link
     rel="stylesheet"
@@ -75,22 +75,13 @@
       word-break: break-word;
     }
 
-    .success {
-      background: #dcfce7;
-      color: #166534;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      font-size: 13px;
-    }
-
     /* =========================
        STATISTICS
     ========================= */
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin-bottom: 12px;
     }
@@ -113,6 +104,18 @@
       font-size: 12px;
       color: #64748b;
       margin-top: 4px;
+    }
+
+    .stat-online .stat-number {
+      color: #16a34a;
+    }
+
+    .stat-delayed .stat-number {
+      color: #ca8a04;
+    }
+
+    .stat-offline .stat-number {
+      color: #dc2626;
     }
 
     /* =========================
@@ -165,8 +168,20 @@
       border-left: 5px solid #94a3b8;
     }
 
-    .employee-card.working {
+    .employee-card.online {
       border-left-color: #16a34a;
+    }
+
+    .employee-card.delayed {
+      border-left-color: #eab308;
+    }
+
+    .employee-card.offline {
+      border-left-color: #dc2626;
+    }
+
+    .employee-card.no-gps {
+      border-left-color: #94a3b8;
     }
 
     .employee-name {
@@ -188,6 +203,8 @@
       border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
+      margin-right: 5px;
+      margin-bottom: 4px;
     }
 
     .status-working {
@@ -196,6 +213,26 @@
     }
 
     .status-not-working {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .gps-online {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .gps-delayed {
+      background: #fef9c3;
+      color: #a16207;
+    }
+
+    .gps-offline {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .gps-none {
       background: #f1f5f9;
       color: #64748b;
     }
@@ -226,12 +263,6 @@
     .btn-google {
       background: #f1f5f9;
       color: #334155;
-    }
-
-    .btn-refresh {
-      background: #0f766e;
-      color: white;
-      margin-top: 8px;
     }
 
     button:hover,
@@ -269,11 +300,19 @@
       font-weight: bold;
     }
 
-    .marker-working {
+    .marker-online {
       background: #16a34a;
     }
 
-    .marker-not-working {
+    .marker-delayed {
+      background: #eab308;
+    }
+
+    .marker-offline {
+      background: #dc2626;
+    }
+
+    .marker-no-gps {
       background: #64748b;
     }
 
@@ -333,9 +372,13 @@
       margin-top: 5px;
     }
 
+    .gps-age {
+      font-weight: bold;
+    }
+
     @media (max-width: 700px) {
       .stats {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .stat {
@@ -378,7 +421,7 @@
 <body>
 
   <div class="header">
-    <h1>🗺 Xodimlar kartasi</h1>
+    <h1>👥 Xodimlarni boshqarish</h1>
     <p>Real vaqtga yaqin GPS monitoring</p>
   </div>
 
@@ -392,17 +435,22 @@
 
       <div class="stat">
         <div class="stat-number" id="totalEmployees">0</div>
-        <div class="stat-label">Jami xodim</div>
+        <div class="stat-label">👥 Jami xodim</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-number" id="workingEmployees">0</div>
-        <div class="stat-label">Ishlayapti</div>
+      <div class="stat stat-online">
+        <div class="stat-number" id="onlineEmployees">0</div>
+        <div class="stat-label">🟢 Online</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-number" id="gpsEmployees">0</div>
-        <div class="stat-label">GPS mavjud</div>
+      <div class="stat stat-delayed">
+        <div class="stat-number" id="delayedEmployees">0</div>
+        <div class="stat-label">🟡 Kechikkan</div>
+      </div>
+
+      <div class="stat stat-offline">
+        <div class="stat-number" id="offlineEmployees">0</div>
+        <div class="stat-label">🔴 Offline</div>
       </div>
 
     </div>
@@ -437,8 +485,6 @@
 
   </div>
 
-  <!-- LEAFLET -->
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
@@ -470,6 +516,207 @@
     let loading = false;
 
     let refreshTimer = null;
+
+
+    /*
+    =====================================================
+    GPS STATUS
+    =====================================================
+
+    0 - 60 sekund   = ONLINE
+    1 - 5 minut     = DELAYED
+    5+ minut        = OFFLINE
+    =====================================================
+    */
+
+    function getGpsStatus(employee) {
+
+      if (
+        !employee ||
+        !employee.last_location_at
+      ) {
+
+        return "no-gps";
+
+      }
+
+
+      const gpsTime =
+        new Date(
+          employee.last_location_at
+        ).getTime();
+
+
+      if (
+        !Number.isFinite(gpsTime)
+      ) {
+
+        return "no-gps";
+
+      }
+
+
+      const now =
+        Date.now();
+
+
+      const ageSeconds =
+        (now - gpsTime) / 1000;
+
+
+      /*
+      Kelajakdagi noto'g'ri vaqt
+      */
+
+      if (ageSeconds < 0) {
+
+        return "online";
+
+      }
+
+
+      if (ageSeconds <= 60) {
+
+        return "online";
+
+      }
+
+
+      if (ageSeconds <= 300) {
+
+        return "delayed";
+
+      }
+
+
+      return "offline";
+
+    }
+
+
+    /*
+    =====================================================
+    GPS STATUS TEXT
+    =====================================================
+    */
+
+    function getGpsStatusText(employee) {
+
+      const status =
+        getGpsStatus(employee);
+
+
+      if (status === "online") {
+
+        return "🟢 Online";
+
+      }
+
+      if (status === "delayed") {
+
+        return "🟡 Kechikkan";
+
+      }
+
+      if (status === "offline") {
+
+        return "🔴 Offline";
+
+      }
+
+      return "⚪ GPS yo‘q";
+
+    }
+
+
+    /*
+    =====================================================
+    GPS AGE TEXT
+    =====================================================
+    */
+
+    function getGpsAgeText(employee) {
+
+      if (
+        !employee ||
+        !employee.last_location_at
+      ) {
+
+        return "GPS ma'lumoti yo‘q";
+
+      }
+
+
+      const gpsTime =
+        new Date(
+          employee.last_location_at
+        ).getTime();
+
+
+      if (
+        !Number.isFinite(gpsTime)
+      ) {
+
+        return "GPS ma'lumoti yo‘q";
+
+      }
+
+
+      let seconds =
+        Math.floor(
+          (Date.now() - gpsTime) / 1000
+        );
+
+
+      if (seconds < 0) {
+
+        seconds = 0;
+
+      }
+
+
+      if (seconds < 60) {
+
+        return seconds + " soniya oldin";
+
+      }
+
+
+      const minutes =
+        Math.floor(
+          seconds / 60
+        );
+
+
+      if (minutes < 60) {
+
+        return minutes + " daqiqa oldin";
+
+      }
+
+
+      const hours =
+        Math.floor(
+          minutes / 60
+        );
+
+
+      if (hours < 24) {
+
+        return hours + " soat oldin";
+
+      }
+
+
+      const days =
+        Math.floor(
+          hours / 24
+        );
+
+
+      return days + " kun oldin";
+
+    }
 
 
     /*
@@ -569,13 +816,20 @@
 
       }
 
-      const date = new Date(value);
+      const date =
+        new Date(value);
 
-      if (isNaN(date.getTime())) {
+
+      if (
+        isNaN(
+          date.getTime()
+        )
+      ) {
 
         return "—";
 
       }
+
 
       return date.toLocaleString(
         "uz-UZ",
@@ -598,15 +852,30 @@
 
       return String(value ?? "")
 
-        .replace(/&/g, "&amp;")
+        .replace(
+          /&/g,
+          "&amp;"
+        )
 
-        .replace(/</g, "&lt;")
+        .replace(
+          /</g,
+          "&lt;"
+        )
 
-        .replace(/>/g, "&gt;")
+        .replace(
+          />/g,
+          "&gt;"
+        )
 
-        .replace(/"/g, "&quot;")
+        .replace(
+          /"/g,
+          "&quot;"
+        )
 
-        .replace(/'/g, "&#039;");
+        .replace(
+          /'/g,
+          "&#039;"
+        );
 
     }
 
@@ -619,15 +888,47 @@
 
     function createEmployeeIcon(employee) {
 
-      const working = isWorking(employee);
+      const gpsStatus =
+        getGpsStatus(employee);
+
+
+      let markerClass =
+        "marker-no-gps";
+
+
+      if (
+        gpsStatus === "online"
+      ) {
+
+        markerClass =
+          "marker-online";
+
+      }
+
+      else if (
+        gpsStatus === "delayed"
+      ) {
+
+        markerClass =
+          "marker-delayed";
+
+      }
+
+      else if (
+        gpsStatus === "offline"
+      ) {
+
+        markerClass =
+          "marker-offline";
+
+      }
+
 
       return L.divIcon({
 
         html:
           '<div class="employee-marker ' +
-          (working
-            ? "marker-working"
-            : "marker-not-working") +
+          markerClass +
           '">' +
           "👤" +
           "</div>",
@@ -653,14 +954,23 @@
 
     function createPopup(employee) {
 
-      const working = isWorking(employee);
-
-      const statusText = working
-        ? "🟢 Ishlayapti"
-        : "⚪ Ishlamayapti";
+      const working =
+        isWorking(employee);
 
 
-      let gpsText = "GPS mavjud emas";
+      const workStatus =
+        working
+          ? "🟢 Ishlayapti"
+          : "⚪ Ishlamayapti";
+
+
+      const gpsStatus =
+        getGpsStatusText(employee);
+
+
+      let gpsText =
+        "GPS mavjud emas";
+
 
       const hasGps =
         employee.latitude !== null &&
@@ -684,9 +994,12 @@
 
       if (hasGps) {
 
-        const lat = Number(employee.latitude);
+        const lat =
+          Number(employee.latitude);
 
-        const lon = Number(employee.longitude);
+
+        const lon =
+          Number(employee.longitude);
 
 
         if (
@@ -717,25 +1030,34 @@
 
           '<div class="popup-title">' +
             escapeHtml(
-              employee.full_name || "Noma'lum"
+              employee.full_name ||
+              "Noma'lum"
             ) +
           "</div>" +
 
           '<div class="popup-row">' +
             "🏢 Filial: " +
             escapeHtml(
-              employee.branch_name || "—"
+              employee.branch_name ||
+              "—"
             ) +
           "</div>" +
 
           '<div class="popup-row">' +
-            "📊 Holat: " +
-            statusText +
+            "👷 Ish holati: " +
+            workStatus +
+          "</div>" +
+
+          '<div class="popup-row">' +
+            "📡 GPS holati: " +
+            gpsStatus +
           "</div>" +
 
           '<div class="popup-row">' +
             "🕐 Ish boshlagan: " +
-            formatDate(employee.work_started_at) +
+            formatDate(
+              employee.work_started_at
+            ) +
           "</div>" +
 
           '<div class="popup-row">' +
@@ -745,7 +1067,14 @@
 
           '<div class="popup-row">' +
             "🕒 Oxirgi GPS: " +
-            formatDate(employee.last_location_at) +
+            formatDate(
+              employee.last_location_at
+            ) +
+          "</div>" +
+
+          '<div class="popup-row">' +
+            "⏱ GPS: " +
+            getGpsAgeText(employee) +
           "</div>" +
 
           googleButton +
@@ -773,15 +1102,21 @@
 
 
       const id =
-        String(employee.employee_id);
+        String(
+          employee.employee_id
+        );
 
 
       const lat =
-        Number(employee.latitude);
+        Number(
+          employee.latitude
+        );
 
 
       const lon =
-        Number(employee.longitude);
+        Number(
+          employee.longitude
+        );
 
 
       const validGps =
@@ -799,7 +1134,9 @@
 
       if (!validGps) {
 
-        if (markers.has(id)) {
+        if (
+          markers.has(id)
+        ) {
 
           map.removeLayer(
             markers.get(id)
@@ -818,7 +1155,9 @@
       MARKER BOR
       */
 
-      if (markers.has(id)) {
+      if (
+        markers.has(id)
+      ) {
 
         const marker =
           markers.get(id);
@@ -831,12 +1170,16 @@
 
 
         marker.setIcon(
-          createEmployeeIcon(employee)
+          createEmployeeIcon(
+            employee
+          )
         );
 
 
         marker.setPopupContent(
-          createPopup(employee)
+          createPopup(
+            employee
+          )
         );
 
 
@@ -854,13 +1197,17 @@
           [lat, lon],
           {
             icon:
-              createEmployeeIcon(employee)
+              createEmployeeIcon(
+                employee
+              )
           }
         );
 
 
       marker.bindPopup(
-        createPopup(employee)
+        createPopup(
+          employee
+        )
       );
 
 
@@ -881,7 +1228,9 @@
     =====================================================
     */
 
-    function removeOldMarkers(currentIds) {
+    function removeOldMarkers(
+      currentIds
+    ) {
 
       if (!map) {
 
@@ -893,9 +1242,13 @@
       markers.forEach(
         function(marker, id) {
 
-          if (!currentIds.has(id)) {
+          if (
+            !currentIds.has(id)
+          ) {
 
-            map.removeLayer(marker);
+            map.removeLayer(
+              marker
+            );
 
             markers.delete(id);
 
@@ -931,7 +1284,9 @@
         );
 
 
-      if (markerArray.length === 1) {
+      if (
+        markerArray.length === 1
+      ) {
 
         const position =
           markerArray[0].getLatLng();
@@ -961,7 +1316,9 @@
         group.getBounds();
 
 
-      if (bounds.isValid()) {
+      if (
+        bounds.isValid()
+      ) {
 
         map.fitBounds(
           bounds,
@@ -985,37 +1342,47 @@
     =====================================================
     */
 
-    function updateStatistics(employees) {
+    function updateStatistics(
+      employees
+    ) {
 
-      let working = 0;
+      let online = 0;
 
-      let gps = 0;
+      let delayed = 0;
+
+      let offline = 0;
 
 
       employees.forEach(
         function(employee) {
 
-          if (isWorking(employee)) {
-
-            working++;
-
-          }
-
-
-          const lat =
-            Number(employee.latitude);
-
-
-          const lon =
-            Number(employee.longitude);
+          const status =
+            getGpsStatus(
+              employee
+            );
 
 
           if (
-            Number.isFinite(lat) &&
-            Number.isFinite(lon)
+            status === "online"
           ) {
 
-            gps++;
+            online++;
+
+          }
+
+          else if (
+            status === "delayed"
+          ) {
+
+            delayed++;
+
+          }
+
+          else if (
+            status === "offline"
+          ) {
+
+            offline++;
 
           }
 
@@ -1030,15 +1397,21 @@
 
 
       document.getElementById(
-        "workingEmployees"
+        "onlineEmployees"
       ).textContent =
-        working;
+        online;
 
 
       document.getElementById(
-        "gpsEmployees"
+        "delayedEmployees"
       ).textContent =
-        gps;
+        delayed;
+
+
+      document.getElementById(
+        "offlineEmployees"
+      ).textContent =
+        offline;
 
     }
 
@@ -1049,7 +1422,9 @@
     =====================================================
     */
 
-    function renderEmployeeCards(employees) {
+    function renderEmployeeCards(
+      employees
+    ) {
 
       const container =
         document.getElementById(
@@ -1057,7 +1432,9 @@
         );
 
 
-      if (!employees.length) {
+      if (
+        !employees.length
+      ) {
 
         container.innerHTML =
           '<div class="loading">' +
@@ -1076,15 +1453,27 @@
         function(employee) {
 
           const working =
-            isWorking(employee);
+            isWorking(
+              employee
+            );
+
+
+          const gpsStatus =
+            getGpsStatus(
+              employee
+            );
 
 
           const lat =
-            Number(employee.latitude);
+            Number(
+              employee.latitude
+            );
 
 
           const lon =
-            Number(employee.longitude);
+            Number(
+              employee.longitude
+            );
 
 
           const hasGps =
@@ -1099,20 +1488,62 @@
 
 
           card.className =
-            "employee-card" +
-            (
-              working
-                ? " working"
-                : ""
-            );
+            "employee-card " +
+            gpsStatus;
 
 
-          const status =
+          const workStatus =
             working
 
               ? '<span class="status status-working">🟢 Ishlayapti</span>'
 
               : '<span class="status status-not-working">⚪ Ishlamayapti</span>';
+
+
+          let gpsStatusHtml = "";
+
+
+          if (
+            gpsStatus === "online"
+          ) {
+
+            gpsStatusHtml =
+              '<span class="status gps-online">' +
+              "🟢 Online" +
+              "</span>";
+
+          }
+
+          else if (
+            gpsStatus === "delayed"
+          ) {
+
+            gpsStatusHtml =
+              '<span class="status gps-delayed">' +
+              "🟡 Kechikkan" +
+              "</span>";
+
+          }
+
+          else if (
+            gpsStatus === "offline"
+          ) {
+
+            gpsStatusHtml =
+              '<span class="status gps-offline">' +
+              "🔴 Offline" +
+              "</span>";
+
+          }
+
+          else {
+
+            gpsStatusHtml =
+              '<span class="status gps-none">' +
+              "⚪ GPS yo‘q" +
+              "</span>";
+
+          }
 
 
           const gpsText =
@@ -1159,12 +1590,13 @@
               "🏢 " +
               escapeHtml(
                 employee.branch_name ||
-                "Filial yo'q"
+                "Filial yo‘q"
               ) +
             "</div>" +
 
             '<div class="row">' +
-              status +
+              workStatus +
+              gpsStatusHtml +
             "</div>" +
 
             '<div class="row">' +
@@ -1183,6 +1615,13 @@
               "🕒 Oxirgi GPS: " +
               formatDate(
                 employee.last_location_at
+              ) +
+            "</div>" +
+
+            '<div class="row gps-age">' +
+              "📡 Signal: " +
+              getGpsAgeText(
+                employee
               ) +
             "</div>" +
 
@@ -1233,14 +1672,20 @@
     =====================================================
     */
 
-    function showEmployeeOnMap(employee) {
+    function showEmployeeOnMap(
+      employee
+    ) {
 
       const lat =
-        Number(employee.latitude);
+        Number(
+          employee.latitude
+        );
 
 
       const lon =
-        Number(employee.longitude);
+        Number(
+          employee.longitude
+        );
 
 
       if (
@@ -1305,7 +1750,9 @@
     =====================================================
     */
 
-    function showError(message) {
+    function showError(
+      message
+    ) {
 
       const box =
         document.getElementById(
@@ -1315,7 +1762,9 @@
 
       box.innerHTML =
         '<div class="error">' +
-        escapeHtml(message) +
+        escapeHtml(
+          message
+        ) +
         "</div>";
 
     }
@@ -1355,11 +1804,6 @@
 
     async function loadEmployees() {
 
-      /*
-      Bir vaqtning o'zida
-      2 ta request yubormaymiz.
-      */
-
       if (loading) {
 
         return;
@@ -1374,13 +1818,6 @@
 
         setLoadingStatus();
 
-
-        /*
-        ABORT CONTROLLER
-
-        10 sekunddan ko'p
-        kutib qolmaydi.
-        */
 
         const controller =
           new AbortController();
@@ -1458,10 +1895,6 @@
           data
         );
 
-
-        /*
-        API ARRAY
-        */
 
         let employees = [];
 
@@ -1590,9 +2023,6 @@
 
         /*
         FIRST LOAD ONLY
-
-        Har 30 sekundda
-        mapni markazlashtirmaymiz.
         */
 
         if (
@@ -1656,7 +2086,6 @@
           100
         );
 
-
       }
 
       catch (error) {
@@ -1704,7 +2133,6 @@
         ).innerHTML =
           "🔴 Ma'lumotlarni yuklashda xato";
 
-
       }
 
       finally {
@@ -1735,22 +2163,14 @@
       );
 
 
-      /*
-      MAP
-      */
-
       initMap();
 
-
-      /*
-      FIRST LOAD
-      */
 
       loadEmployees();
 
 
       /*
-      EVERY 30 SECONDS
+      HAR 30 SEKUNDDA YANGILANADI
       */
 
       refreshTimer =
