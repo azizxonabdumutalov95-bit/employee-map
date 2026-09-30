@@ -1,1 +1,1635 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Сана оралиғи ҳисоботи</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+    }
+
+    .toolbar {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .toolbar label {
+      font-weight: bold;
+    }
+
+    input,
+    select,
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .card-title {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .table-box {
+      background: white;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+
+    th {
+      background: #f9fafb;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-yellow {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .status-red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 1100px) {
+      .cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .container {
+        padding: 12px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card-value {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>📅 Сана оралиғи ҳисоботи</h1>
+
+  <div class="toolbar">
+
+    <label>
+      Бошланиш:
+    </label>
+
+    <input
+      type="date"
+      id="startDate"
+    >
+
+    <label>
+      Тугаш:
+    </label>
+
+    <input
+      type="date"
+      id="endDate"
+    >
+
+    <label>
+      Филиал:
+    </label>
+
+    <select id="branch">
+      <option value="">
+        Барча филиаллар
+      </option>
+    </select>
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Ходим қидириш..."
+    >
+
+    <button
+      type="button"
+      onclick="loadReport()"
+    >
+      🔄 Ҳисобот
+    </button>
+
+  </div>
+
+  <div
+    id="errorBox"
+    class="error"
+  ></div>
+
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-title">
+        👥 Жами ходим
+      </div>
+
+      <div
+        class="card-value"
+        id="totalEmployees"
+      >
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-title">
+        📅 Ишлаган ходим
+      </div>
+
+      <div
+        class="card-value"
+        id="workedEmployees"
+      >
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-title">
+        📆 Иш кунлари
+      </div>
+
+      <div
+        class="card-value"
+        id="totalWorkDays"
+      >
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-title">
+        🟢 Актив ходим
+      </div>
+
+      <div
+        class="card-value"
+        id="activeEmployees"
+      >
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-title">
+        ⏱ Жами иш вақти
+      </div>
+
+      <div
+        class="card-value"
+        id="totalWorkTime"
+      >
+        0 соат
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-title">
+        🔢 Жами сессия
+      </div>
+
+      <div
+        class="card-value"
+        id="totalSessions"
+      >
+        0
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="table-box">
+
+    <div
+      id="loading"
+      class="loading"
+    >
+      Ҳисобот юкланмоқда...
+    </div>
+
+
+    <table
+      id="reportTable"
+      style="display:none;"
+    >
+
+      <thead>
+
+        <tr>
+          <th>№</th>
+          <th>Ходим</th>
+          <th>Филиал</th>
+          <th>Ишлаган кун</th>
+          <th>Ишламаган кун</th>
+          <th>Жами иш вақти</th>
+          <th>Сессия</th>
+          <th>Ўртача кунлик вақт</th>
+          <th>Ҳолат</th>
+        </tr>
+
+      </thead>
+
+      <tbody
+        id="reportBody"
+      ></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+  "https://qyvglgcjsqifyubmpahw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_2DotFSs_dpuB97oSeqgepg_OErV7nyc";
+
+
+function supabaseGet(
+  table,
+  params = {}
+) {
+
+  const url =
+    new URL(
+      SUPABASE_URL +
+      "/rest/v1/" +
+      table
+    );
+
+  Object.entries(params)
+    .forEach(
+      ([key, value]) => {
+
+        url.searchParams.set(
+          key,
+          value
+        );
+
+      }
+    );
+
+
+  return fetch(
+    url,
+    {
+      method: "GET",
+
+      headers: {
+        apikey:
+          SUPABASE_KEY,
+
+        Authorization:
+          "Bearer " +
+          SUPABASE_KEY
+      }
+    }
+  )
+  .then(
+    async response => {
+
+      const text =
+        await response.text();
+
+      if (!response.ok) {
+
+        throw new Error(
+          response.status +
+          " " +
+          text
+        );
+
+      }
+
+      return text
+        ? JSON.parse(text)
+        : [];
+
+    }
+  );
+
+}
+
+
+function formatDuration(
+  seconds
+) {
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds) || 0
+      )
+    );
+
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+
+  if (hours > 0) {
+
+    return (
+      hours +
+      " соат " +
+      minutes +
+      " дақиқа"
+    );
+
+  }
+
+
+  return (
+    minutes +
+    " дақиқа"
+  );
+
+}
+
+
+function getDateKey(
+  date
+) {
+
+  const formatter =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Tashkent"
+      }
+    );
+
+  return formatter.format(
+    date
+  );
+
+}
+
+
+function getTashkentDayStart(
+  dateString
+) {
+
+  return new Date(
+    dateString +
+    "T00:00:00+05:00"
+  );
+
+}
+
+
+function getDayList(
+  startDate,
+  endDate
+) {
+
+  const days = [];
+
+  let current =
+    new Date(
+      startDate.getTime()
+    );
+
+
+  while (
+    current <= endDate
+  ) {
+
+    days.push(
+      getDateKey(current)
+    );
+
+
+    current =
+      new Date(
+        current.getTime() +
+        24 * 60 * 60 * 1000
+      );
+
+  }
+
+
+  return days;
+
+}
+
+
+function mergeIntervals(
+  intervals
+) {
+
+  if (
+    intervals.length === 0
+  ) {
+
+    return [];
+
+  }
+
+
+  intervals.sort(
+    (a, b) =>
+      a[0] - b[0]
+  );
+
+
+  const merged = [
+    intervals[0].slice()
+  ];
+
+
+  for (
+    let i = 1;
+    i < intervals.length;
+    i++
+  ) {
+
+    const current =
+      intervals[i];
+
+    const last =
+      merged[
+        merged.length - 1
+      ];
+
+
+    if (
+      current[0] <=
+      last[1]
+    ) {
+
+      if (
+        current[1] >
+        last[1]
+      ) {
+
+        last[1] =
+          current[1];
+
+      }
+
+    } else {
+
+      merged.push(
+        current.slice()
+      );
+
+    }
+
+  }
+
+
+  return merged;
+
+}
+
+
+function calculateSessionForDay(
+  session,
+  dayStart,
+  dayEnd
+) {
+
+  const start =
+    new Date(
+      session.started_at
+    );
+
+
+  if (
+    isNaN(
+      start.getTime()
+    )
+  ) {
+
+    return 0;
+
+  }
+
+
+  let end;
+
+
+  if (
+    session.ended_at
+  ) {
+
+    end =
+      new Date(
+        session.ended_at
+      );
+
+  } else if (
+    session.finished_at
+  ) {
+
+    end =
+      new Date(
+        session.finished_at
+      );
+
+  } else {
+
+    end =
+      new Date();
+
+  }
+
+
+  if (
+    isNaN(
+      end.getTime()
+    )
+  ) {
+
+    return 0;
+
+  }
+
+
+  const startMs =
+    Math.max(
+      start.getTime(),
+      dayStart.getTime()
+    );
+
+
+  const endMs =
+    Math.min(
+      end.getTime(),
+      dayEnd.getTime()
+    );
+
+
+  if (
+    endMs <= startMs
+  ) {
+
+    return 0;
+
+  }
+
+
+  return (
+    endMs -
+    startMs
+  ) / 1000;
+
+}
+
+
+async function loadReport() {
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  errorBox.style.display =
+    "none";
+
+
+  document.getElementById(
+    "loading"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "reportTable"
+  ).style.display =
+    "none";
+
+
+  try {
+
+    const startValue =
+      document.getElementById(
+        "startDate"
+      ).value;
+
+
+    const endValue =
+      document.getElementById(
+        "endDate"
+      ).value;
+
+
+    if (
+      !startValue ||
+      !endValue
+    ) {
+
+      throw new Error(
+        "Бошланиш ва тугаш санасини танланг."
+      );
+
+    }
+
+
+    const startDate =
+      getTashkentDayStart(
+        startValue
+      );
+
+
+    const endDate =
+      getTashkentDayStart(
+        endValue
+      );
+
+
+    if (
+      endDate <
+      startDate
+    ) {
+
+      throw new Error(
+        "Тугаш санаси бошланиш санасидан олдин бўлиши мумкин эмас."
+      );
+
+    }
+
+
+    /*
+      Кунлар рўйхати
+    */
+
+    const days =
+      getDayList(
+        startDate,
+        endDate
+      );
+
+
+    /*
+      Филиаллар
+    */
+
+    const branches =
+      await supabaseGet(
+        "branches",
+        {
+          select:
+            "id,name",
+          order:
+            "name.asc"
+        }
+      );
+
+
+    /*
+      Ходимлар
+    */
+
+    const employees =
+      await supabaseGet(
+        "employees",
+        {
+          select:
+            "id,full_name,telegram_id,branch_id"
+        }
+      );
+
+
+    /*
+      Work sessions
+
+      Бошланиш санаси
+      тугаш санасидан олдин бўлган
+      барча sessionлар олинади.
+    */
+
+    const rangeEnd =
+      new Date(
+        endDate.getTime() +
+        24 * 60 * 60 * 1000
+      );
+
+
+    const sessions =
+      await supabaseGet(
+        "work_sessions",
+        {
+          select:
+            "id,employee_id,started_at,finished_at,ended_at,status,duration_seconds",
+
+          started_at:
+            "lt." +
+            rangeEnd.toISOString(),
+
+          order:
+            "started_at.asc"
+        }
+      );
+
+
+    /*
+      Sessionларни ходим бўйича
+      гуруҳлаймиз
+    */
+
+    const sessionsByEmployee =
+      {};
+
+
+    for (
+      const session
+      of sessions
+    ) {
+
+      if (
+        !sessionsByEmployee[
+          session.employee_id
+        ]
+      ) {
+
+        sessionsByEmployee[
+          session.employee_id
+        ] = [];
+
+      }
+
+
+      sessionsByEmployee[
+        session.employee_id
+      ].push(
+        session
+      );
+
+    }
+
+
+    /*
+      Филиал фильтри
+    */
+
+    const selectedBranch =
+      document.getElementById(
+        "branch"
+      ).value;
+
+
+    /*
+      Ходим статистикаси
+    */
+
+    const employeeReports =
+      [];
+
+
+    let totalWorkSeconds = 0;
+    let totalWorkDays = 0;
+    let totalSessions = 0;
+    let activeEmployees = 0;
+
+
+    for (
+      const employee
+      of employees
+    ) {
+
+      if (
+        selectedBranch &&
+        String(
+          employee.branch_id
+        ) !==
+        String(
+          selectedBranch
+        )
+      ) {
+
+        continue;
+
+      }
+
+
+      const employeeSessions =
+        sessionsByEmployee[
+          employee.id
+        ] || [];
+
+
+      let workedDays = 0;
+
+      let workSeconds = 0;
+
+      let sessionCount = 0;
+
+      let active = false;
+
+
+      /*
+        Ҳар бир кунни ҳисоблаймиз
+      */
+
+      for (
+        const dayKey
+        of days
+      ) {
+
+        const dayStart =
+          getTashkentDayStart(
+            dayKey
+          );
+
+
+        const dayEnd =
+          new Date(
+            dayStart.getTime() +
+            24 * 60 * 60 * 1000
+          );
+
+
+        const intervals = [];
+
+
+        for (
+          const session
+          of employeeSessions
+        ) {
+
+          const seconds =
+            calculateSessionForDay(
+              session,
+              dayStart,
+              dayEnd
+            );
+
+
+          if (
+            seconds > 0
+          ) {
+
+            const start =
+              new Date(
+                session.started_at
+              );
+
+
+            let end;
+
+
+            if (
+              session.ended_at
+            ) {
+
+              end =
+                new Date(
+                  session.ended_at
+                );
+
+            } else if (
+              session.finished_at
+            ) {
+
+              end =
+                new Date(
+                  session.finished_at
+                );
+
+            } else {
+
+              end =
+                new Date();
+
+              if (
+                session.status ===
+                "active"
+              ) {
+
+                active = true;
+
+              }
+
+            }
+
+
+            const startMs =
+              Math.max(
+                start.getTime(),
+                dayStart.getTime()
+              );
+
+
+            const endMs =
+              Math.min(
+                end.getTime(),
+                dayEnd.getTime()
+              );
+
+
+            intervals.push(
+              [
+                startMs,
+                endMs
+              ]
+            );
+
+
+            sessionCount++;
+
+          }
+
+        }
+
+
+        /*
+          Бир кунда бир нечта
+          overlap session бўлса
+          икки марта ҳисобламаймиз.
+        */
+
+        const merged =
+          mergeIntervals(
+            intervals
+          );
+
+
+        let daySeconds = 0;
+
+
+        for (
+          const interval
+          of merged
+        ) {
+
+          daySeconds +=
+            (
+              interval[1] -
+              interval[0]
+            ) / 1000;
+
+        }
+
+
+        if (
+          daySeconds > 0
+        ) {
+
+          workedDays++;
+
+          workSeconds +=
+            daySeconds;
+
+        }
+
+      }
+
+
+      /*
+        Фақат ишлаган ходимларни
+        эмас, барча ходимларни
+        ҳисоботга киритамиз.
+      */
+
+      const branch =
+        branches.find(
+          item =>
+            String(
+              item.id
+            ) ===
+            String(
+              employee.branch_id
+            )
+        );
+
+
+      employeeReports.push({
+
+        id:
+          employee.id,
+
+        full_name:
+          employee.full_name ||
+          "Номаълум",
+
+        branch_name:
+          branch
+            ? branch.name
+            : "Филиал йўқ",
+
+        workedDays,
+
+        notWorkedDays:
+          Math.max(
+            0,
+            days.length -
+            workedDays
+          ),
+
+        workSeconds,
+
+        sessionCount,
+
+        active
+
+      });
+
+
+      totalWorkSeconds +=
+        workSeconds;
+
+      totalWorkDays +=
+        workedDays;
+
+      totalSessions +=
+        sessionCount;
+
+
+      if (active) {
+
+        activeEmployees++;
+
+      }
+
+    }
+
+
+    /*
+      Summary
+    */
+
+    document.getElementById(
+      "totalEmployees"
+    ).textContent =
+      employeeReports.length;
+
+
+    document.getElementById(
+      "workedEmployees"
+    ).textContent =
+      employeeReports.filter(
+        employee =>
+          employee.workedDays > 0
+      ).length;
+
+
+    document.getElementById(
+      "totalWorkDays"
+    ).textContent =
+      totalWorkDays;
+
+
+    document.getElementById(
+      "activeEmployees"
+    ).textContent =
+      activeEmployees;
+
+
+    document.getElementById(
+      "totalWorkTime"
+    ).textContent =
+      formatDuration(
+        totalWorkSeconds
+      );
+
+
+    document.getElementById(
+      "totalSessions"
+    ).textContent =
+      totalSessions;
+
+
+    renderTable(
+      employeeReports,
+      days.length
+    );
+
+
+    document.getElementById(
+      "loading"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "reportTable"
+    ).style.display =
+      "table";
+
+
+  } catch (error) {
+
+    console.error(
+      "REPORT ERROR:",
+      error
+    );
+
+
+    document.getElementById(
+      "loading"
+    ).style.display =
+      "none";
+
+
+    errorBox.style.display =
+      "block";
+
+
+    errorBox.textContent =
+      "❌ Хато:\n" +
+      error.message;
+
+  }
+
+}
+
+
+function renderTable(
+  reports,
+  totalDays
+) {
+
+  const tbody =
+    document.getElementById(
+      "reportBody"
+    );
+
+
+  const search =
+    document.getElementById(
+      "searchInput"
+    ).value
+    .trim()
+    .toLowerCase();
+
+
+  const filtered =
+    reports.filter(
+      employee => {
+
+        if (!search) {
+          return true;
+        }
+
+
+        return (
+          employee.full_name
+            .toLowerCase()
+            .includes(search) ||
+
+          employee.branch_name
+            .toLowerCase()
+            .includes(search)
+        );
+
+      }
+    );
+
+
+  if (
+    filtered.length === 0
+  ) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="9"
+          style="
+            text-align:center;
+            padding:30px;
+          "
+        >
+          Маълумот топилмади
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    filtered
+      .map(
+        (employee, index) => {
+
+          let status;
+
+
+          if (
+            employee.active
+          ) {
+
+            status =
+              `
+              <span class="status status-green">
+                🟢 Ҳозир ишда
+              </span>
+              `;
+
+          } else if (
+            employee.workedDays > 0
+          ) {
+
+            status =
+              `
+              <span class="status status-yellow">
+                🟡 Ишлаган
+              </span>
+              `;
+
+          } else {
+
+            status =
+              `
+              <span class="status status-red">
+                🔴 Ишламаган
+              </span>
+              `;
+
+          }
+
+
+          const averageSeconds =
+            employee.workedDays > 0
+              ? employee.workSeconds /
+                employee.workedDays
+              : 0;
+
+
+          return `
+
+            <tr>
+
+              <td>
+                ${index + 1}
+              </td>
+
+              <td>
+                <strong>
+                  ${escapeHtml(
+                    employee.full_name
+                  )}
+                </strong>
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  employee.branch_name
+                )}
+              </td>
+
+              <td>
+                ${employee.workedDays}
+              </td>
+
+              <td>
+                ${
+                  employee.notWorkedDays
+                }
+              </td>
+
+              <td>
+                ${formatDuration(
+                  employee.workSeconds
+                )}
+              </td>
+
+              <td>
+                ${employee.sessionCount}
+              </td>
+
+              <td>
+                ${formatDuration(
+                  averageSeconds
+                )}
+              </td>
+
+              <td>
+                ${status}
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+/*
+  Филиалларни юклаш
+*/
+
+async function loadBranches() {
+
+  try {
+
+    const branches =
+      await supabaseGet(
+        "branches",
+        {
+          select:
+            "id,name",
+          order:
+            "name.asc"
+        }
+      );
+
+
+    const select =
+      document.getElementById(
+        "branch"
+      );
+
+
+    branches.forEach(
+      branch => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          branch.id;
+
+        option.textContent =
+          branch.name;
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "BRANCH ERROR:",
+      error
+    );
+
+  }
+
+}
+
+
+/*
+  Бугунги сана
+*/
+
+function setDates() {
+
+  const today =
+    getDateKey(
+      new Date()
+    );
+
+
+  document.getElementById(
+    "startDate"
+  ).value =
+    today;
+
+
+  document.getElementById(
+    "endDate"
+  ).value =
+    today;
+
+}
+
+
+/*
+  Search
+*/
+
+document
+  .getElementById(
+    "searchInput"
+  )
+  .addEventListener(
+    "input",
+    () => {
+
+      /*
+        Фильтрлаш учун қайта ҳисоблаш
+        шарт эмас — мавжуд маълумотни
+        қайта чизиш учун loadReport()
+      */
+
+      loadReport();
+
+    }
+  );
+
+
+/*
+  Branch change
+*/
+
+document
+  .getElementById(
+    "branch"
+  )
+  .addEventListener(
+    "change",
+    () => {
+
+      loadReport();
+
+    }
+  );
+
+
+/*
+  START
+*/
+
+async function start() {
+
+  setDates();
+
+  await loadBranches();
+
+  await loadReport();
+
+}
+
+
+start();
+
+</script>
+
+</body>
+</html>
