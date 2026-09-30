@@ -602,7 +602,6 @@ function haversineDistance(
 /* =========================
    LOAD DASHBOARD
 ========================= */
-
 async function loadDashboard() {
 
   const errorBox =
@@ -618,7 +617,7 @@ async function loadDashboard() {
       "date"
     ).value;
 
-  const url =
+  const dashboardUrl =
     API +
     "?view=dashboard" +
     "&date=" +
@@ -626,8 +625,14 @@ async function loadDashboard() {
 
   try {
 
+    /* =========================
+       DASHBOARD
+    ========================= */
+
     const response =
-      await fetch(url);
+      await fetch(
+        dashboardUrl
+      );
 
     const data =
       await response.json();
@@ -650,19 +655,34 @@ async function loadDashboard() {
 
     }
 
-    dashboardData = data;
+    dashboardData =
+      data;
 
-    fillBranches(
-      data.employees || []
-    );
+
+    /* =========================
+       BRANCHES
+    ========================= */
+
+    await loadBranches();
+
+
+    /* =========================
+       SUMMARY
+    ========================= */
 
     updateSummary(
       data.summary || {}
     );
 
+
+    /* =========================
+       EMPLOYEES
+    ========================= */
+
     renderEmployees(
       data.employees || []
     );
+
 
   } catch (error) {
 
@@ -694,15 +714,10 @@ async function loadDashboard() {
   }
 
 }
-
-
 /* =========================
    BRANCHES
 ========================= */
-
-function fillBranches(
-  employees
-) {
+async function loadBranches() {
 
   const select =
     document.getElementById(
@@ -712,76 +727,113 @@ function fillBranches(
   const oldValue =
     select.value;
 
-  const branches =
-    new Map();
+  try {
 
-  employees.forEach(
-    employee => {
+    const response =
+      await fetch(
+        API +
+        "?view=branches"
+      );
 
-      if (
-        employee.branch_id !== null &&
-        employee.branch_name
-      ) {
+    const data =
+      await response.json();
 
-        branches.set(
-          employee.branch_id,
-          employee.branch_name
-        );
-
-      }
-
-    }
-  );
-
-  select.innerHTML =
-    `<option value="">
-      Барча филиаллар
-    </option>`;
-
-  [...branches.entries()]
-    .sort(
-      (a, b) =>
-        String(a[1])
-          .localeCompare(
-            String(b[1])
-          )
-    )
-    .forEach(
-      ([id, name]) => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value = id;
-
-        option.textContent =
-          name;
-
-        select.appendChild(
-          option
-        );
-
-      }
+    console.log(
+      "BRANCHES DATA:",
+      data
     );
 
-  if (
-    [...select.options]
-      .some(
-        option =>
-          option.value === oldValue
-      )
-  ) {
+    if (
+      !response.ok ||
+      data.success === false
+    ) {
 
-    select.value =
-      oldValue;
+      throw new Error(
+        data.error ||
+        "Филиалларни олишда хато"
+      );
+
+    }
+
+    const branches =
+      Array.isArray(
+        data.branches
+      )
+        ? data.branches
+        : [];
+
+
+    select.innerHTML =
+      `<option value="">
+        Барча филиаллар
+      </option>`;
+
+
+    branches
+      .sort(
+        (a, b) =>
+          String(
+            a.name || ""
+          ).localeCompare(
+            String(
+              b.name || ""
+            )
+          )
+      )
+      .forEach(
+        branch => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            branch.id;
+
+          option.textContent =
+            branch.name;
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+    /* Аввал танланган филиални сақлаш */
+
+    if (
+      [...select.options]
+        .some(
+          option =>
+            option.value ===
+            String(oldValue)
+        )
+    ) {
+
+      select.value =
+        oldValue;
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "LOAD BRANCHES ERROR:",
+      error
+    );
+
+    select.innerHTML =
+      `<option value="">
+        Барча филиаллар
+      </option>`;
 
   }
 
 }
-
-
 /* =========================
    SUMMARY
 ========================= */
