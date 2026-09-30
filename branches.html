@@ -1,13 +1,18 @@
-```html
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Филиаллар бошқаруви</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -62,12 +67,6 @@
 
     .form-box.show {
       display: block;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
     }
 
     label {
@@ -165,16 +164,22 @@
       text-align: center;
       padding: 30px;
     }
+
   </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
+  <!-- HEADER -->
+
   <div class="top">
 
-    <h1>🏢 Филиаллар бошқаруви</h1>
+    <h1>
+      🏢 Филиаллар бошқаруви
+    </h1>
 
     <button
       class="add-btn"
@@ -185,6 +190,8 @@
 
   </div>
 
+
+  <!-- MESSAGE -->
 
   <div
     id="message"
@@ -203,31 +210,20 @@
       Янги филиал қўшиш
     </h2>
 
-
     <input
       id="editId"
       type="hidden"
     >
 
+    <label>
+      Филиал номи
+    </label>
 
-    <div class="form-grid">
-
-      <div>
-
-        <label>
-          Филиал номи
-        </label>
-
-        <input
-          id="branchName"
-          type="text"
-          placeholder="Масалан: Тошкент"
-        >
-
-      </div>
-
-    </div>
-
+    <input
+      id="branchName"
+      type="text"
+      placeholder="Масалан: Тошкент"
+    >
 
     <button
       class="save-btn"
@@ -235,7 +231,6 @@
     >
       💾 Сақлаш
     </button>
-
 
     <button
       class="cancel-btn"
@@ -287,7 +282,6 @@
 
       </thead>
 
-
       <tbody id="branchTable">
 
         <tr>
@@ -312,9 +306,18 @@
 
 <script>
 
+
+/* =====================================================
+   API
+===================================================== */
+
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
+
+/* =====================================================
+   GLOBAL
+===================================================== */
 
 let branchesList = [];
 
@@ -352,36 +355,26 @@ function showMessage(
 
 function openAddForm() {
 
-  document
-    .getElementById(
-      "formTitle"
-    )
-    .textContent =
+  document.getElementById(
+    "formTitle"
+  ).textContent =
     "Янги филиал қўшиш";
 
-
-  document
-    .getElementById(
-      "editId"
-    )
-    .value =
+  document.getElementById(
+    "editId"
+  ).value =
     "";
 
-
-  document
-    .getElementById(
-      "branchName"
-    )
-    .value =
+  document.getElementById(
+    "branchName"
+  ).value =
     "";
 
-
-  document
-    .getElementById(
-      "formBox"
-    )
-    .classList
-    .add("show");
+  document.getElementById(
+    "formBox"
+  ).classList.add(
+    "show"
+  );
 
 }
 
@@ -392,12 +385,11 @@ function openAddForm() {
 
 function closeForm() {
 
-  document
-    .getElementById(
-      "formBox"
-    )
-    .classList
-    .remove("show");
+  document.getElementById(
+    "formBox"
+  ).classList.remove(
+    "show"
+  );
 
 }
 
@@ -413,6 +405,18 @@ async function loadBranches() {
       "branchTable"
     );
 
+  table.innerHTML = `
+    <tr>
+      <td
+        colspan="4"
+        class="loading"
+      >
+        ⏳ Филиаллар юкланмоқда...
+      </td>
+    </tr>
+  `;
+
+
   try {
 
     const response =
@@ -421,40 +425,65 @@ async function loadBranches() {
         "?view=branches"
       );
 
+
     const data =
       await response.json();
 
+
     console.log(
-      "BRANCHES:",
+      "BRANCH API RESPONSE:",
       data
     );
 
+
     if (
-      !response.ok ||
+      !response.ok
+    ) {
+
+      throw new Error(
+        "HTTP " +
+        response.status
+      );
+
+    }
+
+
+    if (
       data.success === false
     ) {
 
       throw new Error(
         data.error ||
+        data.message ||
         "Филиалларни олишда хато"
       );
 
     }
 
-    const branches =
-      Array.isArray(
-        data.branches
-      )
-        ? data.branches
-        : [];
-
 
     /*
-      Филиаллар рўйхатини сақлаш
+      API:
+      {
+        success: true,
+        branches: [...]
+      }
     */
 
+    if (
+      !Array.isArray(
+        data.branches
+      )
+    ) {
+
+      throw new Error(
+        "API филиаллар рўйхатини нотўғри қайтарди"
+      );
+
+    }
+
+
     branchesList =
-      branches.map(
+      data.branches.map(
         function(branch) {
 
           return {
@@ -474,9 +503,11 @@ async function loadBranches() {
       );
 
 
-    /*
-      Филиалларни экранга чиқариш
-    */
+    console.log(
+      "BRANCHES LIST:",
+      branchesList
+    );
+
 
     renderBranches(
       branchesList
@@ -486,33 +517,29 @@ async function loadBranches() {
   } catch (error) {
 
     console.error(
-      "BRANCH ERROR:",
+      "LOAD BRANCHES ERROR:",
       error
     );
 
 
-    table.innerHTML =
-      `
+    table.innerHTML = `
       <tr>
-
         <td
           colspan="4"
           class="loading"
         >
-
-          ❌ Филиалларни олишда хато:
-          ${error.message}
-
+          ❌ Хато: ${error.message}
         </td>
-
       </tr>
-      `;
+    `;
 
   }
 
 }
+
+
 /* =====================================================
-   RENDER
+   RENDER BRANCHES
 ===================================================== */
 
 function renderBranches(
@@ -530,11 +557,11 @@ function renderBranches(
 
 
   if (
+    !branches ||
     branches.length === 0
   ) {
 
-    table.innerHTML =
-      `
+    table.innerHTML = `
       <tr>
         <td
           colspan="4"
@@ -543,7 +570,7 @@ function renderBranches(
           Филиаллар топилмади
         </td>
       </tr>
-      `;
+    `;
 
     return;
 
@@ -559,21 +586,48 @@ function renderBranches(
         );
 
 
-      row.innerHTML =
-        `
-        <td>${branch.id}</td>
+      /* ID */
 
-        <td>${branch.name}</td>
+      const idCell =
+        document.createElement(
+          "td"
+        );
 
-        <td>${branch.employee_count}</td>
+      idCell.textContent =
+        branch.id;
 
-        <td></td>
-        `;
 
+      /* NAME */
+
+      const nameCell =
+        document.createElement(
+          "td"
+        );
+
+      nameCell.textContent =
+        branch.name || "";
+
+
+      /* EMPLOYEE COUNT */
+
+      const countCell =
+        document.createElement(
+          "td"
+        );
+
+      countCell.textContent =
+        branch.employee_count || 0;
+
+
+      /* ACTIONS */
 
       const actionCell =
-        row.children[3];
+        document.createElement(
+          "td"
+        );
 
+
+      /* EDIT */
 
       const editButton =
         document.createElement(
@@ -596,10 +650,7 @@ function renderBranches(
         };
 
 
-      actionCell.appendChild(
-        editButton
-      );
-
+      /* DELETE */
 
       const deleteButton =
         document.createElement(
@@ -623,43 +674,34 @@ function renderBranches(
 
 
       actionCell.appendChild(
+        editButton
+      );
+
+      actionCell.appendChild(
         deleteButton
       );
 
-    }
-  );
+
+      row.appendChild(
+        idCell
+      );
+
+      row.appendChild(
+        nameCell
+      );
+
+      row.appendChild(
+        countCell
+      );
+
+      row.appendChild(
+        actionCell
+      );
 
 
-  branches.forEach(
-    function(branch) {
-
-      const rows =
-        table.querySelectorAll(
-          "tr"
-        );
-
-      const row =
-        Array.from(rows).find(
-          function(item) {
-
-            return item.children[0] &&
-              Number(
-                item.children[0].textContent
-              ) === Number(
-                branch.id
-              );
-
-          }
-        );
-
-
-      if (row) {
-
-        table.appendChild(
-          row
-        );
-
-      }
+      table.appendChild(
+        row
+      );
 
     }
   );
@@ -683,7 +725,9 @@ function filterBranches() {
       .trim();
 
 
-  if (!search) {
+  if (
+    search === ""
+  ) {
 
     renderBranches(
       branchesList
@@ -702,7 +746,9 @@ function filterBranches() {
           branch.name || ""
         )
         .toLowerCase()
-        .includes(search);
+        .includes(
+          search
+        );
 
       }
     );
@@ -723,36 +769,29 @@ function editBranch(
   branch
 ) {
 
-  document
-    .getElementById(
-      "formTitle"
-    )
-    .textContent =
+  document.getElementById(
+    "formTitle"
+  ).textContent =
     "✏️ Филиални таҳрирлаш";
 
 
-  document
-    .getElementById(
-      "editId"
-    )
-    .value =
+  document.getElementById(
+    "editId"
+  ).value =
     branch.id;
 
 
-  document
-    .getElementById(
-      "branchName"
-    )
-    .value =
+  document.getElementById(
+    "branchName"
+  ).value =
     branch.name || "";
 
 
-  document
-    .getElementById(
-      "formBox"
-    )
-    .classList
-    .add("show");
+  document.getElementById(
+    "formBox"
+  ).classList.add(
+    "show"
+  );
 
 
   window.scrollTo(
@@ -772,26 +811,42 @@ function editBranch(
 async function saveBranch() {
 
   const editId =
-    document
-      .getElementById(
-        "editId"
-      )
-      .value;
+    document.getElementById(
+      "editId"
+    ).value;
 
 
   const name =
-    document
-      .getElementById(
-        "branchName"
-      )
-      .value
-      .trim();
+    document.getElementById(
+      "branchName"
+    ).value
+    .trim();
 
 
-  if (!name) {
+  if (
+    name === ""
+  ) {
 
     showMessage(
-      "Филиал номини киритинг",
+      "❌ Филиал номини киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  /*
+    ҲОЗИРЧА ФАҚАТ ҚЎШИШ
+  */
+
+  if (
+    editId
+  ) {
+
+    showMessage(
+      "⚠️ Таҳрирлаш API кейинги босқичда қўшилади.",
       "error"
     );
 
@@ -802,23 +857,12 @@ async function saveBranch() {
 
   try {
 
-    if (editId) {
-
-      showMessage(
-        "⚠️ Таҳрирлаш API ҳали қўшилмаган",
-        "error"
-      );
-
-      return;
-
-    }
-
-
     const response =
       await fetch(
         API +
         "?view=branch_add",
         {
+
           method:
             "POST",
 
@@ -834,6 +878,7 @@ async function saveBranch() {
                   name
               }
             )
+
         }
       );
 
@@ -843,18 +888,19 @@ async function saveBranch() {
 
 
     console.log(
-      "ADD BRANCH:",
+      "ADD BRANCH RESPONSE:",
       data
     );
 
 
     if (
       !response.ok ||
-      !data.success
+      data.success === false
     ) {
 
       throw new Error(
         data.error ||
+        data.message ||
         "Филиал қўшилмади"
       );
 
@@ -869,7 +915,9 @@ async function saveBranch() {
 
     closeForm();
 
-    loadBranches();
+
+    await loadBranches();
+
 
   } catch (error) {
 
@@ -891,38 +939,25 @@ async function saveBranch() {
 
 
 /* =====================================================
-   DELETE
+   DELETE BRANCH
 ===================================================== */
 
-async function deleteBranch(
+function deleteBranch(
   branch
 ) {
-
-  if (
-    Number(
-      branch.employee_count
-    ) > 0
-  ) {
-
-    showMessage(
-      "❌ Бу филиалда ходимлар бор. Аввал ходимларни бошқа филиалга ўтказинг.",
-      "error"
-    );
-
-    return;
-
-  }
-
 
   const confirmed =
     confirm(
       "⚠️ " +
       branch.name +
-      "\n\nУшбу филиални ўчиришни тасдиқлайсизми?"
+      "\n\n" +
+      "Ушбу филиални ўчиришни тасдиқлайсизми?"
     );
 
 
-  if (!confirmed) {
+  if (
+    !confirmed
+  ) {
 
     return;
 
@@ -930,12 +965,16 @@ async function deleteBranch(
 
 
   showMessage(
-    "⚠️ Филиални ўчириш API ҳали қўшилмаган",
+    "⚠️ Ўчириш API кейинги босқичда қўшилади.",
     "error"
   );
 
 }
 
+
+/* =====================================================
+   START
+===================================================== */
 
 loadBranches();
 
@@ -943,4 +982,3 @@ loadBranches();
 
 </body>
 </html>
-```
