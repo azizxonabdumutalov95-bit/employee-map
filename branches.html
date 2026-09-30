@@ -413,7 +413,6 @@ async function loadBranches() {
       "branchTable"
     );
 
-
   try {
 
     const response =
@@ -422,73 +421,44 @@ async function loadBranches() {
         "?view=branches"
       );
 
-
     const data =
       await response.json();
-
 
     console.log(
       "BRANCHES:",
       data
     );
 
+    if (
+      !response.ok ||
+      data.success === false
+    ) {
 
-    const branches =
-      Array.isArray(data)
-        ? data
-        : (
-          Array.isArray(
-            data.branches
-          )
-            ? data.branches
-            : []
-        );
-
-
-    const employeesResponse =
-      await fetch(
-        API +
-        "?view=employees"
+      throw new Error(
+        data.error ||
+        "Филиалларни олишда хато"
       );
 
+    }
 
-    const employeesData =
-      await employeesResponse.json();
-
-
-    const employees =
+    const branches =
       Array.isArray(
-        employeesData
+        data.branches
       )
-        ? employeesData
-        : (
-          Array.isArray(
-            employeesData.employees
-          )
-            ? employeesData.employees
-            : []
-        );
+        ? data.branches
+        : [];
 
+
+    /*
+      Филиаллар рўйхатини сақлаш
+    */
 
     branchesList =
       branches.map(
         function(branch) {
 
-          const count =
-            employees.filter(
-              function(employee) {
-
-                return Number(
-                  employee.branch_id
-                ) === Number(
-                  branch.id
-                );
-
-              }
-            ).length;
-
-
           return {
+
             id:
               branch.id,
 
@@ -496,12 +466,17 @@ async function loadBranches() {
               branch.name,
 
             employee_count:
-              count
+              0
+
           };
 
         }
       );
 
+
+    /*
+      Филиалларни экранга чиқариш
+    */
 
     renderBranches(
       branchesList
@@ -519,20 +494,23 @@ async function loadBranches() {
     table.innerHTML =
       `
       <tr>
+
         <td
           colspan="4"
           class="loading"
         >
-          Филиалларни олишда хато
+
+          ❌ Филиалларни олишда хато:
+          ${error.message}
+
         </td>
+
       </tr>
       `;
 
   }
 
 }
-
-
 /* =====================================================
    RENDER
 ===================================================== */
