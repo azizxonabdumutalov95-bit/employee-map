@@ -493,19 +493,17 @@ async function loadReport() {
 
     /* SESSIONS */
 
-    sessions = await supabaseGet(
-      "work_sessions",
-      {
-        select:
-          "id,employee_id,started_at,ended_at,duration_seconds",
-        started_at:
-          "lt." + nextDay.toISOString(),
-        ended_at:
-          "gte." + dayStart.toISOString(),
-        order:
-          "started_at.asc"
-      }
-    );
+   sessions = await supabaseGet(
+  "work_sessions",
+  {
+    select:
+      "id,employee_id,started_at,finished_at,ended_at,status,duration_seconds",
+    started_at:
+      "lt." + nextDay.toISOString(),
+    order:
+      "started_at.asc"
+  }
+);
 
 
     /* BRANCH FILTER */
