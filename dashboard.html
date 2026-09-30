@@ -4,9 +4,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Ходимлар Dashboard</title>
 
 <style>
+
 *{
   box-sizing:border-box;
 }
@@ -19,7 +21,7 @@ body{
 }
 
 .container{
-  max-width:1200px;
+  max-width:1250px;
   margin:auto;
   padding:20px;
 }
@@ -61,6 +63,10 @@ button{
   cursor:pointer;
 }
 
+button:hover{
+  opacity:.9;
+}
+
 .status{
   background:white;
   border:1px solid #e0e5e9;
@@ -69,9 +75,10 @@ button{
   margin-bottom:16px;
 }
 
-.error{
-  color:#b42318;
+.status.error{
   background:#fff0f0;
+  color:#b42318;
+  border-color:#f0b4b4;
 }
 
 .cards{
@@ -119,7 +126,7 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:900px;
+  min-width:950px;
 }
 
 th,
@@ -128,6 +135,7 @@ td{
   border-bottom:1px solid #edf0f2;
   text-align:left;
   font-size:14px;
+  vertical-align:middle;
 }
 
 th{
@@ -141,6 +149,7 @@ th{
   border-radius:20px;
   font-size:12px;
   font-weight:bold;
+  white-space:nowrap;
 }
 
 .green{
@@ -166,11 +175,22 @@ th{
 .muted{
   color:#7b8791;
   font-size:12px;
+  margin-top:3px;
 }
 
 a{
   color:#1769e0;
   text-decoration:none;
+}
+
+a:hover{
+  text-decoration:underline;
+}
+
+.empty{
+  text-align:center;
+  padding:30px !important;
+  color:#7b8791;
 }
 
 @media(max-width:850px){
@@ -196,8 +216,10 @@ a{
   }
 
 }
+
 </style>
 </head>
+
 
 <body>
 
@@ -205,7 +227,9 @@ a{
 
   <div class="header">
 
-    <h1>📊 Ходимлар Dashboard</h1>
+    <h1>
+      📊 Ходимлар Dashboard
+    </h1>
 
     <div class="controls">
 
@@ -215,12 +239,17 @@ a{
       >
 
       <select id="branch">
+
         <option value="">
           Барча филиаллар
         </option>
+
       </select>
 
-      <button id="refresh">
+      <button
+        id="refresh"
+        type="button"
+      >
         🔄 Янгилаш
       </button>
 
@@ -229,10 +258,15 @@ a{
   </div>
 
 
-  <div id="status" class="status">
+  <div
+    id="status"
+    class="status"
+  >
     ⏳ Маълумотлар юкланмоқда...
   </div>
 
+
+  <!-- 1-QATOR -->
 
   <div class="cards">
 
@@ -302,6 +336,8 @@ a{
   </div>
 
 
+  <!-- 2-QATOR -->
+
   <div class="cards">
 
     <div class="card">
@@ -346,7 +382,7 @@ a{
         id="distance"
         class="value"
       >
-        0 км
+        0.00 км
       </div>
 
     </div>
@@ -370,11 +406,14 @@ a{
   </div>
 
 
+  <!-- EMPLOYEES -->
+
   <div class="section">
 
     <h2>
       👤 Ходимлар
     </h2>
+
 
     <div class="table-wrap">
 
@@ -420,7 +459,19 @@ a{
 
         </thead>
 
+
         <tbody id="employees">
+
+          <tr>
+
+            <td
+              colspan="8"
+              class="empty"
+            >
+              ⏳ Маълумотлар юкланмоқда...
+            </td>
+
+          </tr>
 
         </tbody>
 
@@ -435,41 +486,63 @@ a{
 
 <script>
 
-const API =
-"https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
+/* =========================
+   SUPABASE API
+========================= */
+
+const API =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+
+/* =========================
+   GLOBAL DATA
+========================= */
 
 let allEmployees = [];
 
 let currentData = null;
 
 
-function esc(value){
+/* =========================
+   HTML SAFE
+========================= */
 
-  return String(value ?? "")
-    .replace(
-      /[&<>"']/g,
-      function(c){
+function escapeHtml(value){
 
-        return {
+  return String(
+    value ?? ""
+  ).replace(
+    /[&<>"']/g,
+    function(character){
 
-          "&":"&amp;",
-          "<":"&lt;",
-          ">":"&gt;",
-          '"':"&quot;",
-          "'":"&#039;"
+      const entities = {
 
-        }[c];
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
 
-      }
-    );
+      };
+
+      return entities[
+        character
+      ];
+
+    }
+  );
 
 }
 
 
+/* =========================
+   STATUS
+========================= */
+
 function setStatus(
-  text,
-  error=false
+  message,
+  error = false
 ){
 
   const element =
@@ -477,10 +550,894 @@ function setStatus(
       "status"
     );
 
-  element.textContent =
-    text;
 
-  element.className =
-    error
-      ? "status
+  element.textContent =
+    message;
+
+
+  if(error){
+
+    element.className =
+      "status error";
+
+  }else{
+
+    element.className =
+      "status";
+
+  }
+
+}
+
+
+/* =========================
+   DURATION
+========================= */
+
+function formatDuration(
+  seconds
+){
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds) || 0
+      )
+    );
+
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+
+  const secs =
+    seconds % 60;
+
+
+  return (
+
+    String(hours)
+      .padStart(2,"0")
+
+    + ":"
+
+    + String(minutes)
+      .padStart(2,"0")
+
+    + ":"
+
+    + String(secs)
+      .padStart(2,"0")
+
+  );
+
+}
+
+
+/* =========================
+   STATUS BADGE
+========================= */
+
+function getStatusBadge(
+  employee
+){
+
+  if(
+    employee.active_session === true
+  ){
+
+    return `
+      <span class="badge green">
+        🟢 Ишда
+      </span>
+    `;
+
+  }
+
+
+  if(
+    employee.gps_active === true
+  ){
+
+    return `
+      <span class="badge blue">
+        📍 GPS актив
+      </span>
+    `;
+
+  }
+
+
+  if(
+    employee.worked === true
+  ){
+
+    return `
+      <span class="badge yellow">
+        🟡 Ишлаган
+      </span>
+    `;
+
+  }
+
+
+  if(
+    Number(
+      employee.gps_points
+    ) > 0
+  ){
+
+    return `
+      <span class="badge blue">
+        📍 GPS бор
+      </span>
+    `;
+
+  }
+
+
+  return `
+    <span class="badge red">
+      🔴 Ишламаган
+    </span>
+  `;
+
+}
+
+
+/* =========================
+   GPS INFO
+========================= */
+
+function getGpsInfo(
+  employee
+){
+
+  if(
+    !employee.last_location
+  ){
+
+    return `
+      <span class="muted">
+        GPS маълумоти йўқ
+      </span>
+    `;
+
+  }
+
+
+  const latitude =
+    Number(
+      employee.last_location.latitude
+    );
+
+
+  const longitude =
+    Number(
+      employee.last_location.longitude
+    );
+
+
+  if(
+    !Number.isFinite(latitude)
+    ||
+    !Number.isFinite(longitude)
+  ){
+
+    return `
+      <span class="muted">
+        Координата хато
+      </span>
+    `;
+
+  }
+
+
+  const mapUrl =
+    "https://www.google.com/maps?q="
+    + latitude
+    + ","
+    + longitude;
+
+
+  let time = "";
+
+
+  if(
+    employee.last_location.recorded_at
+  ){
+
+    time =
+      new Date(
+        employee.last_location.recorded_at
+      ).toLocaleString(
+        "uz-UZ"
+      );
+
+  }
+
+
+  return `
+
+    <a
+      href="${mapUrl}"
+      target="_blank"
+      rel="noopener"
+    >
+      📍
+      ${latitude.toFixed(5)},
+      ${longitude.toFixed(5)}
+    </a>
+
+    <div class="muted">
+      ${escapeHtml(time)}
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   BRANCH FILTER
+========================= */
+
+function renderBranches(){
+
+  const select =
+    document.getElementById(
+      "branch"
+    );
+
+
+  const selected =
+    select.value;
+
+
+  const branchNames =
+    [
+      ...new Set(
+
+        allEmployees
+          .map(
+            employee =>
+              employee.branch_name
+          )
+          .filter(
+            Boolean
+          )
+
+      )
+    ].sort();
+
+
+  select.innerHTML =
+    `
+      <option value="">
+        Барча филиаллар
+      </option>
+    `;
+
+
+  branchNames.forEach(
+    branchName => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        branchName;
+
+
+      option.textContent =
+        branchName;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  if(
+    branchNames.includes(
+      selected
+    )
+  ){
+
+    select.value =
+      selected;
+
+  }
+
+}
+
+
+/* =========================
+   RENDER DASHBOARD
+========================= */
+
+function renderDashboard(){
+
+  if(
+    !currentData
+  ){
+
+    return;
+
+  }
+
+
+  const selectedBranch =
+    document.getElementById(
+      "branch"
+    ).value;
+
+
+  const employees =
+    allEmployees.filter(
+      employee => {
+
+        if(
+          !selectedBranch
+        ){
+
+          return true;
+
+        }
+
+
+        return (
+          employee.branch_name
+          ===
+          selectedBranch
+        );
+
+      }
+    );
+
+
+  let workedCount = 0;
+
+  let notWorkedCount = 0;
+
+  let activeCount = 0;
+
+  let activeGpsCount = 0;
+
+  let totalSeconds = 0;
+
+  let totalDistance = 0;
+
+  let totalGpsPoints = 0;
+
+
+  employees.forEach(
+    employee => {
+
+
+      if(
+        employee.worked
+      ){
+
+        workedCount++;
+
+      }else{
+
+        notWorkedCount++;
+
+      }
+
+
+      if(
+        employee.active_session
+      ){
+
+        activeCount++;
+
+      }
+
+
+      if(
+        employee.gps_active
+      ){
+
+        activeGpsCount++;
+
+      }
+
+
+      totalSeconds +=
+        Number(
+          employee.work_seconds
+        ) || 0;
+
+
+      totalDistance +=
+        Number(
+          employee.distance_km
+        ) || 0;
+
+
+      totalGpsPoints +=
+        Number(
+          employee.gps_points
+        ) || 0;
+
+    }
+  );
+
+
+  /* STATISTICS */
+
+
+  document.getElementById(
+    "total"
+  ).textContent =
+    employees.length;
+
+
+  document.getElementById(
+    "worked"
+  ).textContent =
+    workedCount;
+
+
+  document.getElementById(
+    "notWorked"
+  ).textContent =
+    notWorkedCount;
+
+
+  document.getElementById(
+    "active"
+  ).textContent =
+    activeCount;
+
+
+  document.getElementById(
+    "gps"
+  ).textContent =
+    activeGpsCount;
+
+
+  document.getElementById(
+    "workTime"
+  ).textContent =
+    formatDuration(
+      totalSeconds
+    );
+
+
+  document.getElementById(
+    "distance"
+  ).textContent =
+    totalDistance.toFixed(2)
+    + " км";
+
+
+  document.getElementById(
+    "points"
+  ).textContent =
+    totalGpsPoints;
+
+
+  /* TABLE */
+
+
+  const tbody =
+    document.getElementById(
+      "employees"
+    );
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if(
+    employees.length === 0
+  ){
+
+    tbody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="8"
+          class="empty"
+        >
+          Маълумот топилмади
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  employees.forEach(
+    employee => {
+
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      row.innerHTML = `
+
+        <td>
+
+          ${getStatusBadge(
+            employee
+          )}
+
+        </td>
+
+
+        <td>
+
+          <b>
+            ${escapeHtml(
+              employee.full_name
+            )}
+          </b>
+
+          <div class="muted">
+
+            ID:
+            ${employee.employee_id}
+
+          </div>
+
+        </td>
+
+
+        <td>
+
+          ${escapeHtml(
+            employee.branch_name
+            || "—"
+          )}
+
+        </td>
+
+
+        <td>
+
+          ${escapeHtml(
+            employee.work_time
+            || "00:00:00"
+          )}
+
+        </td>
+
+
+        <td>
+
+          ${
+            Number(
+              employee.work_sessions
+            ) || 0
+          }
+
+        </td>
+
+
+        <td>
+
+          ${
+            Number(
+              employee.gps_points
+            ) || 0
+          }
+
+        </td>
+
+
+        <td>
+
+          ${
+            (
+              Number(
+                employee.distance_km
+              ) || 0
+            ).toFixed(2)
+          }
+
+          км
+
+        </td>
+
+
+        <td>
+
+          ${getGpsInfo(
+            employee
+          )}
+
+        </td>
+
+      `;
+
+
+      tbody.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================
+   LOAD DASHBOARD
+========================= */
+
+async function loadDashboard(){
+
+  const dateInput =
+    document.getElementById(
+      "date"
+    );
+
+
+  const date =
+    dateInput.value;
+
+
+  setStatus(
+    "⏳ Маълумотлар юкланмоқда..."
+  );
+
+
+  try{
+
+
+    /* URL */
+
+    const url =
+      new URL(
+        API
+      );
+
+
+    url.searchParams.set(
+      "view",
+      "dashboard"
+    );
+
+
+    if(
+      date
+    ){
+
+      url.searchParams.set(
+        "date",
+        date
+      );
+
+    }
+
+
+    /* API REQUEST */
+
+    const response =
+      await fetch(
+        url.toString(),
+        {
+          method:"GET",
+          cache:"no-store"
+        }
+      );
+
+
+    /* HTTP CHECK */
+
+    if(
+      !response.ok
+    ){
+
+      throw new Error(
+        "HTTP "
+        + response.status
+      );
+
+    }
+
+
+    /* JSON */
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "DASHBOARD DATA:",
+      data
+    );
+
+
+    /* SUCCESS CHECK */
+
+    if(
+      data.success !== true
+    ){
+
+      throw new Error(
+        data.error
+        ||
+        "API success=false қайтарди"
+      );
+
+    }
+
+
+    /* SAVE */
+
+    currentData =
+      data;
+
+
+    allEmployees =
+      Array.isArray(
+        data.employees
+      )
+      ? data.employees
+      : [];
+
+
+    /* RENDER */
+
+    renderBranches();
+
+    renderDashboard();
+
+
+    /* STATUS */
+
+    setStatus(
+
+      "✅ "
+      + data.date
+      + " — маълумотлар янгиланди"
+
+    );
+
+
+  }catch(error){
+
+
+    console.error(
+      "DASHBOARD ERROR:",
+      error
+    );
+
+
+    setStatus(
+
+      "❌ "
+      + error.message,
+
+      true
+
+    );
+
+  }
+
+}
+
+
+/* =========================
+   DEFAULT DATE
+========================= */
+
+function setToday(){
+
+  const today =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Tashkent"
+      }
+    ).format(
+      new Date()
+    );
+
+
+  document.getElementById(
+    "date"
+  ).value =
+    today;
+
+}
+
+
+/* =========================
+   EVENTS
+========================= */
+
+document.getElementById(
+  "refresh"
+).addEventListener(
+  "click",
+  function(){
+
+    loadDashboard();
+
+  }
+);
+
+
+document.getElementById(
+  "date"
+).addEventListener(
+  "change",
+  function(){
+
+    loadDashboard();
+
+  }
+);
+
+
+document.getElementById(
+  "branch"
+).addEventListener(
+  "change",
+  function(){
+
+    renderDashboard();
+
+  }
+);
+
+
+/* =========================
+   START
+========================= */
+
+setToday();
+
+loadDashboard();
+
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+setInterval(
+  function(){
+
+    loadDashboard();
+
+  },
+  30000
+);
+
+</script>
+
+</body>
+</html>
 ```
