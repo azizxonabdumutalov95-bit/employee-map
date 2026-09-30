@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -111,6 +112,11 @@
     .error {
       background: #f8d7da;
       color: #842029;
+    }
+
+    .info {
+      background: #cff4fc;
+      color: #055160;
     }
 
     .search-box {
@@ -306,7 +312,6 @@
 
 <script>
 
-
 /* =====================================================
    API
 ===================================================== */
@@ -461,14 +466,6 @@ async function loadBranches() {
     }
 
 
-    /*
-      API:
-      {
-        success: true,
-        branches: [...]
-      }
-    */
-
     if (
       !Array.isArray(
         data.branches
@@ -494,18 +491,13 @@ async function loadBranches() {
             name:
               branch.name,
 
-            employee_count: branch.employee_count || 0
+            employee_count:
+              branch.employee_count || 0
 
           };
 
         }
       );
-
-
-    console.log(
-      "BRANCHES LIST:",
-      branchesList
-    );
 
 
     renderBranches(
@@ -585,8 +577,6 @@ function renderBranches(
         );
 
 
-      /* ID */
-
       const idCell =
         document.createElement(
           "td"
@@ -595,8 +585,6 @@ function renderBranches(
       idCell.textContent =
         branch.id;
 
-
-      /* NAME */
 
       const nameCell =
         document.createElement(
@@ -607,8 +595,6 @@ function renderBranches(
         branch.name || "";
 
 
-      /* EMPLOYEE COUNT */
-
       const countCell =
         document.createElement(
           "td"
@@ -617,8 +603,6 @@ function renderBranches(
       countCell.textContent =
         branch.employee_count || 0;
 
-
-      /* ACTIONS */
 
       const actionCell =
         document.createElement(
@@ -803,15 +787,107 @@ function editBranch(
 }
 
 
-
 /* =====================================================
    DELETE BRANCH
 ===================================================== */
 
-async function deleteBranch(branch) {
+async function deleteBranch(
+  branch
+) {
 
-  const confirme/* =====================================================
+  const confirmed =
+    confirm(
+      "⚠️ " +
+      branch.name +
+      "\n\n" +
+      "Ушбу филиални ўчиришни тасдиқлайсизми?"
+    );
+
+
+  if (
+    !confirmed
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    showMessage(
+      "⏳ Филиал ўчирилмоқда...",
+      "info"
+    );
+
+
+    const response =
+      await fetch(
+        API +
+        "?view=branch_delete&id=" +
+        encodeURIComponent(
+          branch.id
+        ),
+        {
+          method:
+            "DELETE"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Филиални ўчиришда хато"
+      );
+
+    }
+
+
+    showMessage(
+      "✅ " +
+      branch.name +
+      " филиали ўчирилди.",
+      "success"
+    );
+
+
+    await loadBranches();
+
+
+  } catch (error) {
+
+    console.error(
+      "DELETE BRANCH ERROR:",
+      error
+    );
+
+
+    showMessage(
+      "❌ " +
+      (
+        error.message ||
+        "Филиални ўчиришда хато"
+      ),
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
    SAVE BRANCH
+   ADD + UPDATE
 ===================================================== */
 
 async function saveBranch() {
@@ -846,10 +922,12 @@ async function saveBranch() {
   try {
 
     /* =================================================
-       UPDATE BRANCH
+       UPDATE
     ================================================= */
 
-    if (editId) {
+    if (
+      editId
+    ) {
 
       const response =
         await fetch(
@@ -869,7 +947,9 @@ async function saveBranch() {
               JSON.stringify(
                 {
                   id:
-                    Number(editId),
+                    Number(
+                      editId
+                    ),
 
                   name:
                     name
@@ -915,13 +995,14 @@ async function saveBranch() {
 
       await loadBranches();
 
+
       return;
 
     }
 
 
     /* =================================================
-       ADD BRANCH
+       ADD
     ================================================= */
 
     const response =
@@ -996,78 +1077,18 @@ async function saveBranch() {
 
     showMessage(
       "❌ " +
-      error.message,
-      "error"
-    );
-
-  }
-
-}d = confirm(
-    "⚠️ " +
-    branch.name +
-    "\n\n" +
-    "Ушбу филиални ўчиришни тасдиқлайсизми?"
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-
-    showMessage(
-      "⏳ Филиал ўчирилмоқда...",
-      "info"
-    );
-
-    const response =
-      await fetch(
-        API +
-        "?view=branch_delete&id=" +
-        encodeURIComponent(branch.id),
-        {
-          method: "DELETE"
-        }
-      );
-
-    const data =
-      await response.json();
-
-    if (!response.ok || !data.success) {
-
-      throw new Error(
-        data.error ||
-        "Филиални ўчиришда хато"
-      );
-
-    }
-
-    showMessage(
-      "✅ " +
-      branch.name +
-      " филиали ўчирилди.",
-      "success"
-    );
-
-    await loadBranches();
-
-  } catch (error) {
-
-    console.error(
-      "DELETE BRANCH ERROR:",
-      error
-    );
-
-    showMessage(
-      "❌ " +
-      (error.message ||
-      "Филиални ўчиришда хато"),
+      (
+        error.message ||
+        "Филиал сақлашда хато"
+      ),
       "error"
     );
 
   }
 
 }
+
+
 /* =====================================================
    START
 ===================================================== */
@@ -1078,3 +1099,4 @@ loadBranches();
 
 </body>
 </html>
+```
