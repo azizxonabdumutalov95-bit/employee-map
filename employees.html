@@ -1,1 +1,707 @@
+```html
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Ходимлар бошқаруви</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .add-btn {
+      background: #198754;
+      color: white;
+    }
+
+    .form-box {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .form-box.show {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .save-btn {
+      background: #0d6efd;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .cancel-btn {
+      background: #6c757d;
+      color: white;
+      margin-top: 15px;
+      margin-left: 8px;
+    }
+
+    .message {
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .success {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .table-box {
+      background: white;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f3f5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top">
+    <h1>👥 Ходимлар бошқаруви</h1>
+
+    <button
+      class="add-btn"
+      onclick="openForm()"
+    >
+      ➕ Ходим қўшиш
+    </button>
+  </div>
+
+
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+
+  <!-- ADD EMPLOYEE -->
+
+  <div
+    id="formBox"
+    class="form-box"
+  >
+
+    <h2>Янги ходим қўшиш</h2>
+
+    <div class="form-grid">
+
+      <div>
+        <label>Ф.И.О.</label>
+
+        <input
+          id="fullName"
+          type="text"
+          placeholder="Масалан: Алиев Али"
+        >
+      </div>
+
+
+      <div>
+        <label>Telegram ID</label>
+
+        <input
+          id="telegramId"
+          type="number"
+          placeholder="Масалан: 123456789"
+        >
+      </div>
+
+
+      <div>
+        <label>Филиал</label>
+
+        <select id="branchId">
+          <option value="">
+            Филиални танланг
+          </option>
+        </select>
+      </div>
+
+
+      <div>
+        <label>Роль</label>
+
+        <select id="role">
+          <option value="employee">
+            Employee
+          </option>
+
+          <option value="admin">
+            Admin
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+
+    <button
+      class="save-btn"
+      onclick="addEmployee()"
+    >
+      💾 Сақлаш
+    </button>
+
+
+    <button
+      class="cancel-btn"
+      onclick="closeForm()"
+    >
+      Бекор қилиш
+    </button>
+
+  </div>
+
+
+  <!-- EMPLOYEE TABLE -->
+
+  <div class="table-box">
+
+    <table>
+
+      <thead>
+
+        <tr>
+          <th>ID</th>
+          <th>Ходим</th>
+          <th>Telegram ID</th>
+          <th>Филиал</th>
+          <th>Роль</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="employeeTable">
+
+        <tr>
+          <td
+            colspan="5"
+            class="loading"
+          >
+            Маълумотлар юкланмоқда...
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const API =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+
+function showMessage(
+  text,
+  type
+) {
+
+  const box =
+    document.getElementById(
+      "message"
+    );
+
+  box.textContent =
+    text;
+
+  box.className =
+    "message " +
+    type;
+
+  box.style.display =
+    "block";
+
+}
+
+
+function openForm() {
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .add("show");
+
+}
+
+
+function closeForm() {
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .remove("show");
+
+}
+
+
+async function loadBranches() {
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=branches"
+      );
+
+    const data =
+      await response.json();
+
+    console.log(
+      "BRANCHES:",
+      data
+    );
+
+    const branches =
+      Array.isArray(data)
+        ? data
+        : (
+          Array.isArray(
+            data.branches
+          )
+            ? data.branches
+            : []
+        );
+
+    const select =
+      document.getElementById(
+        "branchId"
+      );
+
+    select.innerHTML =
+      '<option value="">Филиални танланг</option>';
+
+    branches.forEach(
+      function(branch) {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          branch.id;
+
+        option.textContent =
+          branch.name;
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "BRANCH ERROR:",
+      error
+    );
+
+  }
+
+}
+
+
+async function loadEmployees() {
+
+  const table =
+    document.getElementById(
+      "employeeTable"
+    );
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=employees"
+      );
+
+    const data =
+      await response.json();
+
+    console.log(
+      "EMPLOYEES:",
+      data
+    );
+
+    const employees =
+      Array.isArray(data)
+        ? data
+        : (
+          Array.isArray(
+            data.employees
+          )
+            ? data.employees
+            : []
+        );
+
+    table.innerHTML =
+      "";
+
+    if (
+      employees.length === 0
+    ) {
+
+      table.innerHTML =
+        `
+        <tr>
+          <td
+            colspan="5"
+            class="loading"
+          >
+            Ходимлар топилмади
+          </td>
+        </tr>
+        `;
+
+      return;
+
+    }
+
+
+    employees.forEach(
+      function(employee) {
+
+        const row =
+          document.createElement(
+            "tr"
+          );
+
+        row.innerHTML =
+          `
+          <td>${employee.id ?? ""}</td>
+
+          <td>${employee.full_name ?? ""}</td>
+
+          <td>${employee.telegram_id ?? ""}</td>
+
+          <td>${employee.branch_name ?? employee.branch_id ?? ""}</td>
+
+          <td>${employee.role ?? "employee"}</td>
+          `;
+
+        table.appendChild(
+          row
+        );
+
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "EMPLOYEE ERROR:",
+      error
+    );
+
+    table.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="5"
+          class="loading"
+        >
+          Ходимларни олишда хато
+        </td>
+      </tr>
+      `;
+
+  }
+
+}
+
+
+async function addEmployee() {
+
+  const fullName =
+    document
+      .getElementById(
+        "fullName"
+      )
+      .value
+      .trim();
+
+  const telegramId =
+    document
+      .getElementById(
+        "telegramId"
+      )
+      .value
+      .trim();
+
+  const branchId =
+    document
+      .getElementById(
+        "branchId"
+      )
+      .value;
+
+  const role =
+    document
+      .getElementById(
+        "role"
+      )
+      .value;
+
+
+  if (!fullName) {
+
+    showMessage(
+      "Ф.И.О. киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!telegramId) {
+
+    showMessage(
+      "Telegram ID киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=employee_add",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              {
+                full_name:
+                  fullName,
+
+                telegram_id:
+                  Number(
+                    telegramId
+                  ),
+
+                branch_id:
+                  branchId
+                    ? Number(
+                        branchId
+                      )
+                    : null,
+
+                role:
+                  role
+              }
+            )
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "ADD EMPLOYEE:",
+      data
+    );
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Ходим қўшилмади"
+      );
+
+    }
+
+
+    showMessage(
+      "✅ Ходим муваффақиятли қўшилди",
+      "success"
+    );
+
+
+    document
+      .getElementById(
+        "fullName"
+      )
+      .value =
+      "";
+
+    document
+      .getElementById(
+        "telegramId"
+      )
+      .value =
+      "";
+
+    document
+      .getElementById(
+        "branchId"
+      )
+      .value =
+      "";
+
+    document
+      .getElementById(
+        "role"
+      )
+      .value =
+      "employee";
+
+
+    closeForm();
+
+    loadEmployees();
+
+  } catch (error) {
+
+    console.error(
+      "ADD ERROR:",
+      error
+    );
+
+    showMessage(
+      "❌ " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+loadBranches();
+
+loadEmployees();
+
+</script>
+
+</body>
+</html>
+```
