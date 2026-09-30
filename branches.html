@@ -942,36 +942,74 @@ async function saveBranch() {
    DELETE BRANCH
 ===================================================== */
 
-function deleteBranch(
-  branch
-) {
+async function deleteBranch(branch) {
 
-  const confirmed =
-    confirm(
-      "⚠️ " +
-      branch.name +
-      "\n\n" +
-      "Ушбу филиални ўчиришни тасдиқлайсизми?"
+  const confirmed = confirm(
+    "⚠️ " +
+    branch.name +
+    "\n\n" +
+    "Ушбу филиални ўчиришни тасдиқлайсизми?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    showMessage(
+      "⏳ Филиал ўчирилмоқда...",
+      "info"
     );
 
+    const response =
+      await fetch(
+        API +
+        "?view=branch_delete&id=" +
+        encodeURIComponent(branch.id),
+        {
+          method: "DELETE"
+        }
+      );
 
-  if (
-    !confirmed
-  ) {
+    const data =
+      await response.json();
 
-    return;
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error ||
+        "Филиални ўчиришда хато"
+      );
+
+    }
+
+    showMessage(
+      "✅ " +
+      branch.name +
+      " филиали ўчирилди.",
+      "success"
+    );
+
+    await loadBranches();
+
+  } catch (error) {
+
+    console.error(
+      "DELETE BRANCH ERROR:",
+      error
+    );
+
+    showMessage(
+      "❌ " +
+      (error.message ||
+      "Филиални ўчиришда хато"),
+      "error"
+    );
 
   }
 
-
-  showMessage(
-    "⚠️ Ўчириш API кейинги босқичда қўшилади.",
-    "error"
-  );
-
 }
-
-
 /* =====================================================
    START
 ===================================================== */
