@@ -7,6 +7,11 @@
 
   <title>Ходимлар Dashboard</title>
 
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
   <style>
     * {
       box-sizing: border-box;
@@ -21,7 +26,7 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1450px;
       margin: auto;
     }
 
@@ -47,26 +52,50 @@
 
     button {
       cursor: pointer;
+      border: none;
       background: #2563eb;
       color: white;
-      border: none;
     }
 
     button:hover {
-      opacity: 0.9;
+      opacity: .9;
+    }
+
+    button.gray {
+      background: #6b7280;
+    }
+
+    button.green-btn {
+      background: #16a34a;
     }
 
     .status {
       padding: 12px;
       margin-bottom: 20px;
       border-radius: 8px;
-      background: #fff;
+      background: white;
       border: 1px solid #ddd;
+    }
+
+    .loading {
+      color: #92400e;
+    }
+
+    .success {
+      color: #166534;
+      background: #dcfce7;
+      border-color: #bbf7d0;
+    }
+
+    .error {
+      color: #991b1b;
+      background: #fee2e2;
+      border-color: #fecaca;
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
       gap: 15px;
       margin-bottom: 25px;
     }
@@ -75,7 +104,7 @@
       background: white;
       border-radius: 12px;
       padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
 
     .card-title {
@@ -85,7 +114,7 @@
     }
 
     .card-value {
-      font-size: 28px;
+      font-size: 27px;
       font-weight: bold;
     }
 
@@ -99,7 +128,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 950px;
+      min-width: 1050px;
     }
 
     th,
@@ -112,6 +141,16 @@
 
     th {
       background: #f8fafc;
+    }
+
+    .employee-name {
+      color: #2563eb;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .employee-name:hover {
+      text-decoration: underline;
     }
 
     .badge {
@@ -142,23 +181,89 @@
       color: #374151;
     }
 
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-      border-color: #fecaca;
+    .employee-panel {
+      display: none;
+      margin-top: 25px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
     }
 
-    .success {
-      background: #dcfce7;
-      color: #166534;
-      border-color: #bbf7d0;
+    .employee-panel.show {
+      display: block;
     }
 
-    .loading {
-      color: #92400e;
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .detail {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .map-wrapper {
+      margin-top: 15px;
+    }
+
+    #routeMap {
+      height: 480px;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+
+    .route-info {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .route-box {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #777;
     }
 
     @media (max-width: 600px) {
+
       body {
         padding: 10px;
       }
@@ -166,6 +271,11 @@
       .card-value {
         font-size: 22px;
       }
+
+      #routeMap {
+        height: 380px;
+      }
+
     }
   </style>
 </head>
@@ -184,7 +294,9 @@
     >
 
     <select id="branchSelect">
-      <option value="">Барча филиаллар</option>
+      <option value="">
+        Барча филиаллар
+      </option>
     </select>
 
     <button id="refreshBtn">
@@ -193,6 +305,7 @@
 
   </div>
 
+
   <div
     id="status"
     class="status loading"
@@ -200,66 +313,98 @@
     ⏳ Маълумотлар юкланмоқда...
   </div>
 
+
   <div class="cards">
 
     <div class="card">
-      <div class="card-title">👥 Жами ходимлар</div>
+      <div class="card-title">
+        👥 Жами ходимлар
+      </div>
+
       <div
         class="card-value"
         id="totalEmployees"
       >0</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">🟢 Ишлаганлар</div>
+      <div class="card-title">
+        🟢 Ишлаганлар
+      </div>
+
       <div
         class="card-value"
         id="workedEmployees"
       >0</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">🔴 Ишламаганлар</div>
+      <div class="card-title">
+        🔴 Ишламаганлар
+      </div>
+
       <div
         class="card-value"
         id="notWorkedEmployees"
       >0</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">🟢 Ҳозир ишда</div>
+      <div class="card-title">
+        🟢 Ҳозир ишда
+      </div>
+
       <div
         class="card-value"
         id="activeEmployees"
       >0</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">📍 Актив GPS</div>
+      <div class="card-title">
+        📍 Актив GPS
+      </div>
+
       <div
         class="card-value"
         id="activeGps"
       >0</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">⏱ Жами иш вақти</div>
+      <div class="card-title">
+        ⏱ Жами иш вақти
+      </div>
+
       <div
         class="card-value"
         id="totalWorkTime"
       >00:00:00</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">🚗 Масофа</div>
+      <div class="card-title">
+        🚗 Масофа
+      </div>
+
       <div
         class="card-value"
         id="totalDistance"
       >0.00 км</div>
     </div>
 
+
     <div class="card">
-      <div class="card-title">📍 GPS нуқталари</div>
+      <div class="card-title">
+        📍 GPS нуқталари
+      </div>
+
       <div
         class="card-value"
         id="totalGpsPoints"
@@ -268,6 +413,7 @@
 
   </div>
 
+
   <div class="table-box">
 
     <h2>👤 Ходимлар</h2>
@@ -275,6 +421,7 @@
     <table>
 
       <thead>
+
         <tr>
           <th>Ҳолат</th>
           <th>Ходим</th>
@@ -284,13 +431,15 @@
           <th>GPS</th>
           <th>Масофа</th>
           <th>Охирги GPS</th>
+          <th>Маршрут</th>
         </tr>
+
       </thead>
 
       <tbody id="employeeTable">
 
         <tr>
-          <td colspan="8">
+          <td colspan="9">
             ⏳ Маълумотлар юкланмоқда...
           </td>
         </tr>
@@ -301,12 +450,76 @@
 
   </div>
 
+
+  <!-- EMPLOYEE DETAIL -->
+
+  <div
+    id="employeePanel"
+    class="employee-panel"
+  >
+
+    <div class="panel-header">
+
+      <h2 id="employeeTitle">
+        👤 Ходим
+      </h2>
+
+      <button
+        id="closePanelBtn"
+        class="gray"
+      >
+        ✖ Ёпиш
+      </button>
+
+    </div>
+
+
+    <div
+      id="employeeDetails"
+      class="detail-grid"
+    ></div>
+
+
+    <div class="route-info">
+
+      <div class="route-box">
+        📍 GPS нуқталари:
+        <b id="routePoints">0</b>
+      </div>
+
+      <div class="route-box">
+        🚗 Масофа:
+        <b id="routeDistance">0.00 км</b>
+      </div>
+
+      <div class="route-box">
+        ⏱ Маршрут вақти:
+        <b id="routeDuration">00:00:00</b>
+      </div>
+
+    </div>
+
+
+    <div class="map-wrapper">
+
+      <div id="routeMap"></div>
+
+    </div>
+
+  </div>
+
 </div>
+
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
 
 <script>
 
 "use strict";
+
 
 /* =========================================
    API
@@ -321,49 +534,101 @@ const API =
 ========================================= */
 
 const dateInput =
-  document.getElementById("dateInput");
+  document.getElementById(
+    "dateInput"
+  );
 
 const branchSelect =
-  document.getElementById("branchSelect");
+  document.getElementById(
+    "branchSelect"
+  );
 
 const refreshBtn =
-  document.getElementById("refreshBtn");
+  document.getElementById(
+    "refreshBtn"
+  );
 
 const statusBox =
-  document.getElementById("status");
+  document.getElementById(
+    "status"
+  );
 
 const employeeTable =
-  document.getElementById("employeeTable");
+  document.getElementById(
+    "employeeTable"
+  );
+
+const employeePanel =
+  document.getElementById(
+    "employeePanel"
+  );
+
+const employeeTitle =
+  document.getElementById(
+    "employeeTitle"
+  );
+
+const employeeDetails =
+  document.getElementById(
+    "employeeDetails"
+  );
+
+const closePanelBtn =
+  document.getElementById(
+    "closePanelBtn"
+  );
 
 
 /* =========================================
-   DATE
+   MAP VARIABLES
+========================================= */
+
+let routeMap = null;
+
+let routeLine = null;
+
+let routeStartMarker = null;
+
+let routeEndMarker = null;
+
+let routePointMarkers = [];
+
+
+/* =========================================
+   TODAY
 ========================================= */
 
 function getToday() {
 
-  const now = new Date();
+  const now =
+    new Date();
 
   const year =
     now.getFullYear();
 
   const month =
-    String(now.getMonth() + 1)
-      .padStart(2, "0");
+    String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
 
   const day =
-    String(now.getDate())
-      .padStart(2, "0");
+    String(
+      now.getDate()
+    ).padStart(2, "0");
 
-  return `${year}-${month}-${day}`;
+  return (
+    year +
+    "-" +
+    month +
+    "-" +
+    day
+  );
+
 }
 
 
-/* =========================================
-   INITIAL DATE
-========================================= */
-
-dateInput.value = getToday();
+dateInput.value =
+  getToday();
 
 
 /* =========================================
@@ -380,23 +645,31 @@ function setStatus(
 
   statusBox.className =
     "status " + type;
+
 }
 
 
 /* =========================================
-   FORMAT TIME
+   FORMAT DURATION
 ========================================= */
 
-function formatDuration(seconds) {
+function formatDuration(
+  seconds
+) {
 
   seconds =
     Number(seconds) || 0;
 
   seconds =
-    Math.max(0, Math.floor(seconds));
+    Math.max(
+      0,
+      Math.floor(seconds)
+    );
 
   const hours =
-    Math.floor(seconds / 3600);
+    Math.floor(
+      seconds / 3600
+    );
 
   const minutes =
     Math.floor(
@@ -407,29 +680,51 @@ function formatDuration(seconds) {
     seconds % 60;
 
   return (
-    String(hours).padStart(2, "0") +
+    String(hours)
+      .padStart(2, "0") +
     ":" +
-    String(minutes).padStart(2, "0") +
+    String(minutes)
+      .padStart(2, "0") +
     ":" +
-    String(secs).padStart(2, "0")
+    String(secs)
+      .padStart(2, "0")
   );
+
 }
 
 
 /* =========================================
-   ESCAPE HTML
+   ESCAPE
 ========================================= */
 
-function escapeHtml(value) {
+function escapeHtml(
+  value
+) {
 
   return String(
     value ?? ""
   )
-  .replaceAll("&", "&amp;")
-  .replaceAll("<", "&lt;")
-  .replaceAll(">", "&gt;")
-  .replaceAll('"', "&quot;")
-  .replaceAll("'", "&#039;");
+  .replaceAll(
+    "&",
+    "&amp;"
+  )
+  .replaceAll(
+    "<",
+    "&lt;"
+  )
+  .replaceAll(
+    ">",
+    "&gt;"
+  )
+  .replaceAll(
+    '"',
+    "&quot;"
+  )
+  .replaceAll(
+    "'",
+    "&#039;"
+  );
+
 }
 
 
@@ -437,7 +732,9 @@ function escapeHtml(value) {
    GPS TIME
 ========================================= */
 
-function formatGpsTime(value) {
+function formatGpsTime(
+  value
+) {
 
   if (!value) {
     return "-";
@@ -457,9 +754,11 @@ function formatGpsTime(value) {
   return date.toLocaleString(
     "uz-UZ",
     {
-      timeZone: "Asia/Tashkent"
+      timeZone:
+        "Asia/Tashkent"
     }
   );
+
 }
 
 
@@ -467,9 +766,13 @@ function formatGpsTime(value) {
    STATUS BADGE
 ========================================= */
 
-function getStatusBadge(employee) {
+function getStatusBadge(
+  employee
+) {
 
-  if (employee.active_session) {
+  if (
+    employee.active_session
+  ) {
 
     return `
       <span class="badge green">
@@ -479,7 +782,10 @@ function getStatusBadge(employee) {
 
   }
 
-  if (employee.worked) {
+
+  if (
+    employee.worked
+  ) {
 
     return `
       <span class="badge yellow">
@@ -489,54 +795,66 @@ function getStatusBadge(employee) {
 
   }
 
+
   return `
     <span class="badge red">
       🔴 Ишламаган
     </span>
   `;
+
 }
 
 
 /* =========================================
-   LOAD DATA
+   LOAD DASHBOARD
 ========================================= */
 
 async function loadDashboard() {
 
   const date =
-    dateInput.value || getToday();
+    dateInput.value ||
+    getToday();
+
 
   setStatus(
     "⏳ Маълумотлар юкланмоқда...",
     "loading"
   );
 
-  refreshBtn.disabled = true;
+
+  refreshBtn.disabled =
+    true;
+
 
   try {
 
     const url =
       API +
       "?view=dashboard&date=" +
-      encodeURIComponent(date);
+      encodeURIComponent(
+        date
+      );
+
 
     console.log(
       "Dashboard API:",
       url
     );
 
+
     const response =
-      await fetch(url, {
-        method: "GET",
-        cache: "no-store"
-      });
+      await fetch(
+        url,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
 
-    console.log(
-      "API status:",
-      response.status
-    );
 
-    if (!response.ok) {
+    if (
+      !response.ok
+    ) {
 
       throw new Error(
         "API HTTP " +
@@ -545,13 +863,16 @@ async function loadDashboard() {
 
     }
 
+
     const data =
       await response.json();
+
 
     console.log(
       "Dashboard data:",
       data
     );
+
 
     if (
       !data ||
@@ -560,17 +881,27 @@ async function loadDashboard() {
 
       throw new Error(
         data?.error ||
-        "API нотўғри маълумот қайтарди"
+        "API нотўғри жавоб қайтарди"
       );
 
     }
 
-    renderDashboard(data);
+
+    window.dashboardData =
+      data;
+
+
+    renderDashboard(
+      data
+    );
+
 
     setStatus(
-      `✅ Маълумотлар янгиланди: ${date}`,
+      "✅ Маълумотлар янгиланди: " +
+      date,
       "success"
     );
+
 
   } catch (error) {
 
@@ -579,23 +910,31 @@ async function loadDashboard() {
       error
     );
 
+
     setStatus(
-      "❌ Маълумотларни олишда хато: " +
+      "❌ Хато: " +
       error.message,
       "error"
     );
 
-    employeeTable.innerHTML = `
+
+    employeeTable.innerHTML =
+      `
       <tr>
-        <td colspan="8">
-          ❌ ${escapeHtml(error.message)}
+        <td colspan="9">
+          ❌ ${
+            escapeHtml(
+              error.message
+            )
+          }
         </td>
       </tr>
-    `;
+      `;
 
   } finally {
 
-    refreshBtn.disabled = false;
+    refreshBtn.disabled =
+      false;
 
   }
 
@@ -606,18 +945,21 @@ async function loadDashboard() {
    RENDER DASHBOARD
 ========================================= */
 
-function renderDashboard(data) {
+function renderDashboard(
+  data
+) {
 
   const summary =
     data.summary || {};
 
+
   const employees =
-    Array.isArray(data.employees)
+    Array.isArray(
+      data.employees
+    )
       ? data.employees
       : [];
 
-
-  /* SUMMARY */
 
   document.getElementById(
     "totalEmployees"
@@ -673,14 +1015,14 @@ function renderDashboard(data) {
     summary.total_gps_points ?? 0;
 
 
-  /* BRANCHES */
+  renderBranches(
+    employees
+  );
 
-  renderBranches(employees);
 
-
-  /* TABLE */
-
-  renderEmployees(employees);
+  renderEmployees(
+    employees
+  );
 
 }
 
@@ -689,13 +1031,17 @@ function renderDashboard(data) {
    BRANCHES
 ========================================= */
 
-function renderBranches(employees) {
+function renderBranches(
+  employees
+) {
 
   const oldValue =
     branchSelect.value;
 
+
   const branches =
     new Map();
+
 
   employees.forEach(
     employee => {
@@ -706,8 +1052,11 @@ function renderBranches(employees) {
         return;
       }
 
+
       branches.set(
-        String(employee.branch_id),
+        String(
+          employee.branch_id
+        ),
         employee.branch_name ||
         "Филиал"
       );
@@ -717,9 +1066,11 @@ function renderBranches(employees) {
 
 
   branchSelect.innerHTML =
-    `<option value="">
-      Барча филиаллар
-    </option>`;
+    `
+      <option value="">
+        Барча филиаллар
+      </option>
+    `;
 
 
   [...branches.entries()]
@@ -738,10 +1089,14 @@ function renderBranches(employees) {
             "option"
           );
 
-        option.value = id;
+
+        option.value =
+          id;
+
 
         option.textContent =
           name;
+
 
         branchSelect.appendChild(
           option
@@ -755,7 +1110,8 @@ function renderBranches(employees) {
     [...branchSelect.options]
       .some(
         option =>
-          option.value === oldValue
+          option.value ===
+          oldValue
       )
   ) {
 
@@ -793,17 +1149,21 @@ function renderEmployees(
       : employees;
 
 
-  if (!filtered.length) {
+  if (
+    !filtered.length
+  ) {
 
-    employeeTable.innerHTML = `
+    employeeTable.innerHTML =
+      `
       <tr>
-        <td colspan="8">
+        <td colspan="9">
           Ходимлар топилмади.
         </td>
       </tr>
-    `;
+      `;
 
     return;
+
   }
 
 
@@ -826,7 +1186,8 @@ function renderEmployees(
 
           const distance =
             Number(
-              employee.distance_km || 0
+              employee.distance_km ||
+              0
             ).toFixed(2);
 
 
@@ -834,47 +1195,89 @@ function renderEmployees(
             <tr>
 
               <td>
-                ${getStatusBadge(employee)}
-              </td>
-
-              <td>
-                <strong>
-                  ${escapeHtml(
-                    employee.full_name
-                  )}
-                </strong>
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  employee.branch_name ||
-                  "-"
+                ${getStatusBadge(
+                  employee
                 )}
               </td>
 
+
               <td>
-                ${escapeHtml(
-                  employee.work_time ||
-                  formatDuration(
-                    employee.work_seconds
+
+                <span
+                  class="employee-name"
+                  data-id="${
+                    employee.employee_id
+                  }"
+                >
+                  ${
+                    escapeHtml(
+                      employee.full_name
+                    )
+                  }
+                </span>
+
+              </td>
+
+
+              <td>
+                ${
+                  escapeHtml(
+                    employee.branch_name ||
+                    "-"
                   )
-                )}
+                }
               </td>
 
-              <td>
-                ${employee.work_sessions ?? 0}
-              </td>
 
               <td>
-                ${employee.gps_points ?? 0}
+                ${
+                  escapeHtml(
+                    employee.work_time ||
+                    formatDuration(
+                      employee.work_seconds
+                    )
+                  )
+                }
               </td>
+
+
+              <td>
+                ${
+                  employee.work_sessions ??
+                  0
+                }
+              </td>
+
+
+              <td>
+                ${
+                  employee.gps_points ??
+                  0
+                }
+              </td>
+
 
               <td>
                 ${distance} км
               </td>
 
+
               <td>
                 ${gpsText}
+              </td>
+
+
+              <td>
+
+                <button
+                  class="green-btn route-btn"
+                  data-id="${
+                    employee.employee_id
+                  }"
+                >
+                  🗺 Кўриш
+                </button>
+
               </td>
 
             </tr>
@@ -884,54 +1287,820 @@ function renderEmployees(
       )
       .join("");
 
+
+  document
+    .querySelectorAll(
+      ".employee-name"
+    )
+    .forEach(
+      element => {
+
+        element.addEventListener(
+          "click",
+          () => {
+
+            const id =
+              Number(
+                element.dataset.id
+              );
+
+            openEmployee(
+              id
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      ".route-btn"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const id =
+              Number(
+                button.dataset.id
+              );
+
+            openEmployee(
+              id
+            );
+
+          }
+        );
+
+      }
+    );
+
 }
 
 
 /* =========================================
-   BRANCH FILTER
+   OPEN EMPLOYEE
 ========================================= */
 
-branchSelect.addEventListener(
-  "change",
-  async () => {
+function openEmployee(
+  employeeId
+) {
 
-    try {
+  const employees =
+    window.dashboardData?.employees ||
+    [];
 
-      const date =
-        dateInput.value ||
-        getToday();
 
-      const response =
-        await fetch(
-          API +
-          "?view=dashboard&date=" +
-          encodeURIComponent(date),
-          {
-            cache: "no-store"
+  const employee =
+    employees.find(
+      item =>
+        Number(
+          item.employee_id
+        ) ===
+        Number(
+          employeeId
+        )
+    );
+
+
+  if (!employee) {
+
+    alert(
+      "Ходим маълумоти топилмади."
+    );
+
+    return;
+
+  }
+
+
+  employeePanel.classList.add(
+    "show"
+  );
+
+
+  employeeTitle.innerHTML =
+    "👤 " +
+    escapeHtml(
+      employee.full_name
+    );
+
+
+  employeeDetails.innerHTML =
+    `
+      <div class="detail">
+        <div class="detail-label">
+          Ходим
+        </div>
+        <div class="detail-value">
+          ${
+            escapeHtml(
+              employee.full_name
+            )
           }
-        );
+        </div>
+      </div>
 
-      const data =
-        await response.json();
 
-      if (
-        data.success
-      ) {
+      <div class="detail">
+        <div class="detail-label">
+          Филиал
+        </div>
+        <div class="detail-value">
+          ${
+            escapeHtml(
+              employee.branch_name ||
+              "-"
+            )
+          }
+        </div>
+      </div>
 
-        renderEmployees(
-          data.employees || []
-        );
 
-      }
+      <div class="detail">
+        <div class="detail-label">
+          Ҳолат
+        </div>
+        <div class="detail-value">
+          ${
+            employee.active_session
+              ? "🟢 Ҳозир ишда"
+              : employee.worked
+                ? "🟡 Ишлаган"
+                : "🔴 Ишламаган"
+          }
+        </div>
+      </div>
 
-    } catch (error) {
 
-      console.error(
-        "FILTER ERROR:",
-        error
+      <div class="detail">
+        <div class="detail-label">
+          Иш бошланган
+        </div>
+        <div class="detail-value">
+          ${
+            formatGpsTime(
+              employee.first_start
+            )
+          }
+        </div>
+      </div>
+
+
+      <div class="detail">
+        <div class="detail-label">
+          Иш тугаган
+        </div>
+        <div class="detail-value">
+          ${
+            formatGpsTime(
+              employee.last_end
+            )
+          }
+        </div>
+      </div>
+
+
+      <div class="detail">
+        <div class="detail-label">
+          Жами иш вақти
+        </div>
+        <div class="detail-value">
+          ${
+            employee.work_time ||
+            formatDuration(
+              employee.work_seconds
+            )
+          }
+        </div>
+      </div>
+    `;
+
+
+  loadRoute(
+    employeeId
+  );
+
+
+  employeePanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
+
+
+/* =========================================
+   LOAD ROUTE
+========================================= */
+
+async function loadRoute(
+  employeeId
+) {
+
+  const date =
+    dateInput.value ||
+    getToday();
+
+
+  try {
+
+    const url =
+      API +
+      "?view=route" +
+      "&employee_id=" +
+      encodeURIComponent(
+        employeeId
+      ) +
+      "&date=" +
+      encodeURIComponent(
+        date
+      );
+
+
+    console.log(
+      "Route API:",
+      url
+    );
+
+
+    const response =
+      await fetch(
+        url,
+        {
+          cache: "no-store"
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        "Route API HTTP " +
+        response.status
       );
 
     }
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "Route data:",
+      data
+    );
+
+
+    const points =
+      Array.isArray(
+        data.points
+      )
+        ? data.points
+        : Array.isArray(
+            data.route
+          )
+          ? data.route
+          : [];
+
+
+    drawRoute(
+      points
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "ROUTE ERROR:",
+      error
+    );
+
+
+    document.getElementById(
+      "routePoints"
+    ).textContent =
+      "0";
+
+
+    document.getElementById(
+      "routeDistance"
+    ).textContent =
+      "0.00 км";
+
+
+    document.getElementById(
+      "routeDuration"
+    ).textContent =
+      "00:00:00";
+
+
+    createMap();
+
+
+    alert(
+      "Маршрутни олишда хато: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   CREATE MAP
+========================================= */
+
+function createMap() {
+
+  if (!routeMap) {
+
+    routeMap =
+      L.map(
+        "routeMap"
+      );
+
+
+    L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        attribution:
+          "&copy; OpenStreetMap"
+      }
+    ).addTo(
+      routeMap
+    );
+
+
+    routeMap.setView(
+      [40.38, 69.25],
+      12
+    );
+
+  }
+
+
+  setTimeout(
+    () => {
+
+      routeMap.invalidateSize();
+
+    },
+    100
+  );
+
+}
+
+
+/* =========================================
+   CLEAR MAP
+========================================= */
+
+function clearMap() {
+
+  if (!routeMap) {
+    return;
+  }
+
+
+  if (routeLine) {
+
+    routeMap.removeLayer(
+      routeLine
+    );
+
+    routeLine = null;
+
+  }
+
+
+  if (
+    routeStartMarker
+  ) {
+
+    routeMap.removeLayer(
+      routeStartMarker
+    );
+
+    routeStartMarker =
+      null;
+
+  }
+
+
+  if (
+    routeEndMarker
+  ) {
+
+    routeMap.removeLayer(
+      routeEndMarker
+    );
+
+    routeEndMarker =
+      null;
+
+  }
+
+
+  routePointMarkers
+    .forEach(
+      marker => {
+
+        routeMap.removeLayer(
+          marker
+        );
+
+      }
+    );
+
+
+  routePointMarkers = [];
+
+}
+
+
+/* =========================================
+   DRAW ROUTE
+========================================= */
+
+function drawRoute(
+  points
+) {
+
+  createMap();
+
+  clearMap();
+
+
+  if (
+    !points.length
+  ) {
+
+    document.getElementById(
+      "routePoints"
+    ).textContent =
+      "0";
+
+
+    document.getElementById(
+      "routeDistance"
+    ).textContent =
+      "0.00 км";
+
+
+    document.getElementById(
+      "routeDuration"
+    ).textContent =
+      "00:00:00";
+
+
+    routeMap.setView(
+      [40.38, 69.25],
+      12
+    );
+
+
+    return;
+
+  }
+
+
+  const coordinates =
+    points
+      .map(
+        point => {
+
+          const lat =
+            Number(
+              point.latitude
+            );
+
+          const lng =
+            Number(
+              point.longitude
+            );
+
+
+          return [
+            lat,
+            lng
+          ];
+
+        }
+      )
+      .filter(
+        item =>
+          Number.isFinite(
+            item[0]
+          ) &&
+          Number.isFinite(
+            item[1]
+          )
+      );
+
+
+  if (
+    !coordinates.length
+  ) {
+
+    return;
+
+  }
+
+
+  routeLine =
+    L.polyline(
+      coordinates,
+      {
+        weight: 5
+      }
+    ).addTo(
+      routeMap
+    );
+
+
+  const start =
+    coordinates[0];
+
+
+  const end =
+    coordinates[
+      coordinates.length - 1
+    ];
+
+
+  routeStartMarker =
+    L.circleMarker(
+      start,
+      {
+        radius: 8
+      }
+    )
+    .addTo(
+      routeMap
+    )
+    .bindPopup(
+      "🟢 Бошланиш"
+    );
+
+
+  routeEndMarker =
+    L.circleMarker(
+      end,
+      {
+        radius: 8
+      }
+    )
+    .addTo(
+      routeMap
+    )
+    .bindPopup(
+      "🔴 Охирги нуқта"
+    );
+
+
+  coordinates.forEach(
+    (coordinate, index) => {
+
+      if (
+        index === 0 ||
+        index ===
+          coordinates.length - 1
+      ) {
+        return;
+      }
+
+
+      const marker =
+        L.circleMarker(
+          coordinate,
+          {
+            radius: 3
+          }
+        )
+        .addTo(
+          routeMap
+        );
+
+
+      routePointMarkers.push(
+        marker
+      );
+
+    }
+  );
+
+
+  const bounds =
+    routeLine.getBounds();
+
+
+  routeMap.fitBounds(
+    bounds,
+    {
+      padding: [
+        30,
+        30
+      ]
+    }
+  );
+
+
+  /* DISTANCE */
+
+  let distance =
+    0;
+
+
+  for (
+    let i = 1;
+    i < coordinates.length;
+    i++
+  ) {
+
+    distance +=
+      haversine(
+        coordinates[
+          i - 1
+        ][0],
+        coordinates[
+          i - 1
+        ][1],
+        coordinates[
+          i
+        ][0],
+        coordinates[
+          i
+        ][1]
+      );
+
+  }
+
+
+  document.getElementById(
+    "routePoints"
+  ).textContent =
+    points.length;
+
+
+  document.getElementById(
+    "routeDistance"
+  ).textContent =
+    distance.toFixed(2) +
+    " км";
+
+
+  /* DURATION */
+
+  const first =
+    points[0];
+
+
+  const last =
+    points[
+      points.length - 1
+    ];
+
+
+  const firstTime =
+    new Date(
+      first.recorded_at ||
+      first.created_at
+    ).getTime();
+
+
+  const lastTime =
+    new Date(
+      last.recorded_at ||
+      last.created_at
+    ).getTime();
+
+
+  if (
+    Number.isFinite(
+      firstTime
+    ) &&
+    Number.isFinite(
+      lastTime
+    ) &&
+    lastTime >= firstTime
+  ) {
+
+    const seconds =
+      Math.floor(
+        (
+          lastTime -
+          firstTime
+        ) / 1000
+      );
+
+
+    document.getElementById(
+      "routeDuration"
+    ).textContent =
+      formatDuration(
+        seconds
+      );
+
+  }
+
+}
+
+
+/* =========================================
+   HAVERSINE
+========================================= */
+
+function haversine(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+) {
+
+  const R =
+    6371;
+
+
+  const dLat =
+    (
+      lat2 -
+      lat1
+    ) *
+    Math.PI /
+    180;
+
+
+  const dLon =
+    (
+      lon2 -
+      lon1
+    ) *
+    Math.PI /
+    180;
+
+
+  const a =
+    Math.sin(
+      dLat / 2
+    ) *
+    Math.sin(
+      dLat / 2
+    ) +
+    Math.cos(
+      lat1 *
+      Math.PI /
+      180
+    ) *
+    Math.cos(
+      lat2 *
+      Math.PI /
+      180
+    ) *
+    Math.sin(
+      dLon / 2
+    ) *
+    Math.sin(
+      dLon / 2
+    );
+
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(
+        1 - a
+      )
+    );
+
+
+  return R * c;
+
+}
+
+
+/* =========================================
+   CLOSE PANEL
+========================================= */
+
+closePanelBtn.addEventListener(
+  "click",
+  () => {
+
+    employeePanel.classList.remove(
+      "show"
+    );
 
   }
 );
@@ -948,7 +2117,7 @@ refreshBtn.addEventListener(
 
 
 /* =========================================
-   DATE CHANGE
+   DATE
 ========================================= */
 
 dateInput.addEventListener(
@@ -958,12 +2127,34 @@ dateInput.addEventListener(
 
 
 /* =========================================
+   BRANCH
+========================================= */
+
+branchSelect.addEventListener(
+  "change",
+  () => {
+
+    const employees =
+      window.dashboardData?.employees ||
+      [];
+
+
+    renderEmployees(
+      employees
+    );
+
+  }
+);
+
+
+/* =========================================
    START
 ========================================= */
 
 console.log(
-  "DASHBOARD JS ISHLADI"
+  "DASHBOARD 2.0 JS ISHLADI"
 );
+
 
 loadDashboard();
 
