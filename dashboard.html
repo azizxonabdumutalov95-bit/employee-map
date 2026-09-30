@@ -19,141 +19,117 @@
 
     body {
       margin: 0;
-      padding: 20px;
       font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #222;
+      background: #f3f4f6;
+      color: #111827;
     }
 
     .container {
-      max-width: 1450px;
+      max-width: 1400px;
       margin: auto;
+      padding: 20px;
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin: 0 0 20px;
     }
 
     .toolbar {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      align-items: center;
     }
 
-    select,
+    .toolbar label {
+      font-weight: bold;
+    }
+
     input,
+    select,
     button {
       padding: 10px 14px;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 15px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
     }
 
     button {
       cursor: pointer;
-      border: none;
       background: #2563eb;
       color: white;
+      border: none;
     }
 
     button:hover {
-      opacity: .9;
+      background: #1d4ed8;
     }
 
-    button.gray {
-      background: #6b7280;
-    }
-
-    button.green-btn {
-      background: #16a34a;
-    }
-
-    .status {
-      padding: 12px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      background: white;
-      border: 1px solid #ddd;
-    }
-
-    .loading {
-      color: #92400e;
-    }
-
-    .success {
-      color: #166534;
-      background: #dcfce7;
-      border-color: #bbf7d0;
-    }
-
-    .error {
-      color: #991b1b;
-      background: #fee2e2;
-      border-color: #fecaca;
-    }
-
-    .cards {
+    .summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .card {
       background: white;
       border-radius: 12px;
       padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .card-title {
-      font-size: 14px;
-      color: #666;
+      color: #6b7280;
+      font-size: 13px;
       margin-bottom: 8px;
     }
 
     .card-value {
-      font-size: 27px;
+      font-size: 25px;
       font-weight: bold;
     }
 
     .table-box {
       background: white;
       border-radius: 12px;
-      padding: 15px;
       overflow-x: auto;
+      margin-bottom: 20px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1050px;
+      min-width: 900px;
     }
 
     th,
     td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #eee;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
       text-align: left;
-      white-space: nowrap;
     }
 
     th {
-      background: #f8fafc;
+      background: #f9fafb;
+      font-size: 13px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
     }
 
     .employee-name {
       color: #2563eb;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: bold;
     }
 
-    .employee-name:hover {
-      text-decoration: underline;
-    }
-
-    .badge {
+    .status {
       display: inline-block;
       padding: 5px 9px;
       border-radius: 20px;
@@ -161,121 +137,113 @@
       font-weight: bold;
     }
 
-    .green {
+    .status-green {
       background: #dcfce7;
       color: #166534;
     }
 
-    .red {
+    .status-yellow {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .status-red {
       background: #fee2e2;
       color: #991b1b;
     }
 
-    .yellow {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .gray {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .employee-panel {
-      display: none;
-      margin-top: 25px;
+    .detail {
       background: white;
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+      margin-top: 20px;
+      display: none;
     }
 
-    .employee-panel.show {
-      display: block;
-    }
-
-    .panel-header {
+    .detail-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    .panel-header h2 {
-      margin: 0;
+    .detail-title {
+      font-size: 22px;
+      font-weight: bold;
     }
 
-    .detail-grid {
+    .route-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    .detail {
-      background: #f8fafc;
+    .route-stat {
+      background: #f9fafb;
+      padding: 15px;
       border-radius: 10px;
-      padding: 14px;
     }
 
-    .detail-label {
-      font-size: 12px;
-      color: #666;
+    .route-stat-title {
+      color: #6b7280;
+      font-size: 13px;
       margin-bottom: 5px;
     }
 
-    .detail-value {
+    .route-stat-value {
+      font-size: 20px;
       font-weight: bold;
-      font-size: 16px;
-    }
-
-    .map-wrapper {
-      margin-top: 15px;
     }
 
     #routeMap {
-      height: 480px;
       width: 100%;
+      height: 500px;
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid #ddd;
     }
 
-    .route-info {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 15px 0;
+    .loading {
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
     }
 
-    .route-box {
-      padding: 10px 14px;
-      border-radius: 8px;
-      background: #f8fafc;
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
     }
 
     .empty {
       text-align: center;
       padding: 30px;
-      color: #777;
+      color: #6b7280;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 1100px) {
+      .summary {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
 
-      body {
-        padding: 10px;
+    @media (max-width: 700px) {
+      .summary {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .card-value {
-        font-size: 22px;
+      .route-stats {
+        grid-template-columns: 1fr;
       }
 
       #routeMap {
-        height: 380px;
+        height: 400px;
       }
-
     }
   </style>
 </head>
@@ -288,15 +256,21 @@
 
   <div class="toolbar">
 
+    <label for="date">
+      📅 Сана:
+    </label>
+
     <input
       type="date"
-      id="dateInput"
+      id="date"
     >
 
-    <select id="branchSelect">
-      <option value="">
-        Барча филиаллар
-      </option>
+    <label for="branch">
+      🏢 Филиал:
+    </label>
+
+    <select id="branch">
+      <option value="">Барча филиаллар</option>
     </select>
 
     <button id="refreshBtn">
@@ -305,132 +279,98 @@
 
   </div>
 
+  <div id="errorBox" class="error"></div>
 
-  <div
-    id="status"
-    class="status loading"
-  >
-    ⏳ Маълумотлар юкланмоқда...
-  </div>
-
-
-  <div class="cards">
+  <div class="summary">
 
     <div class="card">
       <div class="card-title">
         👥 Жами ходимлар
       </div>
-
       <div
         class="card-value"
         id="totalEmployees"
-      >0</div>
+      >
+        0
+      </div>
     </div>
-
 
     <div class="card">
       <div class="card-title">
         🟢 Ишлаганлар
       </div>
-
       <div
         class="card-value"
         id="workedEmployees"
-      >0</div>
+      >
+        0
+      </div>
     </div>
-
 
     <div class="card">
       <div class="card-title">
         🔴 Ишламаганлар
       </div>
-
       <div
         class="card-value"
         id="notWorkedEmployees"
-      >0</div>
+      >
+        0
+      </div>
     </div>
-
 
     <div class="card">
       <div class="card-title">
         🟢 Ҳозир ишда
       </div>
-
       <div
         class="card-value"
         id="activeEmployees"
-      >0</div>
+      >
+        0
+      </div>
     </div>
-
 
     <div class="card">
       <div class="card-title">
-        📍 Актив GPS
+        📍 GPS актив
       </div>
-
       <div
         class="card-value"
         id="activeGps"
-      >0</div>
+      >
+        0
+      </div>
     </div>
-
 
     <div class="card">
       <div class="card-title">
         ⏱ Жами иш вақти
       </div>
-
       <div
         class="card-value"
         id="totalWorkTime"
-      >00:00:00</div>
-    </div>
-
-
-    <div class="card">
-      <div class="card-title">
-        🚗 Масофа
+      >
+        00:00:00
       </div>
-
-      <div
-        class="card-value"
-        id="totalDistance"
-      >0.00 км</div>
-    </div>
-
-
-    <div class="card">
-      <div class="card-title">
-        📍 GPS нуқталари
-      </div>
-
-      <div
-        class="card-value"
-        id="totalGpsPoints"
-      >0</div>
     </div>
 
   </div>
 
-
   <div class="table-box">
-
-    <h2>👤 Ходимлар</h2>
 
     <table>
 
       <thead>
 
         <tr>
-          <th>Ҳолат</th>
           <th>Ходим</th>
           <th>Филиал</th>
+          <th>Статус</th>
           <th>Иш вақти</th>
-          <th>Сессия</th>
           <th>GPS</th>
+          <th>GPS нуқта</th>
           <th>Масофа</th>
-          <th>Охирги GPS</th>
           <th>Маршрут</th>
         </tr>
 
@@ -439,8 +379,11 @@
       <tbody id="employeeTable">
 
         <tr>
-          <td colspan="9">
-            ⏳ Маълумотлар юкланмоқда...
+          <td
+            colspan="8"
+            class="loading"
+          >
+            Маълумотлар юкланмоқда...
           </td>
         </tr>
 
@@ -450,220 +393,130 @@
 
   </div>
 
-
-  <!-- EMPLOYEE DETAIL -->
+  <!-- DETAIL -->
 
   <div
-    id="employeePanel"
-    class="employee-panel"
+    id="detail"
+    class="detail"
   >
 
-    <div class="panel-header">
+    <div class="detail-header">
 
-      <h2 id="employeeTitle">
-        👤 Ходим
-      </h2>
+      <div
+        id="detailTitle"
+        class="detail-title"
+      >
+        🗺 Ходим маршрути
+      </div>
 
       <button
-        id="closePanelBtn"
-        class="gray"
+        id="closeDetail"
+        type="button"
       >
         ✖ Ёпиш
       </button>
 
     </div>
 
+    <div class="route-stats">
 
-    <div
-      id="employeeDetails"
-      class="detail-grid"
-    ></div>
+      <div class="route-stat">
 
+        <div class="route-stat-title">
+          📍 GPS нуқталари
+        </div>
 
-    <div class="route-info">
+        <div
+          id="routePoints"
+          class="route-stat-value"
+        >
+          0
+        </div>
 
-      <div class="route-box">
-        📍 GPS нуқталари:
-        <b id="routePoints">0</b>
       </div>
 
-      <div class="route-box">
-        🚗 Масофа:
-        <b id="routeDistance">0.00 км</b>
+      <div class="route-stat">
+
+        <div class="route-stat-title">
+          🚗 Масофа
+        </div>
+
+        <div
+          id="routeDistance"
+          class="route-stat-value"
+        >
+          0.00 км
+        </div>
+
       </div>
 
-      <div class="route-box">
-        ⏱ Маршрут вақти:
-        <b id="routeDuration">00:00:00</b>
+      <div class="route-stat">
+
+        <div class="route-stat-title">
+          ⏱ Маршрут вақти
+        </div>
+
+        <div
+          id="routeDuration"
+          class="route-stat-value"
+        >
+          00:00:00
+        </div>
+
       </div>
 
     </div>
 
-
-    <div class="map-wrapper">
-
-      <div id="routeMap"></div>
-
-    </div>
+    <div id="routeMap"></div>
 
   </div>
 
 </div>
 
-
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-
-"use strict";
-
-
-/* =========================================
-   API
-========================================= */
 
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
-
-/* =========================================
-   ELEMENTS
-========================================= */
-
-const dateInput =
-  document.getElementById(
-    "dateInput"
-  );
-
-const branchSelect =
-  document.getElementById(
-    "branchSelect"
-  );
-
-const refreshBtn =
-  document.getElementById(
-    "refreshBtn"
-  );
-
-const statusBox =
-  document.getElementById(
-    "status"
-  );
-
-const employeeTable =
-  document.getElementById(
-    "employeeTable"
-  );
-
-const employeePanel =
-  document.getElementById(
-    "employeePanel"
-  );
-
-const employeeTitle =
-  document.getElementById(
-    "employeeTitle"
-  );
-
-const employeeDetails =
-  document.getElementById(
-    "employeeDetails"
-  );
-
-const closePanelBtn =
-  document.getElementById(
-    "closePanelBtn"
-  );
-
-
-/* =========================================
-   MAP VARIABLES
-========================================= */
+let dashboardData = null;
 
 let routeMap = null;
 
 let routeLine = null;
 
-let routeStartMarker = null;
+let routeMarkers = [];
 
-let routeEndMarker = null;
-
-let routePointMarkers = [];
+let selectedEmployee = null;
 
 
-/* =========================================
-   TODAY
-========================================= */
+/* =========================
+   DATE
+========================= */
 
-function getToday() {
+function getTodayTashkent() {
 
-  const now =
-    new Date();
-
-  const year =
-    now.getFullYear();
-
-  const month =
-    String(
-      now.getMonth() + 1
-    ).padStart(2, "0");
-
-  const day =
-    String(
-      now.getDate()
-    ).padStart(2, "0");
-
-  return (
-    year +
-    "-" +
-    month +
-    "-" +
-    day
-  );
+  return new Intl.DateTimeFormat(
+    "en-CA",
+    {
+      timeZone: "Asia/Tashkent"
+    }
+  ).format(new Date());
 
 }
 
 
-dateInput.value =
-  getToday();
+/* =========================
+   FORMAT TIME
+========================= */
 
+function formatDuration(totalSeconds) {
 
-/* =========================================
-   STATUS
-========================================= */
-
-function setStatus(
-  message,
-  type = "loading"
-) {
-
-  statusBox.textContent =
-    message;
-
-  statusBox.className =
-    "status " + type;
-
-}
-
-
-/* =========================================
-   FORMAT DURATION
-========================================= */
-
-function formatDuration(
-  seconds
-) {
-
-  seconds =
-    Number(seconds) || 0;
-
-  seconds =
+  const seconds =
     Math.max(
       0,
-      Math.floor(seconds)
+      Number(totalSeconds) || 0
     );
 
   const hours =
@@ -677,231 +530,139 @@ function formatDuration(
     );
 
   const secs =
-    seconds % 60;
+    Math.floor(
+      seconds % 60
+    );
 
   return (
-    String(hours)
-      .padStart(2, "0") +
+    String(hours).padStart(2, "0") +
     ":" +
-    String(minutes)
-      .padStart(2, "0") +
+    String(minutes).padStart(2, "0") +
     ":" +
-    String(secs)
-      .padStart(2, "0")
+    String(secs).padStart(2, "0")
   );
 
 }
 
 
-/* =========================================
-   ESCAPE
-========================================= */
+/* =========================
+   HAVERSINE
+========================= */
 
-function escapeHtml(
-  value
+function haversineDistance(
+  lat1,
+  lon1,
+  lat2,
+  lon2
 ) {
 
-  return String(
-    value ?? ""
-  )
-  .replaceAll(
-    "&",
-    "&amp;"
-  )
-  .replaceAll(
-    "<",
-    "&lt;"
-  )
-  .replaceAll(
-    ">",
-    "&gt;"
-  )
-  .replaceAll(
-    '"',
-    "&quot;"
-  )
-  .replaceAll(
-    "'",
-    "&#039;"
-  );
+  const R = 6371;
+
+  const dLat =
+    (
+      lat2 - lat1
+    ) *
+    Math.PI /
+    180;
+
+  const dLon =
+    (
+      lon2 - lon1
+    ) *
+    Math.PI /
+    180;
+
+  const a =
+    Math.sin(dLat / 2) *
+    Math.sin(dLat / 2) +
+
+    Math.cos(
+      lat1 * Math.PI / 180
+    ) *
+
+    Math.cos(
+      lat2 * Math.PI / 180
+    ) *
+
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
+    );
+
+  return R * c;
 
 }
 
 
-/* =========================================
-   GPS TIME
-========================================= */
-
-function formatGpsTime(
-  value
-) {
-
-  if (!value) {
-    return "-";
-  }
-
-  const date =
-    new Date(value);
-
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-    return "-";
-  }
-
-  return date.toLocaleString(
-    "uz-UZ",
-    {
-      timeZone:
-        "Asia/Tashkent"
-    }
-  );
-
-}
-
-
-/* =========================================
-   STATUS BADGE
-========================================= */
-
-function getStatusBadge(
-  employee
-) {
-
-  if (
-    employee.active_session
-  ) {
-
-    return `
-      <span class="badge green">
-        🟢 Ишда
-      </span>
-    `;
-
-  }
-
-
-  if (
-    employee.worked
-  ) {
-
-    return `
-      <span class="badge yellow">
-        🟡 Ишлаган
-      </span>
-    `;
-
-  }
-
-
-  return `
-    <span class="badge red">
-      🔴 Ишламаган
-    </span>
-  `;
-
-}
-
-
-/* =========================================
+/* =========================
    LOAD DASHBOARD
-========================================= */
+========================= */
 
 async function loadDashboard() {
 
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+  errorBox.style.display =
+    "none";
+
   const date =
-    dateInput.value ||
-    getToday();
+    document.getElementById(
+      "date"
+    ).value;
 
-
-  setStatus(
-    "⏳ Маълумотлар юкланмоқда...",
-    "loading"
-  );
-
-
-  refreshBtn.disabled =
-    true;
-
+  const url =
+    API +
+    "?view=dashboard" +
+    "&date=" +
+    encodeURIComponent(date);
 
   try {
 
-    const url =
-      API +
-      "?view=dashboard&date=" +
-      encodeURIComponent(
-        date
-      );
-
-
-    console.log(
-      "Dashboard API:",
-      url
-    );
-
-
     const response =
-      await fetch(
-        url,
-        {
-          method: "GET",
-          cache: "no-store"
-        }
-      );
-
-
-    if (
-      !response.ok
-    ) {
-
-      throw new Error(
-        "API HTTP " +
-        response.status
-      );
-
-    }
-
+      await fetch(url);
 
     const data =
       await response.json();
 
-
     console.log(
-      "Dashboard data:",
+      "DASHBOARD DATA:",
       data
     );
 
-
     if (
-      !data ||
-      data.success !== true
+      !response.ok ||
+      data.success === false
     ) {
 
       throw new Error(
-        data?.error ||
-        "API нотўғри жавоб қайтарди"
+        data.error ||
+        data.message ||
+        "Dashboard маълумотини олишда хато"
       );
 
     }
 
+    dashboardData = data;
 
-    window.dashboardData =
-      data;
-
-
-    renderDashboard(
-      data
+    fillBranches(
+      data.employees || []
     );
 
-
-    setStatus(
-      "✅ Маълумотлар янгиланди: " +
-      date,
-      "success"
+    updateSummary(
+      data.summary || {}
     );
 
+    renderEmployees(
+      data.employees || []
+    );
 
   } catch (error) {
 
@@ -910,176 +671,80 @@ async function loadDashboard() {
       error
     );
 
-
-    setStatus(
+    errorBox.innerHTML =
       "❌ Хато: " +
-      error.message,
-      "error"
-    );
+      error.message;
 
+    errorBox.style.display =
+      "block";
 
-    employeeTable.innerHTML =
-      `
+    document.getElementById(
+      "employeeTable"
+    ).innerHTML = `
       <tr>
-        <td colspan="9">
-          ❌ ${
-            escapeHtml(
-              error.message
-            )
-          }
+        <td
+          colspan="8"
+          class="empty"
+        >
+          Маълумотни олишда хато
         </td>
       </tr>
-      `;
-
-  } finally {
-
-    refreshBtn.disabled =
-      false;
+    `;
 
   }
 
 }
 
 
-/* =========================================
-   RENDER DASHBOARD
-========================================= */
-
-function renderDashboard(
-  data
-) {
-
-  const summary =
-    data.summary || {};
-
-
-  const employees =
-    Array.isArray(
-      data.employees
-    )
-      ? data.employees
-      : [];
-
-
-  document.getElementById(
-    "totalEmployees"
-  ).textContent =
-    summary.total_employees ?? 0;
-
-
-  document.getElementById(
-    "workedEmployees"
-  ).textContent =
-    summary.worked_employees ?? 0;
-
-
-  document.getElementById(
-    "notWorkedEmployees"
-  ).textContent =
-    summary.not_worked_employees ?? 0;
-
-
-  document.getElementById(
-    "activeEmployees"
-  ).textContent =
-    summary.active_employees ?? 0;
-
-
-  document.getElementById(
-    "activeGps"
-  ).textContent =
-    summary.active_gps ?? 0;
-
-
-  document.getElementById(
-    "totalWorkTime"
-  ).textContent =
-    summary.total_work_time ||
-    formatDuration(
-      summary.total_work_seconds
-    );
-
-
-  document.getElementById(
-    "totalDistance"
-  ).textContent =
-    Number(
-      summary.total_distance_km || 0
-    ).toFixed(2) +
-    " км";
-
-
-  document.getElementById(
-    "totalGpsPoints"
-  ).textContent =
-    summary.total_gps_points ?? 0;
-
-
-  renderBranches(
-    employees
-  );
-
-
-  renderEmployees(
-    employees
-  );
-
-}
-
-
-/* =========================================
+/* =========================
    BRANCHES
-========================================= */
+========================= */
 
-function renderBranches(
+function fillBranches(
   employees
 ) {
 
-  const oldValue =
-    branchSelect.value;
+  const select =
+    document.getElementById(
+      "branch"
+    );
 
+  const oldValue =
+    select.value;
 
   const branches =
     new Map();
-
 
   employees.forEach(
     employee => {
 
       if (
-        employee.branch_id == null
+        employee.branch_id !== null &&
+        employee.branch_name
       ) {
-        return;
+
+        branches.set(
+          employee.branch_id,
+          employee.branch_name
+        );
+
       }
-
-
-      branches.set(
-        String(
-          employee.branch_id
-        ),
-        employee.branch_name ||
-        "Филиал"
-      );
 
     }
   );
 
-
-  branchSelect.innerHTML =
-    `
-      <option value="">
-        Барча филиаллар
-      </option>
-    `;
-
+  select.innerHTML =
+    `<option value="">
+      Барча филиаллар
+    </option>`;
 
   [...branches.entries()]
     .sort(
       (a, b) =>
-        a[1].localeCompare(
-          b[1],
-          "uz"
-        )
+        String(a[1])
+          .localeCompare(
+            String(b[1])
+          )
     )
     .forEach(
       ([id, name]) => {
@@ -1089,33 +754,27 @@ function renderBranches(
             "option"
           );
 
-
-        option.value =
-          id;
-
+        option.value = id;
 
         option.textContent =
           name;
 
-
-        branchSelect.appendChild(
+        select.appendChild(
           option
         );
 
       }
     );
 
-
   if (
-    [...branchSelect.options]
+    [...select.options]
       .some(
         option =>
-          option.value ===
-          oldValue
+          option.value === oldValue
       )
   ) {
 
-    branchSelect.value =
+    select.value =
       oldValue;
 
   }
@@ -1123,157 +782,237 @@ function renderBranches(
 }
 
 
-/* =========================================
+/* =========================
+   SUMMARY
+========================= */
+
+function updateSummary(
+  summary
+) {
+
+  document.getElementById(
+    "totalEmployees"
+  ).textContent =
+    summary.total_employees || 0;
+
+  document.getElementById(
+    "workedEmployees"
+  ).textContent =
+    summary.worked_employees || 0;
+
+  document.getElementById(
+    "notWorkedEmployees"
+  ).textContent =
+    summary.not_worked_employees || 0;
+
+  document.getElementById(
+    "activeEmployees"
+  ).textContent =
+    summary.active_employees || 0;
+
+  document.getElementById(
+    "activeGps"
+  ).textContent =
+    summary.active_gps || 0;
+
+  document.getElementById(
+    "totalWorkTime"
+  ).textContent =
+    summary.total_work_time ||
+    "00:00:00";
+
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+function getStatus(
+  employee
+) {
+
+  if (
+    employee.active_session
+  ) {
+
+    return `
+      <span class="status status-green">
+        🟢 Ишда
+      </span>
+    `;
+
+  }
+
+  if (
+    employee.gps_active
+  ) {
+
+    return `
+      <span class="status status-yellow">
+        🟡 GPS актив
+      </span>
+    `;
+
+  }
+
+  if (
+    employee.worked
+  ) {
+
+    return `
+      <span class="status status-yellow">
+        🟡 Ишлаган
+      </span>
+    `;
+
+  }
+
+  return `
+    <span class="status status-red">
+      🔴 Ишламаган
+    </span>
+  `;
+
+}
+
+
+/* =========================
    RENDER EMPLOYEES
-========================================= */
+========================= */
 
 function renderEmployees(
   employees
 ) {
 
-  const selectedBranch =
-    branchSelect.value;
+  const table =
+    document.getElementById(
+      "employeeTable"
+    );
 
+  const branch =
+    document.getElementById(
+      "branch"
+    ).value;
 
-  const filtered =
-    selectedBranch
-      ? employees.filter(
-          employee =>
-            String(
-              employee.branch_id
-            ) ===
-            String(
-              selectedBranch
-            )
-        )
-      : employees;
+  let filtered =
+    employees;
 
+  if (branch) {
+
+    filtered =
+      employees.filter(
+        employee =>
+          String(
+            employee.branch_id
+          ) === String(branch)
+      );
+
+  }
 
   if (
-    !filtered.length
+    filtered.length === 0
   ) {
 
-    employeeTable.innerHTML =
-      `
+    table.innerHTML = `
       <tr>
-        <td colspan="9">
-          Ходимлар топилмади.
+        <td
+          colspan="8"
+          class="empty"
+        >
+          Ходимлар топилмади
         </td>
       </tr>
-      `;
+    `;
 
     return;
 
   }
 
-
-  employeeTable.innerHTML =
+  table.innerHTML =
     filtered
       .map(
         employee => {
 
-          const lastGps =
+          const location =
             employee.last_location;
 
-
-          const gpsText =
-            lastGps
-              ? formatGpsTime(
-                  lastGps.recorded_at
+          const coordinates =
+            location
+              ? (
+                  Number(
+                    location.latitude
+                  ).toFixed(5) +
+                  ", " +
+                  Number(
+                    location.longitude
+                  ).toFixed(5)
                 )
-              : "-";
-
-
-          const distance =
-            Number(
-              employee.distance_km ||
-              0
-            ).toFixed(2);
-
+              : "—";
 
           return `
             <tr>
 
               <td>
-                ${getStatusBadge(
-                  employee
-                )}
-              </td>
-
-
-              <td>
 
                 <span
                   class="employee-name"
-                  data-id="${
-                    employee.employee_id
-                  }"
+                  data-id="${employee.employee_id}"
                 >
-                  ${
-                    escapeHtml(
-                      employee.full_name
-                    )
-                  }
+                  ${escapeHtml(
+                    employee.full_name ||
+                    "Номаълум"
+                  )}
                 </span>
 
               </td>
-
 
               <td>
                 ${
                   escapeHtml(
                     employee.branch_name ||
-                    "-"
+                    "—"
                   )
                 }
               </td>
 
+              <td>
+                ${getStatus(employee)}
+              </td>
 
               <td>
                 ${
-                  escapeHtml(
-                    employee.work_time ||
-                    formatDuration(
-                      employee.work_seconds
-                    )
-                  )
+                  employee.work_time ||
+                  "00:00:00"
                 }
               </td>
-
 
               <td>
                 ${
-                  employee.work_sessions ??
-                  0
+                  employee.gps_active
+                    ? "🟢 Онлайн"
+                    : "🔴 Оффлайн"
                 }
               </td>
 
+              <td>
+                ${coordinates}
+              </td>
 
               <td>
                 ${
-                  employee.gps_points ??
-                  0
+                  Number(
+                    employee.distance_km || 0
+                  ).toFixed(2)
                 }
+                км
               </td>
-
-
-              <td>
-                ${distance} км
-              </td>
-
-
-              <td>
-                ${gpsText}
-              </td>
-
 
               <td>
 
                 <button
-                  class="green-btn route-btn"
-                  data-id="${
-                    employee.employee_id
-                  }"
+                  type="button"
+                  data-route-id="${employee.employee_id}"
                 >
                   🗺 Кўриш
                 </button>
@@ -1287,7 +1026,6 @@ function renderEmployees(
       )
       .join("");
 
-
   document
     .querySelectorAll(
       ".employee-name"
@@ -1299,13 +1037,10 @@ function renderEmployees(
           "click",
           () => {
 
-            const id =
+            openEmployeeRoute(
               Number(
                 element.dataset.id
-              );
-
-            openEmployee(
-              id
+              )
             );
 
           }
@@ -1314,10 +1049,9 @@ function renderEmployees(
       }
     );
 
-
   document
     .querySelectorAll(
-      ".route-btn"
+      "[data-route-id]"
     )
     .forEach(
       button => {
@@ -1326,13 +1060,10 @@ function renderEmployees(
           "click",
           () => {
 
-            const id =
+            openEmployeeRoute(
               Number(
-                button.dataset.id
-              );
-
-            openEmployee(
-              id
+                button.dataset.routeId
+              )
             );
 
           }
@@ -1344,170 +1075,163 @@ function renderEmployees(
 }
 
 
-/* =========================================
-   OPEN EMPLOYEE
-========================================= */
+/* =========================
+   ESCAPE HTML
+========================= */
 
-function openEmployee(
+function escapeHtml(
+  value
+) {
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =========================
+   OPEN ROUTE
+========================= */
+
+async function openEmployeeRoute(
   employeeId
 ) {
 
-  const employees =
-    window.dashboardData?.employees ||
-    [];
-
-
   const employee =
-    employees.find(
-      item =>
-        Number(
-          item.employee_id
-        ) ===
-        Number(
-          employeeId
+    dashboardData &&
+    dashboardData.employees
+      ? dashboardData.employees.find(
+          item =>
+            Number(
+              item.employee_id
+            ) === Number(employeeId)
         )
+      : null;
+
+  selectedEmployee =
+    employee;
+
+  const detail =
+    document.getElementById(
+      "detail"
     );
 
+  detail.style.display =
+    "block";
 
-  if (!employee) {
-
-    alert(
-      "Ходим маълумоти топилмади."
+  document.getElementById(
+    "detailTitle"
+  ).textContent =
+    "🗺 " +
+    (
+      employee
+        ? employee.full_name
+        : "Ходим маршрути"
     );
+
+  document.getElementById(
+    "routePoints"
+  ).textContent =
+    "0";
+
+  document.getElementById(
+    "routeDistance"
+  ).textContent =
+    "0.00 км";
+
+  document.getElementById(
+    "routeDuration"
+  ).textContent =
+    "00:00:00";
+
+  initRouteMap();
+
+  setTimeout(
+    () => {
+
+      routeMap.invalidateSize();
+
+    },
+    200
+  );
+
+  const date =
+    document.getElementById(
+      "date"
+    ).value;
+
+  await loadRoute(
+    employeeId,
+    date
+  );
+
+}
+
+
+/* =========================
+   INIT MAP
+========================= */
+
+function initRouteMap() {
+
+  if (routeMap) {
 
     return;
 
   }
 
-
-  employeePanel.classList.add(
-    "show"
-  );
-
-
-  employeeTitle.innerHTML =
-    "👤 " +
-    escapeHtml(
-      employee.full_name
+  routeMap =
+    L.map(
+      "routeMap"
+    ).setView(
+      [
+        40.38,
+        69.25
+      ],
+      13
     );
 
-
-  employeeDetails.innerHTML =
-    `
-      <div class="detail">
-        <div class="detail-label">
-          Ходим
-        </div>
-        <div class="detail-value">
-          ${
-            escapeHtml(
-              employee.full_name
-            )
-          }
-        </div>
-      </div>
-
-
-      <div class="detail">
-        <div class="detail-label">
-          Филиал
-        </div>
-        <div class="detail-value">
-          ${
-            escapeHtml(
-              employee.branch_name ||
-              "-"
-            )
-          }
-        </div>
-      </div>
-
-
-      <div class="detail">
-        <div class="detail-label">
-          Ҳолат
-        </div>
-        <div class="detail-value">
-          ${
-            employee.active_session
-              ? "🟢 Ҳозир ишда"
-              : employee.worked
-                ? "🟡 Ишлаган"
-                : "🔴 Ишламаган"
-          }
-        </div>
-      </div>
-
-
-      <div class="detail">
-        <div class="detail-label">
-          Иш бошланган
-        </div>
-        <div class="detail-value">
-          ${
-            formatGpsTime(
-              employee.first_start
-            )
-          }
-        </div>
-      </div>
-
-
-      <div class="detail">
-        <div class="detail-label">
-          Иш тугаган
-        </div>
-        <div class="detail-value">
-          ${
-            formatGpsTime(
-              employee.last_end
-            )
-          }
-        </div>
-      </div>
-
-
-      <div class="detail">
-        <div class="detail-label">
-          Жами иш вақти
-        </div>
-        <div class="detail-value">
-          ${
-            employee.work_time ||
-            formatDuration(
-              employee.work_seconds
-            )
-          }
-        </div>
-      </div>
-    `;
-
-
-  loadRoute(
-    employeeId
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution:
+        "&copy; OpenStreetMap"
+    }
+  ).addTo(
+    routeMap
   );
-
-
-  employeePanel.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
 
 }
 
 
-/* =========================================
+/* =========================
    LOAD ROUTE
-========================================= */
+========================= */
 
 async function loadRoute(
-  employeeId
+  employeeId,
+  date
 ) {
-
-  const date =
-    dateInput.value ||
-    getToday();
-
 
   try {
 
@@ -1523,155 +1247,207 @@ async function loadRoute(
         date
       );
 
-
     console.log(
-      "Route API:",
+      "ROUTE URL:",
       url
     );
 
-
     const response =
-      await fetch(
-        url,
-        {
-          cache: "no-store"
-        }
-      );
-
-
-    if (
-      !response.ok
-    ) {
-
-      throw new Error(
-        "Route API HTTP " +
-        response.status
-      );
-
-    }
-
+      await fetch(url);
 
     const data =
       await response.json();
 
-
     console.log(
-      "Route data:",
+      "ROUTE DATA:",
       data
     );
 
+    if (
+      !response.ok ||
+      data.success === false
+    ) {
 
-    const points =
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Route маълумотини олишда хато"
+      );
+
+    }
+
+    /*
+      API турли кўринишда
+      массив қайтариши мумкин.
+    */
+
+    let points = [];
+
+    if (
       Array.isArray(
         data.points
       )
-        ? data.points
-        : Array.isArray(
-            data.route
-          )
-          ? data.route
-          : [];
+    ) {
 
+      points =
+        data.points;
 
-    drawRoute(
+    } else if (
+      Array.isArray(
+        data.route
+      )
+    ) {
+
+      points =
+        data.route;
+
+    } else if (
+      Array.isArray(
+        data.locations
+      )
+    ) {
+
+      points =
+        data.locations;
+
+    } else if (
+      Array.isArray(
+        data.data
+      )
+    ) {
+
+      points =
+        data.data;
+
+    } else if (
+      data.data &&
+      Array.isArray(
+        data.data.points
+      )
+    ) {
+
+      points =
+        data.data.points;
+
+    } else if (
+      data.data &&
+      Array.isArray(
+        data.data.locations
+      )
+    ) {
+
+      points =
+        data.data.locations;
+
+    }
+
+    console.log(
+      "ROUTE POINTS:",
       points
     );
 
+    const validPoints =
+      points
+        .map(
+          point => {
+
+            const latitude =
+              Number(
+                point.latitude ??
+                point.lat
+              );
+
+            const longitude =
+              Number(
+                point.longitude ??
+                point.lng ??
+                point.lon
+              );
+
+            if (
+              !Number.isFinite(
+                latitude
+              ) ||
+              !Number.isFinite(
+                longitude
+              )
+            ) {
+
+              return null;
+
+            }
+
+            return {
+
+              latitude,
+
+              longitude,
+
+              recorded_at:
+                point.recorded_at ??
+                point.created_at ??
+                point.timestamp ??
+                null
+
+            };
+
+          }
+        )
+        .filter(
+          Boolean
+        );
+
+    console.log(
+      "VALID ROUTE POINTS:",
+      validPoints
+    );
+
+    drawRoute(
+      validPoints
+    );
 
   } catch (error) {
 
     console.error(
-      "ROUTE ERROR:",
+      "LOAD ROUTE ERROR:",
       error
     );
-
 
     document.getElementById(
       "routePoints"
     ).textContent =
-      "0";
-
+      "Хато";
 
     document.getElementById(
       "routeDistance"
     ).textContent =
-      "0.00 км";
-
+      "Хато";
 
     document.getElementById(
       "routeDuration"
     ).textContent =
-      "00:00:00";
-
-
-    createMap();
-
-
-    alert(
-      "Маршрутни олишда хато: " +
-      error.message
-    );
+      "Хато";
 
   }
 
 }
 
 
-/* =========================================
-   CREATE MAP
-========================================= */
+/* =========================
+   DRAW ROUTE
+========================= */
 
-function createMap() {
-
-  if (!routeMap) {
-
-    routeMap =
-      L.map(
-        "routeMap"
-      );
-
-
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        attribution:
-          "&copy; OpenStreetMap"
-      }
-    ).addTo(
-      routeMap
-    );
-
-
-    routeMap.setView(
-      [40.38, 69.25],
-      12
-    );
-
-  }
-
-
-  setTimeout(
-    () => {
-
-      routeMap.invalidateSize();
-
-    },
-    100
-  );
-
-}
-
-
-/* =========================================
-   CLEAR MAP
-========================================= */
-
-function clearMap() {
+function drawRoute(
+  points
+) {
 
   if (!routeMap) {
+
     return;
+
   }
 
+  // Эски маршрутни тозалаш
 
   if (routeLine) {
 
@@ -1683,266 +1459,84 @@ function clearMap() {
 
   }
 
+  routeMarkers.forEach(
+    marker => {
 
-  if (
-    routeStartMarker
-  ) {
-
-    routeMap.removeLayer(
-      routeStartMarker
-    );
-
-    routeStartMarker =
-      null;
-
-  }
-
-
-  if (
-    routeEndMarker
-  ) {
-
-    routeMap.removeLayer(
-      routeEndMarker
-    );
-
-    routeEndMarker =
-      null;
-
-  }
-
-
-  routePointMarkers
-    .forEach(
-      marker => {
-
-        routeMap.removeLayer(
-          marker
-        );
-
-      }
-    );
-
-
-  routePointMarkers = [];
-
-}
-
-
-/* =========================================
-   DRAW ROUTE
-========================================= */
-
-function drawRoute(
-  points
-) {
-
-  createMap();
-
-  clearMap();
-
-
-  if (
-    !points.length
-  ) {
-
-    document.getElementById(
-      "routePoints"
-    ).textContent =
-      "0";
-
-
-    document.getElementById(
-      "routeDistance"
-    ).textContent =
-      "0.00 км";
-
-
-    document.getElementById(
-      "routeDuration"
-    ).textContent =
-      "00:00:00";
-
-
-    routeMap.setView(
-      [40.38, 69.25],
-      12
-    );
-
-
-    return;
-
-  }
-
-
-  const coordinates =
-    points
-      .map(
-        point => {
-
-          const lat =
-            Number(
-              point.latitude
-            );
-
-          const lng =
-            Number(
-              point.longitude
-            );
-
-
-          return [
-            lat,
-            lng
-          ];
-
-        }
-      )
-      .filter(
-        item =>
-          Number.isFinite(
-            item[0]
-          ) &&
-          Number.isFinite(
-            item[1]
-          )
-      );
-
-
-  if (
-    !coordinates.length
-  ) {
-
-    return;
-
-  }
-
-
-  routeLine =
-    L.polyline(
-      coordinates,
-      {
-        weight: 5
-      }
-    ).addTo(
-      routeMap
-    );
-
-
-  const start =
-    coordinates[0];
-
-
-  const end =
-    coordinates[
-      coordinates.length - 1
-    ];
-
-
-  routeStartMarker =
-    L.circleMarker(
-      start,
-      {
-        radius: 8
-      }
-    )
-    .addTo(
-      routeMap
-    )
-    .bindPopup(
-      "🟢 Бошланиш"
-    );
-
-
-  routeEndMarker =
-    L.circleMarker(
-      end,
-      {
-        radius: 8
-      }
-    )
-    .addTo(
-      routeMap
-    )
-    .bindPopup(
-      "🔴 Охирги нуқта"
-    );
-
-
-  coordinates.forEach(
-    (coordinate, index) => {
-
-      if (
-        index === 0 ||
-        index ===
-          coordinates.length - 1
-      ) {
-        return;
-      }
-
-
-      const marker =
-        L.circleMarker(
-          coordinate,
-          {
-            radius: 3
-          }
-        )
-        .addTo(
-          routeMap
-        );
-
-
-      routePointMarkers.push(
+      routeMap.removeLayer(
         marker
       );
 
     }
   );
 
-
-  const bounds =
-    routeLine.getBounds();
+  routeMarkers = [];
 
 
-  routeMap.fitBounds(
-    bounds,
-    {
-      padding: [
-        30,
-        30
+  // Нуқталар
+
+  const coordinates =
+    points.map(
+      point => [
+        point.latitude,
+        point.longitude
       ]
-    }
-  );
+    );
 
 
-  /* DISTANCE */
+  // Статистика
 
-  let distance =
-    0;
-
+  let distanceKm = 0;
 
   for (
     let i = 1;
-    i < coordinates.length;
+    i < points.length;
     i++
   ) {
 
-    distance +=
-      haversine(
-        coordinates[
-          i - 1
-        ][0],
-        coordinates[
-          i - 1
-        ][1],
-        coordinates[
-          i
-        ][0],
-        coordinates[
-          i
-        ][1]
+    distanceKm +=
+      haversineDistance(
+        points[i - 1].latitude,
+        points[i - 1].longitude,
+        points[i].latitude,
+        points[i].longitude
       );
+
+  }
+
+
+  let durationSeconds =
+    0;
+
+  if (
+    points.length >= 2
+  ) {
+
+    const first =
+      new Date(
+        points[0].recorded_at
+      ).getTime();
+
+    const last =
+      new Date(
+        points[
+          points.length - 1
+        ].recorded_at
+      ).getTime();
+
+    if (
+      Number.isFinite(first) &&
+      Number.isFinite(last) &&
+      last >= first
+    ) {
+
+      durationSeconds =
+        Math.floor(
+          (
+            last - first
+          ) / 1000
+        );
+
+    }
 
   }
 
@@ -1956,215 +1550,252 @@ function drawRoute(
   document.getElementById(
     "routeDistance"
   ).textContent =
-    distance.toFixed(2) +
+    distanceKm.toFixed(2) +
     " км";
 
 
-  /* DURATION */
-
-  const first =
-    points[0];
-
-
-  const last =
-    points[
-      points.length - 1
-    ];
+  document.getElementById(
+    "routeDuration"
+  ).textContent =
+    formatDuration(
+      durationSeconds
+    );
 
 
-  const firstTime =
-    new Date(
-      first.recorded_at ||
-      first.created_at
-    ).getTime();
-
-
-  const lastTime =
-    new Date(
-      last.recorded_at ||
-      last.created_at
-    ).getTime();
-
+  // Нуқта йўқ
 
   if (
-    Number.isFinite(
-      firstTime
-    ) &&
-    Number.isFinite(
-      lastTime
-    ) &&
-    lastTime >= firstTime
+    coordinates.length === 0
   ) {
 
-    const seconds =
-      Math.floor(
-        (
-          lastTime -
-          firstTime
-        ) / 1000
-      );
+    routeMap.setView(
+      [
+        40.38,
+        69.25
+      ],
+      13
+    );
 
-
-    document.getElementById(
-      "routeDuration"
-    ).textContent =
-      formatDuration(
-        seconds
-      );
+    return;
 
   }
+
+
+  // Бир нуқта
+
+  if (
+    coordinates.length === 1
+  ) {
+
+    const marker =
+      L.marker(
+        coordinates[0]
+      ).addTo(
+        routeMap
+      );
+
+    marker.bindPopup(
+      "📍 GPS нуқта"
+    );
+
+    routeMarkers.push(
+      marker
+    );
+
+    routeMap.setView(
+      coordinates[0],
+      16
+    );
+
+    return;
+
+  }
+
+
+  // Линия
+
+  routeLine =
+    L.polyline(
+      coordinates,
+      {
+        weight: 5
+      }
+    ).addTo(
+      routeMap
+    );
+
+
+  // START
+
+  const startMarker =
+    L.circleMarker(
+      coordinates[0],
+      {
+        radius: 8
+      }
+    ).addTo(
+      routeMap
+    );
+
+  startMarker.bindPopup(
+    "🟢 Бошланиш нуқтаси"
+  );
+
+  routeMarkers.push(
+    startMarker
+  );
+
+
+  // END
+
+  const endMarker =
+    L.circleMarker(
+      coordinates[
+        coordinates.length - 1
+      ],
+      {
+        radius: 8
+      }
+    ).addTo(
+      routeMap
+    );
+
+  endMarker.bindPopup(
+    "🔴 Охирги GPS нуқта"
+  );
+
+  routeMarkers.push(
+    endMarker
+  );
+
+
+  // Картага мослаш
+
+  routeMap.fitBounds(
+    routeLine.getBounds(),
+    {
+      padding: [
+        30,
+        30
+      ]
+    }
+  );
 
 }
 
 
-/* =========================================
-   HAVERSINE
-========================================= */
+/* =========================
+   CLOSE DETAIL
+========================= */
 
-function haversine(
-  lat1,
-  lon1,
-  lat2,
-  lon2
-) {
+document
+  .getElementById(
+    "closeDetail"
+  )
+  .addEventListener(
+    "click",
+    () => {
 
-  const R =
-    6371;
+      document.getElementById(
+        "detail"
+      ).style.display =
+        "none";
 
-
-  const dLat =
-    (
-      lat2 -
-      lat1
-    ) *
-    Math.PI /
-    180;
+    }
+  );
 
 
-  const dLon =
-    (
-      lon2 -
-      lon1
-    ) *
-    Math.PI /
-    180;
-
-
-  const a =
-    Math.sin(
-      dLat / 2
-    ) *
-    Math.sin(
-      dLat / 2
-    ) +
-    Math.cos(
-      lat1 *
-      Math.PI /
-      180
-    ) *
-    Math.cos(
-      lat2 *
-      Math.PI /
-      180
-    ) *
-    Math.sin(
-      dLon / 2
-    ) *
-    Math.sin(
-      dLon / 2
-    );
-
-
-  const c =
-    2 *
-    Math.atan2(
-      Math.sqrt(a),
-      Math.sqrt(
-        1 - a
-      )
-    );
-
-
-  return R * c;
-
-}
-
-
-/* =========================================
-   CLOSE PANEL
-========================================= */
-
-closePanelBtn.addEventListener(
-  "click",
-  () => {
-
-    employeePanel.classList.remove(
-      "show"
-    );
-
-  }
-);
-
-
-/* =========================================
+/* =========================
    REFRESH
-========================================= */
+========================= */
 
-refreshBtn.addEventListener(
-  "click",
-  loadDashboard
-);
+document
+  .getElementById(
+    "refreshBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
 
+      loadDashboard();
 
-/* =========================================
-   DATE
-========================================= */
-
-dateInput.addEventListener(
-  "change",
-  loadDashboard
-);
+    }
+  );
 
 
-/* =========================================
-   BRANCH
-========================================= */
+/* =========================
+   DATE CHANGE
+========================= */
 
-branchSelect.addEventListener(
-  "change",
-  () => {
+document
+  .getElementById(
+    "date"
+  )
+  .addEventListener(
+    "change",
+    () => {
 
-    const employees =
-      window.dashboardData?.employees ||
-      [];
+      document.getElementById(
+        "detail"
+      ).style.display =
+        "none";
+
+      loadDashboard();
+
+    }
+  );
 
 
-    renderEmployees(
-      employees
-    );
+/* =========================
+   BRANCH CHANGE
+========================= */
 
-  }
-);
+document
+  .getElementById(
+    "branch"
+  )
+  .addEventListener(
+    "change",
+    () => {
+
+      if (
+        dashboardData
+      ) {
+
+        renderEmployees(
+          dashboardData.employees ||
+          []
+        );
+
+      }
+
+    }
+  );
 
 
-/* =========================================
+/* =========================
    START
-========================================= */
+========================= */
 
-console.log(
-  "DASHBOARD 2.0 JS ISHLADI"
-);
+document.getElementById(
+  "date"
+).value =
+  getTodayTashkent();
 
 
 loadDashboard();
 
 
-/* =========================================
+/* =========================
    AUTO REFRESH
-========================================= */
+========================= */
 
 setInterval(
-  loadDashboard,
+  () => {
+
+    loadDashboard();
+
+  },
   60000
 );
 
