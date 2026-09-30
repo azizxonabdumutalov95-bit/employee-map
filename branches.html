@@ -803,7 +803,14 @@ function editBranch(
 }
 
 
+
 /* =====================================================
+   DELETE BRANCH
+===================================================== */
+
+async function deleteBranch(branch) {
+
+  const confirme/* =====================================================
    SAVE BRANCH
 ===================================================== */
 
@@ -836,25 +843,86 @@ async function saveBranch() {
   }
 
 
-  /*
-    ҲОЗИРЧА ФАҚАТ ҚЎШИШ
-  */
-
-  if (
-    editId
-  ) {
-
-    showMessage(
-      "⚠️ Таҳрирлаш API кейинги босқичда қўшилади.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
   try {
+
+    /* =================================================
+       UPDATE BRANCH
+    ================================================= */
+
+    if (editId) {
+
+      const response =
+        await fetch(
+          API +
+          "?view=branch_update",
+          {
+
+            method:
+              "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(
+                {
+                  id:
+                    Number(editId),
+
+                  name:
+                    name
+                }
+              )
+
+          }
+        );
+
+
+      const data =
+        await response.json();
+
+
+      console.log(
+        "UPDATE BRANCH RESPONSE:",
+        data
+      );
+
+
+      if (
+        !response.ok ||
+        data.success === false
+      ) {
+
+        throw new Error(
+          data.error ||
+          data.message ||
+          "Филиал ўзгартирилмади"
+        );
+
+      }
+
+
+      showMessage(
+        "✅ Филиал номи ўзгартирилди",
+        "success"
+      );
+
+
+      closeForm();
+
+
+      await loadBranches();
+
+      return;
+
+    }
+
+
+    /* =================================================
+       ADD BRANCH
+    ================================================= */
 
     const response =
       await fetch(
@@ -921,7 +989,7 @@ async function saveBranch() {
   } catch (error) {
 
     console.error(
-      "ADD BRANCH ERROR:",
+      "SAVE BRANCH ERROR:",
       error
     );
 
@@ -934,16 +1002,7 @@ async function saveBranch() {
 
   }
 
-}
-
-
-/* =====================================================
-   DELETE BRANCH
-===================================================== */
-
-async function deleteBranch(branch) {
-
-  const confirmed = confirm(
+}d = confirm(
     "⚠️ " +
     branch.name +
     "\n\n" +
