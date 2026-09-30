@@ -20,13 +20,9 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-    }
-
-    h1 {
-      margin-top: 0;
     }
 
     .top {
@@ -38,12 +34,16 @@
       flex-wrap: wrap;
     }
 
+    h1 {
+      margin: 0;
+    }
+
     button {
       border: 0;
       border-radius: 8px;
-      padding: 11px 16px;
+      padding: 10px 14px;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .add-btn {
@@ -115,6 +115,18 @@
       color: #842029;
     }
 
+    .search-box {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .search-box input {
+      max-width: 500px;
+    }
+
     .table-box {
       background: white;
       border-radius: 12px;
@@ -125,7 +137,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px;
+      min-width: 950px;
     }
 
     th,
@@ -143,6 +155,31 @@
       text-align: center;
       padding: 30px;
     }
+
+    .edit-btn {
+      background: #ffc107;
+      color: #222;
+      margin-right: 5px;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    .edit-title {
+      margin-top: 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
   </style>
 </head>
 
@@ -151,14 +188,16 @@
 <div class="container">
 
   <div class="top">
+
     <h1>👥 Ходимлар бошқаруви</h1>
 
     <button
       class="add-btn"
-      onclick="openForm()"
+      onclick="openAddForm()"
     >
       ➕ Ходим қўшиш
     </button>
+
   </div>
 
 
@@ -168,54 +207,84 @@
   ></div>
 
 
-  <!-- ADD EMPLOYEE -->
+  <!-- FORM -->
 
   <div
     id="formBox"
     class="form-box"
   >
 
-    <h2>Янги ходим қўшиш</h2>
+    <h2
+      id="formTitle"
+      class="edit-title"
+    >
+      Янги ходим қўшиш
+    </h2>
+
+
+    <input
+      id="editId"
+      type="hidden"
+    >
+
 
     <div class="form-grid">
 
       <div>
-        <label>Ф.И.О.</label>
+
+        <label>
+          Ф.И.О.
+        </label>
 
         <input
           id="fullName"
           type="text"
           placeholder="Масалан: Алиев Али"
         >
+
       </div>
 
 
       <div>
-        <label>Telegram ID</label>
+
+        <label>
+          Telegram ID
+        </label>
 
         <input
           id="telegramId"
           type="number"
           placeholder="Масалан: 123456789"
         >
+
       </div>
 
 
       <div>
-        <label>Филиал</label>
+
+        <label>
+          Филиал
+        </label>
 
         <select id="branchId">
+
           <option value="">
             Филиални танланг
           </option>
+
         </select>
+
       </div>
 
 
       <div>
-        <label>Роль</label>
+
+        <label>
+          Роль
+        </label>
 
         <select id="role">
+
           <option value="employee">
             Employee
           </option>
@@ -223,7 +292,9 @@
           <option value="admin">
             Admin
           </option>
+
         </select>
+
       </div>
 
     </div>
@@ -231,7 +302,7 @@
 
     <button
       class="save-btn"
-      onclick="addEmployee()"
+      onclick="saveEmployee()"
     >
       💾 Сақлаш
     </button>
@@ -247,7 +318,25 @@
   </div>
 
 
-  <!-- EMPLOYEE TABLE -->
+  <!-- SEARCH -->
+
+  <div class="search-box">
+
+    <label>
+      🔎 Ходим қидириш
+    </label>
+
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Исм ёки Telegram ID бўйича қидиринг..."
+      oninput="filterEmployees()"
+    >
+
+  </div>
+
+
+  <!-- TABLE -->
 
   <div class="table-box">
 
@@ -256,24 +345,35 @@
       <thead>
 
         <tr>
+
           <th>ID</th>
+
           <th>Ходим</th>
+
           <th>Telegram ID</th>
+
           <th>Филиал</th>
+
           <th>Роль</th>
+
+          <th>Амаллар</th>
+
         </tr>
 
       </thead>
 
+
       <tbody id="employeeTable">
 
         <tr>
+
           <td
-            colspan="5"
+            colspan="6"
             class="loading"
           >
             Маълумотлар юкланмоқда...
           </td>
+
         </tr>
 
       </tbody>
@@ -290,6 +390,13 @@
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
+
+let employeesList = [];
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
 
 function showMessage(
   text,
@@ -314,7 +421,59 @@ function showMessage(
 }
 
 
-function openForm() {
+/* =====================================================
+   OPEN ADD FORM
+===================================================== */
+
+function openAddForm() {
+
+  document
+    .getElementById(
+      "formTitle"
+    )
+    .textContent =
+    "Янги ходим қўшиш";
+
+
+  document
+    .getElementById(
+      "editId"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "fullName"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "telegramId"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "branchId"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "role"
+    )
+    .value =
+    "employee";
+
 
   document
     .getElementById(
@@ -325,6 +484,10 @@ function openForm() {
 
 }
 
+
+/* =====================================================
+   CLOSE FORM
+===================================================== */
 
 function closeForm() {
 
@@ -337,6 +500,10 @@ function closeForm() {
 
 }
 
+
+/* =====================================================
+   LOAD BRANCHES
+===================================================== */
 
 async function loadBranches() {
 
@@ -351,10 +518,6 @@ async function loadBranches() {
     const data =
       await response.json();
 
-    console.log(
-      "BRANCHES:",
-      data
-    );
 
     const branches =
       Array.isArray(data)
@@ -367,13 +530,16 @@ async function loadBranches() {
             : []
         );
 
+
     const select =
       document.getElementById(
         "branchId"
       );
 
+
     select.innerHTML =
       '<option value="">Филиални танланг</option>';
+
 
     branches.forEach(
       function(branch) {
@@ -408,12 +574,17 @@ async function loadBranches() {
 }
 
 
+/* =====================================================
+   LOAD EMPLOYEES
+===================================================== */
+
 async function loadEmployees() {
 
   const table =
     document.getElementById(
       "employeeTable"
     );
+
 
   try {
 
@@ -423,15 +594,18 @@ async function loadEmployees() {
         "?view=employees"
       );
 
+
     const data =
       await response.json();
+
 
     console.log(
       "EMPLOYEES:",
       data
     );
 
-    const employees =
+
+    employeesList =
       Array.isArray(data)
         ? data
         : (
@@ -442,57 +616,11 @@ async function loadEmployees() {
             : []
         );
 
-    table.innerHTML =
-      "";
 
-    if (
-      employees.length === 0
-    ) {
-
-      table.innerHTML =
-        `
-        <tr>
-          <td
-            colspan="5"
-            class="loading"
-          >
-            Ходимлар топилмади
-          </td>
-        </tr>
-        `;
-
-      return;
-
-    }
-
-
-    employees.forEach(
-      function(employee) {
-
-        const row =
-          document.createElement(
-            "tr"
-          );
-
-        row.innerHTML =
-          `
-          <td>${employee.id ?? ""}</td>
-
-          <td>${employee.full_name ?? ""}</td>
-
-          <td>${employee.telegram_id ?? ""}</td>
-
-          <td>${employee.branch_name ?? employee.branch_id ?? ""}</td>
-
-          <td>${employee.role ?? "employee"}</td>
-          `;
-
-        table.appendChild(
-          row
-        );
-
-      }
+    renderEmployees(
+      employeesList
     );
+
 
   } catch (error) {
 
@@ -501,11 +629,12 @@ async function loadEmployees() {
       error
     );
 
+
     table.innerHTML =
       `
       <tr>
         <td
-          colspan="5"
+          colspan="6"
           class="loading"
         >
           Ходимларни олишда хато
@@ -518,7 +647,351 @@ async function loadEmployees() {
 }
 
 
-async function addEmployee() {
+/* =====================================================
+   RENDER EMPLOYEES
+===================================================== */
+
+function renderEmployees(
+  employees
+) {
+
+  const table =
+    document.getElementById(
+      "employeeTable"
+    );
+
+
+  table.innerHTML =
+    "";
+
+
+  if (
+    employees.length === 0
+  ) {
+
+    table.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="6"
+          class="loading"
+        >
+          Ходимлар топилмади
+        </td>
+      </tr>
+      `;
+
+    return;
+
+  }
+
+
+  employees.forEach(
+    function(employee) {
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      const idCell =
+        document.createElement(
+          "td"
+        );
+
+      idCell.textContent =
+        employee.id ?? "";
+
+      row.appendChild(
+        idCell
+      );
+
+
+      const nameCell =
+        document.createElement(
+          "td"
+        );
+
+      nameCell.textContent =
+        employee.full_name ?? "";
+
+      row.appendChild(
+        nameCell
+      );
+
+
+      const telegramCell =
+        document.createElement(
+          "td"
+        );
+
+      telegramCell.textContent =
+        employee.telegram_id ?? "";
+
+      row.appendChild(
+        telegramCell
+      );
+
+
+      const branchCell =
+        document.createElement(
+          "td"
+        );
+
+      branchCell.textContent =
+        employee.branch_name ||
+        employee.branch_id ||
+        "";
+
+      row.appendChild(
+        branchCell
+      );
+
+
+      const roleCell =
+        document.createElement(
+          "td"
+        );
+
+      roleCell.textContent =
+        employee.role ||
+        "employee";
+
+      row.appendChild(
+        roleCell
+      );
+
+
+      const actionCell =
+        document.createElement(
+          "td"
+        );
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.className =
+        "edit-btn";
+
+      editButton.textContent =
+        "✏️ Таҳрир";
+
+      editButton.onclick =
+        function() {
+
+          editEmployee(
+            employee
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        editButton
+      );
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.className =
+        "delete-btn";
+
+      deleteButton.textContent =
+        "🗑 Ўчириш";
+
+      deleteButton.onclick =
+        function() {
+
+          deleteEmployee(
+            employee
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        deleteButton
+      );
+
+
+      row.appendChild(
+        actionCell
+      );
+
+
+      table.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function filterEmployees() {
+
+  const search =
+    document
+      .getElementById(
+        "searchInput"
+      )
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  if (!search) {
+
+    renderEmployees(
+      employeesList
+    );
+
+    return;
+
+  }
+
+
+  const filtered =
+    employeesList.filter(
+      function(employee) {
+
+        const name =
+          String(
+            employee.full_name || ""
+          )
+          .toLowerCase();
+
+
+        const telegram =
+          String(
+            employee.telegram_id || ""
+          )
+          .toLowerCase();
+
+
+        const branch =
+          String(
+            employee.branch_name || ""
+          )
+          .toLowerCase();
+
+
+        return (
+          name.includes(search) ||
+          telegram.includes(search) ||
+          branch.includes(search)
+        );
+
+      }
+    );
+
+
+  renderEmployees(
+    filtered
+  );
+
+}
+
+
+/* =====================================================
+   EDIT EMPLOYEE
+===================================================== */
+
+function editEmployee(
+  employee
+) {
+
+  document
+    .getElementById(
+      "formTitle"
+    )
+    .textContent =
+    "✏️ Ходимни таҳрирлаш";
+
+
+  document
+    .getElementById(
+      "editId"
+    )
+    .value =
+    employee.id;
+
+
+  document
+    .getElementById(
+      "fullName"
+    )
+    .value =
+    employee.full_name || "";
+
+
+  document
+    .getElementById(
+      "telegramId"
+    )
+    .value =
+    employee.telegram_id || "";
+
+
+  document
+    .getElementById(
+      "branchId"
+    )
+    .value =
+    employee.branch_id || "";
+
+
+  document
+    .getElementById(
+      "role"
+    )
+    .value =
+    employee.role || "employee";
+
+
+  document
+    .getElementById(
+      "formBox"
+    )
+    .classList
+    .add("show");
+
+
+  window.scrollTo(
+    {
+      top: 0,
+      behavior: "smooth"
+    }
+  );
+
+}
+
+
+/* =====================================================
+   SAVE EMPLOYEE
+===================================================== */
+
+async function saveEmployee() {
+
+  const editId =
+    document
+      .getElementById(
+        "editId"
+      )
+      .value;
+
 
   const fullName =
     document
@@ -528,6 +1001,7 @@ async function addEmployee() {
       .value
       .trim();
 
+
   const telegramId =
     document
       .getElementById(
@@ -536,12 +1010,14 @@ async function addEmployee() {
       .value
       .trim();
 
+
   const branchId =
     document
       .getElementById(
         "branchId"
       )
       .value;
+
 
   const role =
     document
@@ -577,43 +1053,95 @@ async function addEmployee() {
 
   try {
 
-    const response =
-      await fetch(
-        API +
-        "?view=employee_add",
-        {
-          method:
-            "POST",
+    let response;
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
 
-          body:
-            JSON.stringify(
-              {
-                full_name:
-                  fullName,
+    if (editId) {
 
-                telegram_id:
-                  Number(
-                    telegramId
-                  ),
+      response =
+        await fetch(
+          API +
+          "?view=employee_update",
+          {
+            method:
+              "PATCH",
 
-                branch_id:
-                  branchId
-                    ? Number(
-                        branchId
-                      )
-                    : null,
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
 
-                role:
-                  role
-              }
-            )
-        }
-      );
+            body:
+              JSON.stringify(
+                {
+                  id:
+                    Number(
+                      editId
+                    ),
+
+                  full_name:
+                    fullName,
+
+                  telegram_id:
+                    Number(
+                      telegramId
+                    ),
+
+                  branch_id:
+                    branchId
+                      ? Number(
+                          branchId
+                        )
+                      : null,
+
+                  role:
+                    role
+                }
+              )
+          }
+        );
+
+    } else {
+
+      response =
+        await fetch(
+          API +
+          "?view=employee_add",
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(
+                {
+                  full_name:
+                    fullName,
+
+                  telegram_id:
+                    Number(
+                      telegramId
+                    ),
+
+                  branch_id:
+                    branchId
+                      ? Number(
+                          branchId
+                        )
+                      : null,
+
+                  role:
+                    role
+                }
+              )
+          }
+        );
+
+    }
 
 
     const data =
@@ -621,7 +1149,7 @@ async function addEmployee() {
 
 
     console.log(
-      "ADD EMPLOYEE:",
+      "SAVE EMPLOYEE:",
       data
     );
 
@@ -633,45 +1161,18 @@ async function addEmployee() {
 
       throw new Error(
         data.error ||
-        "Ходим қўшилмади"
+        "Маълумот сақланмади"
       );
 
     }
 
 
     showMessage(
-      "✅ Ходим муваффақиятли қўшилди",
+      editId
+        ? "✅ Ходим маълумотлари янгиланди"
+        : "✅ Ходим муваффақиятли қўшилди",
       "success"
     );
-
-
-    document
-      .getElementById(
-        "fullName"
-      )
-      .value =
-      "";
-
-    document
-      .getElementById(
-        "telegramId"
-      )
-      .value =
-      "";
-
-    document
-      .getElementById(
-        "branchId"
-      )
-      .value =
-      "";
-
-    document
-      .getElementById(
-        "role"
-      )
-      .value =
-      "employee";
 
 
     closeForm();
@@ -681,9 +1182,10 @@ async function addEmployee() {
   } catch (error) {
 
     console.error(
-      "ADD ERROR:",
+      "SAVE ERROR:",
       error
     );
+
 
     showMessage(
       "❌ " +
@@ -695,6 +1197,113 @@ async function addEmployee() {
 
 }
 
+
+/* =====================================================
+   DELETE EMPLOYEE
+===================================================== */
+
+async function deleteEmployee(
+  employee
+) {
+
+  if (
+    Number(employee.id) === 1
+  ) {
+
+    showMessage(
+      "❌ Асосий администраторни ўчириш мумкин эмас",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "⚠️ " +
+      employee.full_name +
+      "\n\nУшбу ходимни ўчиришни тасдиқлайсизми?"
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=employee_delete&id=" +
+        encodeURIComponent(
+          employee.id
+        ),
+        {
+          method:
+            "DELETE"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "DELETE EMPLOYEE:",
+      data
+    );
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Ходим ўчирилмади"
+      );
+
+    }
+
+
+    showMessage(
+      "✅ Ходим ўчирилди",
+      "success"
+    );
+
+
+    loadEmployees();
+
+  } catch (error) {
+
+    console.error(
+      "DELETE ERROR:",
+      error
+    );
+
+
+    showMessage(
+      "❌ " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
 
 loadBranches();
 
