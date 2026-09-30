@@ -2,482 +2,302 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Ходимлар Dashboard</title>
+  <title>Ходимлар Dashboard</title>
 
-<style>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-*{
-  box-sizing:border-box;
-}
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  color:#17202a;
-}
+    .container {
+      max-width: 1400px;
+      margin: auto;
+    }
 
-.container{
-  max-width:1250px;
-  margin:auto;
-  padding:20px;
-}
+    h1 {
+      margin-bottom: 20px;
+    }
 
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-bottom:20px;
-}
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
 
-h1{
-  margin:0;
-  font-size:26px;
-}
+    select,
+    input,
+    button {
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
 
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
+    button {
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
 
-input,
-select,
-button{
-  padding:11px 13px;
-  border:1px solid #d5dbe0;
-  border-radius:9px;
-  background:white;
-  font-size:14px;
-}
+    button:hover {
+      opacity: 0.9;
+    }
 
-button{
-  background:#1769e0;
-  color:white;
-  border-color:#1769e0;
-  cursor:pointer;
-}
+    .status {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
 
-button:hover{
-  opacity:.9;
-}
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
 
-.status{
-  background:white;
-  border:1px solid #e0e5e9;
-  border-radius:10px;
-  padding:12px 15px;
-  margin-bottom:16px;
-}
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
 
-.status.error{
-  background:#fff0f0;
-  color:#b42318;
-  border-color:#f0b4b4;
-}
+    .card-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-bottom:14px;
-}
+    .card-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
 
-.card{
-  background:white;
-  border-radius:14px;
-  padding:18px;
-  box-shadow:0 2px 10px rgba(0,0,0,.05);
-}
+    .table-box {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      overflow-x: auto;
+    }
 
-.label{
-  color:#66727d;
-  font-size:13px;
-  margin-bottom:8px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 950px;
+    }
 
-.value{
-  font-size:26px;
-  font-weight:bold;
-}
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      white-space: nowrap;
+    }
 
-.section{
-  background:white;
-  border-radius:14px;
-  padding:18px;
-  box-shadow:0 2px 10px rgba(0,0,0,.05);
-  margin-top:20px;
-}
+    th {
+      background: #f8fafc;
+    }
 
-.section h2{
-  margin:0 0 15px;
-  font-size:19px;
-}
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
 
-.table-wrap{
-  overflow:auto;
-}
+    .green {
+      background: #dcfce7;
+      color: #166534;
+    }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:950px;
-}
+    .red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
 
-th,
-td{
-  padding:12px 10px;
-  border-bottom:1px solid #edf0f2;
-  text-align:left;
-  font-size:14px;
-  vertical-align:middle;
-}
+    .yellow {
+      background: #fef3c7;
+      color: #92400e;
+    }
 
-th{
-  background:#fafbfc;
-  color:#66727d;
-}
+    .gray {
+      background: #e5e7eb;
+      color: #374151;
+    }
 
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:bold;
-  white-space:nowrap;
-}
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
 
-.green{
-  background:#e8f7ee;
-  color:#15803d;
-}
+    .success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
 
-.red{
-  background:#fdecec;
-  color:#c62828;
-}
+    .loading {
+      color: #92400e;
+    }
 
-.yellow{
-  background:#fff7df;
-  color:#9a6700;
-}
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
 
-.blue{
-  background:#e8f0ff;
-  color:#2459b8;
-}
-
-.muted{
-  color:#7b8791;
-  font-size:12px;
-  margin-top:3px;
-}
-
-a{
-  color:#1769e0;
-  text-decoration:none;
-}
-
-a:hover{
-  text-decoration:underline;
-}
-
-.empty{
-  text-align:center;
-  padding:30px !important;
-  color:#7b8791;
-}
-
-@media(max-width:850px){
-
-  .cards{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:520px){
-
-  .container{
-    padding:12px;
-  }
-
-  .cards{
-    grid-template-columns:1fr;
-  }
-
-  h1{
-    font-size:21px;
-  }
-
-}
-
-</style>
+      .card-value {
+        font-size: 22px;
+      }
+    }
+  </style>
 </head>
-
 
 <body>
 
 <div class="container">
 
-  <div class="header">
+  <h1>📊 Ходимлар Dashboard</h1>
 
-    <h1>
-      📊 Ходимлар Dashboard
-    </h1>
+  <div class="toolbar">
 
-    <div class="controls">
+    <input
+      type="date"
+      id="dateInput"
+    >
 
-      <input
-        id="date"
-        type="date"
-      >
+    <select id="branchSelect">
+      <option value="">Барча филиаллар</option>
+    </select>
 
-      <select id="branch">
-
-        <option value="">
-          Барча филиаллар
-        </option>
-
-      </select>
-
-      <button
-        id="refresh"
-        type="button"
-      >
-        🔄 Янгилаш
-      </button>
-
-    </div>
+    <button id="refreshBtn">
+      🔄 Янгилаш
+    </button>
 
   </div>
 
-
   <div
     id="status"
-    class="status"
+    class="status loading"
   >
     ⏳ Маълумотлар юкланмоқда...
   </div>
 
-
-  <!-- 1-QATOR -->
-
   <div class="cards">
 
     <div class="card">
-
-      <div class="label">
-        👥 Жами ходимлар
-      </div>
-
+      <div class="card-title">👥 Жами ходимлар</div>
       <div
-        id="total"
-        class="value"
-      >
-        0
-      </div>
-
+        class="card-value"
+        id="totalEmployees"
+      >0</div>
     </div>
 
-
     <div class="card">
-
-      <div class="label">
-        🟢 Ишлаганлар
-      </div>
-
+      <div class="card-title">🟢 Ишлаганлар</div>
       <div
-        id="worked"
-        class="value"
-      >
-        0
-      </div>
-
+        class="card-value"
+        id="workedEmployees"
+      >0</div>
     </div>
 
-
     <div class="card">
-
-      <div class="label">
-        🔴 Ишламаганлар
-      </div>
-
+      <div class="card-title">🔴 Ишламаганлар</div>
       <div
-        id="notWorked"
-        class="value"
-      >
-        0
-      </div>
-
+        class="card-value"
+        id="notWorkedEmployees"
+      >0</div>
     </div>
 
+    <div class="card">
+      <div class="card-title">🟢 Ҳозир ишда</div>
+      <div
+        class="card-value"
+        id="activeEmployees"
+      >0</div>
+    </div>
 
     <div class="card">
-
-      <div class="label">
-        🟢 Ҳозир ишда
-      </div>
-
+      <div class="card-title">📍 Актив GPS</div>
       <div
-        id="active"
-        class="value"
-      >
-        0
-      </div>
+        class="card-value"
+        id="activeGps"
+      >0</div>
+    </div>
 
+    <div class="card">
+      <div class="card-title">⏱ Жами иш вақти</div>
+      <div
+        class="card-value"
+        id="totalWorkTime"
+      >00:00:00</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚗 Масофа</div>
+      <div
+        class="card-value"
+        id="totalDistance"
+      >0.00 км</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 GPS нуқталари</div>
+      <div
+        class="card-value"
+        id="totalGpsPoints"
+      >0</div>
     </div>
 
   </div>
 
+  <div class="table-box">
 
-  <!-- 2-QATOR -->
+    <h2>👤 Ходимлар</h2>
 
-  <div class="cards">
+    <table>
 
-    <div class="card">
+      <thead>
+        <tr>
+          <th>Ҳолат</th>
+          <th>Ходим</th>
+          <th>Филиал</th>
+          <th>Иш вақти</th>
+          <th>Сессия</th>
+          <th>GPS</th>
+          <th>Масофа</th>
+          <th>Охирги GPS</th>
+        </tr>
+      </thead>
 
-      <div class="label">
-        📍 Актив GPS
-      </div>
+      <tbody id="employeeTable">
 
-      <div
-        id="gps"
-        class="value"
-      >
-        0
-      </div>
+        <tr>
+          <td colspan="8">
+            ⏳ Маълумотлар юкланмоқда...
+          </td>
+        </tr>
 
-    </div>
+      </tbody>
 
-
-    <div class="card">
-
-      <div class="label">
-        ⏱ Жами иш вақти
-      </div>
-
-      <div
-        id="workTime"
-        class="value"
-      >
-        00:00:00
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <div class="label">
-        🚗 Масофа
-      </div>
-
-      <div
-        id="distance"
-        class="value"
-      >
-        0.00 км
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <div class="label">
-        📍 GPS нуқталари
-      </div>
-
-      <div
-        id="points"
-        class="value"
-      >
-        0
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- EMPLOYEES -->
-
-  <div class="section">
-
-    <h2>
-      👤 Ходимлар
-    </h2>
-
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>
-              Ҳолат
-            </th>
-
-            <th>
-              Ходим
-            </th>
-
-            <th>
-              Филиал
-            </th>
-
-            <th>
-              Иш вақти
-            </th>
-
-            <th>
-              Сессия
-            </th>
-
-            <th>
-              GPS
-            </th>
-
-            <th>
-              Масофа
-            </th>
-
-            <th>
-              Охирги GPS
-            </th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody id="employees">
-
-          <tr>
-
-            <td
-              colspan="8"
-              class="empty"
-            >
-              ⏳ Маълумотлар юкланмоқда...
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
+    </table>
 
   </div>
 
@@ -486,154 +306,170 @@ a:hover{
 
 <script>
 
+"use strict";
 
-/* =========================
-   SUPABASE API
-========================= */
+/* =========================================
+   API
+========================================= */
 
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
 
-/* =========================
-   GLOBAL DATA
-========================= */
+/* =========================================
+   ELEMENTS
+========================================= */
 
-let allEmployees = [];
+const dateInput =
+  document.getElementById("dateInput");
 
-let currentData = null;
+const branchSelect =
+  document.getElementById("branchSelect");
+
+const refreshBtn =
+  document.getElementById("refreshBtn");
+
+const statusBox =
+  document.getElementById("status");
+
+const employeeTable =
+  document.getElementById("employeeTable");
 
 
-/* =========================
-   HTML SAFE
-========================= */
+/* =========================================
+   DATE
+========================================= */
 
-function escapeHtml(value){
+function getToday() {
 
-  return String(
-    value ?? ""
-  ).replace(
-    /[&<>"']/g,
-    function(character){
+  const now = new Date();
 
-      const entities = {
+  const year =
+    now.getFullYear();
 
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
+  const month =
+    String(now.getMonth() + 1)
+      .padStart(2, "0");
 
-      };
+  const day =
+    String(now.getDate())
+      .padStart(2, "0");
 
-      return entities[
-        character
-      ];
-
-    }
-  );
-
+  return `${year}-${month}-${day}`;
 }
 
 
-/* =========================
+/* =========================================
+   INITIAL DATE
+========================================= */
+
+dateInput.value = getToday();
+
+
+/* =========================================
    STATUS
-========================= */
+========================================= */
 
 function setStatus(
   message,
-  error = false
-){
+  type = "loading"
+) {
 
-  const element =
-    document.getElementById(
-      "status"
-    );
-
-
-  element.textContent =
+  statusBox.textContent =
     message;
 
-
-  if(error){
-
-    element.className =
-      "status error";
-
-  }else{
-
-    element.className =
-      "status";
-
-  }
-
+  statusBox.className =
+    "status " + type;
 }
 
 
-/* =========================
-   DURATION
-========================= */
+/* =========================================
+   FORMAT TIME
+========================================= */
 
-function formatDuration(
-  seconds
-){
+function formatDuration(seconds) {
 
   seconds =
-    Math.max(
-      0,
-      Math.floor(
-        Number(seconds) || 0
-      )
-    );
+    Number(seconds) || 0;
 
+  seconds =
+    Math.max(0, Math.floor(seconds));
 
   const hours =
-    Math.floor(
-      seconds / 3600
-    );
-
+    Math.floor(seconds / 3600);
 
   const minutes =
     Math.floor(
       (seconds % 3600) / 60
     );
 
-
   const secs =
     seconds % 60;
 
-
   return (
-
-    String(hours)
-      .padStart(2,"0")
-
-    + ":"
-
-    + String(minutes)
-      .padStart(2,"0")
-
-    + ":"
-
-    + String(secs)
-      .padStart(2,"0")
-
+    String(hours).padStart(2, "0") +
+    ":" +
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(secs).padStart(2, "0")
   );
-
 }
 
 
-/* =========================
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(value) {
+
+  return String(
+    value ?? ""
+  )
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
+}
+
+
+/* =========================================
+   GPS TIME
+========================================= */
+
+function formatGpsTime(value) {
+
+  if (!value) {
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "-";
+  }
+
+  return date.toLocaleString(
+    "uz-UZ",
+    {
+      timeZone: "Asia/Tashkent"
+    }
+  );
+}
+
+
+/* =========================================
    STATUS BADGE
-========================= */
+========================================= */
 
-function getStatusBadge(
-  employee
-){
+function getStatusBadge(employee) {
 
-  if(
-    employee.active_session === true
-  ){
+  if (employee.active_session) {
 
     return `
       <span class="badge green">
@@ -643,23 +479,7 @@ function getStatusBadge(
 
   }
 
-
-  if(
-    employee.gps_active === true
-  ){
-
-    return `
-      <span class="badge blue">
-        📍 GPS актив
-      </span>
-    `;
-
-  }
-
-
-  if(
-    employee.worked === true
-  ){
+  if (employee.worked) {
 
     return `
       <span class="badge yellow">
@@ -669,779 +489,495 @@ function getStatusBadge(
 
   }
 
-
-  if(
-    Number(
-      employee.gps_points
-    ) > 0
-  ){
-
-    return `
-      <span class="badge blue">
-        📍 GPS бор
-      </span>
-    `;
-
-  }
-
-
   return `
     <span class="badge red">
       🔴 Ишламаган
     </span>
   `;
-
 }
 
 
-/* =========================
-   GPS INFO
-========================= */
-
-function getGpsInfo(
-  employee
-){
-
-  if(
-    !employee.last_location
-  ){
-
-    return `
-      <span class="muted">
-        GPS маълумоти йўқ
-      </span>
-    `;
-
-  }
-
-
-  const latitude =
-    Number(
-      employee.last_location.latitude
-    );
-
-
-  const longitude =
-    Number(
-      employee.last_location.longitude
-    );
-
-
-  if(
-    !Number.isFinite(latitude)
-    ||
-    !Number.isFinite(longitude)
-  ){
-
-    return `
-      <span class="muted">
-        Координата хато
-      </span>
-    `;
-
-  }
-
-
-  const mapUrl =
-    "https://www.google.com/maps?q="
-    + latitude
-    + ","
-    + longitude;
-
-
-  let time = "";
-
-
-  if(
-    employee.last_location.recorded_at
-  ){
-
-    time =
-      new Date(
-        employee.last_location.recorded_at
-      ).toLocaleString(
-        "uz-UZ"
-      );
-
-  }
-
-
-  return `
-
-    <a
-      href="${mapUrl}"
-      target="_blank"
-      rel="noopener"
-    >
-      📍
-      ${latitude.toFixed(5)},
-      ${longitude.toFixed(5)}
-    </a>
-
-    <div class="muted">
-      ${escapeHtml(time)}
-    </div>
-
-  `;
-
-}
-
-
-/* =========================
-   BRANCH FILTER
-========================= */
-
-function renderBranches(){
-
-  const select =
-    document.getElementById(
-      "branch"
-    );
-
-
-  const selected =
-    select.value;
-
-
-  const branchNames =
-    [
-      ...new Set(
-
-        allEmployees
-          .map(
-            employee =>
-              employee.branch_name
-          )
-          .filter(
-            Boolean
-          )
-
-      )
-    ].sort();
-
-
-  select.innerHTML =
-    `
-      <option value="">
-        Барча филиаллар
-      </option>
-    `;
-
-
-  branchNames.forEach(
-    branchName => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        branchName;
-
-
-      option.textContent =
-        branchName;
-
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-
-  if(
-    branchNames.includes(
-      selected
-    )
-  ){
-
-    select.value =
-      selected;
-
-  }
-
-}
-
-
-/* =========================
-   RENDER DASHBOARD
-========================= */
-
-function renderDashboard(){
-
-  if(
-    !currentData
-  ){
-
-    return;
-
-  }
-
-
-  const selectedBranch =
-    document.getElementById(
-      "branch"
-    ).value;
-
-
-  const employees =
-    allEmployees.filter(
-      employee => {
-
-        if(
-          !selectedBranch
-        ){
-
-          return true;
-
-        }
-
-
-        return (
-          employee.branch_name
-          ===
-          selectedBranch
-        );
-
-      }
-    );
-
-
-  let workedCount = 0;
-
-  let notWorkedCount = 0;
-
-  let activeCount = 0;
-
-  let activeGpsCount = 0;
-
-  let totalSeconds = 0;
-
-  let totalDistance = 0;
-
-  let totalGpsPoints = 0;
-
-
-  employees.forEach(
-    employee => {
-
-
-      if(
-        employee.worked
-      ){
-
-        workedCount++;
-
-      }else{
-
-        notWorkedCount++;
-
-      }
-
-
-      if(
-        employee.active_session
-      ){
-
-        activeCount++;
-
-      }
-
-
-      if(
-        employee.gps_active
-      ){
-
-        activeGpsCount++;
-
-      }
-
-
-      totalSeconds +=
-        Number(
-          employee.work_seconds
-        ) || 0;
-
-
-      totalDistance +=
-        Number(
-          employee.distance_km
-        ) || 0;
-
-
-      totalGpsPoints +=
-        Number(
-          employee.gps_points
-        ) || 0;
-
-    }
-  );
-
-
-  /* STATISTICS */
-
-
-  document.getElementById(
-    "total"
-  ).textContent =
-    employees.length;
-
-
-  document.getElementById(
-    "worked"
-  ).textContent =
-    workedCount;
-
-
-  document.getElementById(
-    "notWorked"
-  ).textContent =
-    notWorkedCount;
-
-
-  document.getElementById(
-    "active"
-  ).textContent =
-    activeCount;
-
-
-  document.getElementById(
-    "gps"
-  ).textContent =
-    activeGpsCount;
-
-
-  document.getElementById(
-    "workTime"
-  ).textContent =
-    formatDuration(
-      totalSeconds
-    );
-
-
-  document.getElementById(
-    "distance"
-  ).textContent =
-    totalDistance.toFixed(2)
-    + " км";
-
-
-  document.getElementById(
-    "points"
-  ).textContent =
-    totalGpsPoints;
-
-
-  /* TABLE */
-
-
-  const tbody =
-    document.getElementById(
-      "employees"
-    );
-
-
-  tbody.innerHTML =
-    "";
-
-
-  if(
-    employees.length === 0
-  ){
-
-    tbody.innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="8"
-          class="empty"
-        >
-          Маълумот топилмади
-        </td>
-
-      </tr>
-
-    `;
-
-    return;
-
-  }
-
-
-  employees.forEach(
-    employee => {
-
-
-      const row =
-        document.createElement(
-          "tr"
-        );
-
-
-      row.innerHTML = `
-
-        <td>
-
-          ${getStatusBadge(
-            employee
-          )}
-
-        </td>
-
-
-        <td>
-
-          <b>
-            ${escapeHtml(
-              employee.full_name
-            )}
-          </b>
-
-          <div class="muted">
-
-            ID:
-            ${employee.employee_id}
-
-          </div>
-
-        </td>
-
-
-        <td>
-
-          ${escapeHtml(
-            employee.branch_name
-            || "—"
-          )}
-
-        </td>
-
-
-        <td>
-
-          ${escapeHtml(
-            employee.work_time
-            || "00:00:00"
-          )}
-
-        </td>
-
-
-        <td>
-
-          ${
-            Number(
-              employee.work_sessions
-            ) || 0
-          }
-
-        </td>
-
-
-        <td>
-
-          ${
-            Number(
-              employee.gps_points
-            ) || 0
-          }
-
-        </td>
-
-
-        <td>
-
-          ${
-            (
-              Number(
-                employee.distance_km
-              ) || 0
-            ).toFixed(2)
-          }
-
-          км
-
-        </td>
-
-
-        <td>
-
-          ${getGpsInfo(
-            employee
-          )}
-
-        </td>
-
-      `;
-
-
-      tbody.appendChild(
-        row
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================
-   LOAD DASHBOARD
-========================= */
-
-async function loadDashboard(){
-
-  const dateInput =
-    document.getElementById(
-      "date"
-    );
-
+/* =========================================
+   LOAD DATA
+========================================= */
+
+async function loadDashboard() {
 
   const date =
-    dateInput.value;
-
+    dateInput.value || getToday();
 
   setStatus(
-    "⏳ Маълумотлар юкланмоқда..."
+    "⏳ Маълумотлар юкланмоқда...",
+    "loading"
   );
 
+  refreshBtn.disabled = true;
 
-  try{
-
-
-    /* URL */
+  try {
 
     const url =
-      new URL(
-        API
-      );
+      API +
+      "?view=dashboard&date=" +
+      encodeURIComponent(date);
 
-
-    url.searchParams.set(
-      "view",
-      "dashboard"
+    console.log(
+      "Dashboard API:",
+      url
     );
 
-
-    if(
-      date
-    ){
-
-      url.searchParams.set(
-        "date",
-        date
-      );
-
-    }
-
-
-    /* API REQUEST */
-
     const response =
-      await fetch(
-        url.toString(),
-        {
-          method:"GET",
-          cache:"no-store"
-        }
-      );
+      await fetch(url, {
+        method: "GET",
+        cache: "no-store"
+      });
 
+    console.log(
+      "API status:",
+      response.status
+    );
 
-    /* HTTP CHECK */
-
-    if(
-      !response.ok
-    ){
+    if (!response.ok) {
 
       throw new Error(
-        "HTTP "
-        + response.status
+        "API HTTP " +
+        response.status
       );
 
     }
-
-
-    /* JSON */
 
     const data =
       await response.json();
 
-
     console.log(
-      "DASHBOARD DATA:",
+      "Dashboard data:",
       data
     );
 
-
-    /* SUCCESS CHECK */
-
-    if(
+    if (
+      !data ||
       data.success !== true
-    ){
+    ) {
 
       throw new Error(
-        data.error
-        ||
-        "API success=false қайтарди"
+        data?.error ||
+        "API нотўғри маълумот қайтарди"
       );
 
     }
 
-
-    /* SAVE */
-
-    currentData =
-      data;
-
-
-    allEmployees =
-      Array.isArray(
-        data.employees
-      )
-      ? data.employees
-      : [];
-
-
-    /* RENDER */
-
-    renderBranches();
-
-    renderDashboard();
-
-
-    /* STATUS */
+    renderDashboard(data);
 
     setStatus(
-
-      "✅ "
-      + data.date
-      + " — маълумотлар янгиланди"
-
+      `✅ Маълумотлар янгиланди: ${date}`,
+      "success"
     );
 
-
-  }catch(error){
-
+  } catch (error) {
 
     console.error(
       "DASHBOARD ERROR:",
       error
     );
 
-
     setStatus(
-
-      "❌ "
-      + error.message,
-
-      true
-
+      "❌ Маълумотларни олишда хато: " +
+      error.message,
+      "error"
     );
+
+    employeeTable.innerHTML = `
+      <tr>
+        <td colspan="8">
+          ❌ ${escapeHtml(error.message)}
+        </td>
+      </tr>
+    `;
+
+  } finally {
+
+    refreshBtn.disabled = false;
 
   }
 
 }
 
 
-/* =========================
-   DEFAULT DATE
-========================= */
+/* =========================================
+   RENDER DASHBOARD
+========================================= */
 
-function setToday(){
+function renderDashboard(data) {
 
-  const today =
-    new Intl.DateTimeFormat(
-      "en-CA",
-      {
-        timeZone:
-          "Asia/Tashkent"
-      }
-    ).format(
-      new Date()
+  const summary =
+    data.summary || {};
+
+  const employees =
+    Array.isArray(data.employees)
+      ? data.employees
+      : [];
+
+
+  /* SUMMARY */
+
+  document.getElementById(
+    "totalEmployees"
+  ).textContent =
+    summary.total_employees ?? 0;
+
+
+  document.getElementById(
+    "workedEmployees"
+  ).textContent =
+    summary.worked_employees ?? 0;
+
+
+  document.getElementById(
+    "notWorkedEmployees"
+  ).textContent =
+    summary.not_worked_employees ?? 0;
+
+
+  document.getElementById(
+    "activeEmployees"
+  ).textContent =
+    summary.active_employees ?? 0;
+
+
+  document.getElementById(
+    "activeGps"
+  ).textContent =
+    summary.active_gps ?? 0;
+
+
+  document.getElementById(
+    "totalWorkTime"
+  ).textContent =
+    summary.total_work_time ||
+    formatDuration(
+      summary.total_work_seconds
     );
 
 
   document.getElementById(
-    "date"
-  ).value =
-    today;
+    "totalDistance"
+  ).textContent =
+    Number(
+      summary.total_distance_km || 0
+    ).toFixed(2) +
+    " км";
+
+
+  document.getElementById(
+    "totalGpsPoints"
+  ).textContent =
+    summary.total_gps_points ?? 0;
+
+
+  /* BRANCHES */
+
+  renderBranches(employees);
+
+
+  /* TABLE */
+
+  renderEmployees(employees);
 
 }
 
 
-/* =========================
-   EVENTS
-========================= */
+/* =========================================
+   BRANCHES
+========================================= */
 
-document.getElementById(
-  "refresh"
-).addEventListener(
+function renderBranches(employees) {
+
+  const oldValue =
+    branchSelect.value;
+
+  const branches =
+    new Map();
+
+  employees.forEach(
+    employee => {
+
+      if (
+        employee.branch_id == null
+      ) {
+        return;
+      }
+
+      branches.set(
+        String(employee.branch_id),
+        employee.branch_name ||
+        "Филиал"
+      );
+
+    }
+  );
+
+
+  branchSelect.innerHTML =
+    `<option value="">
+      Барча филиаллар
+    </option>`;
+
+
+  [...branches.entries()]
+    .sort(
+      (a, b) =>
+        a[1].localeCompare(
+          b[1],
+          "uz"
+        )
+    )
+    .forEach(
+      ([id, name]) => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value = id;
+
+        option.textContent =
+          name;
+
+        branchSelect.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+  if (
+    [...branchSelect.options]
+      .some(
+        option =>
+          option.value === oldValue
+      )
+  ) {
+
+    branchSelect.value =
+      oldValue;
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER EMPLOYEES
+========================================= */
+
+function renderEmployees(
+  employees
+) {
+
+  const selectedBranch =
+    branchSelect.value;
+
+
+  const filtered =
+    selectedBranch
+      ? employees.filter(
+          employee =>
+            String(
+              employee.branch_id
+            ) ===
+            String(
+              selectedBranch
+            )
+        )
+      : employees;
+
+
+  if (!filtered.length) {
+
+    employeeTable.innerHTML = `
+      <tr>
+        <td colspan="8">
+          Ходимлар топилмади.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  employeeTable.innerHTML =
+    filtered
+      .map(
+        employee => {
+
+          const lastGps =
+            employee.last_location;
+
+
+          const gpsText =
+            lastGps
+              ? formatGpsTime(
+                  lastGps.recorded_at
+                )
+              : "-";
+
+
+          const distance =
+            Number(
+              employee.distance_km || 0
+            ).toFixed(2);
+
+
+          return `
+            <tr>
+
+              <td>
+                ${getStatusBadge(employee)}
+              </td>
+
+              <td>
+                <strong>
+                  ${escapeHtml(
+                    employee.full_name
+                  )}
+                </strong>
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  employee.branch_name ||
+                  "-"
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  employee.work_time ||
+                  formatDuration(
+                    employee.work_seconds
+                  )
+                )}
+              </td>
+
+              <td>
+                ${employee.work_sessions ?? 0}
+              </td>
+
+              <td>
+                ${employee.gps_points ?? 0}
+              </td>
+
+              <td>
+                ${distance} км
+              </td>
+
+              <td>
+                ${gpsText}
+              </td>
+
+            </tr>
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================
+   BRANCH FILTER
+========================================= */
+
+branchSelect.addEventListener(
+  "change",
+  async () => {
+
+    try {
+
+      const date =
+        dateInput.value ||
+        getToday();
+
+      const response =
+        await fetch(
+          API +
+          "?view=dashboard&date=" +
+          encodeURIComponent(date),
+          {
+            cache: "no-store"
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        data.success
+      ) {
+
+        renderEmployees(
+          data.employees || []
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "FILTER ERROR:",
+        error
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   REFRESH
+========================================= */
+
+refreshBtn.addEventListener(
   "click",
-  function(){
-
-    loadDashboard();
-
-  }
+  loadDashboard
 );
 
 
-document.getElementById(
-  "date"
-).addEventListener(
+/* =========================================
+   DATE CHANGE
+========================================= */
+
+dateInput.addEventListener(
   "change",
-  function(){
-
-    loadDashboard();
-
-  }
+  loadDashboard
 );
 
 
-document.getElementById(
-  "branch"
-).addEventListener(
-  "change",
-  function(){
-
-    renderDashboard();
-
-  }
-);
-
-
-/* =========================
+/* =========================================
    START
-========================= */
+========================================= */
 
-setToday();
+console.log(
+  "DASHBOARD JS ISHLADI"
+);
 
 loadDashboard();
 
 
-/* =========================
+/* =========================================
    AUTO REFRESH
-========================= */
+========================================= */
 
 setInterval(
-  function(){
-
-    loadDashboard();
-
-  },
-  30000
+  loadDashboard,
+  60000
 );
 
-<script>
-
-alert("DASHBOARD JS ISHLADI");
-
-const API =
-  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+</script>
 
 </body>
 </html>
