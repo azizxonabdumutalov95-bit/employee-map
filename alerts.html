@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Alerts</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .refresh-btn {
+      border: none;
+      background: #2563eb;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .refresh-btn:hover {
+      opacity: 0.9;
+    }
+
+    .filters {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 220px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stat-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .active-value {
+      color: #dc2626;
+    }
+
+    .resolved-value {
+      color: #16a34a;
+    }
+
+    .table-box {
+      background: white;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      font-size: 14px;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-active {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .status-resolved {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #777;
+    }
+
+    .error {
+      text-align: center;
+      padding: 30px;
+      color: #b91c1c;
+    }
+
+    @media (max-width: 700px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 14px;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>🚨 Огоҳлантиришлар</h1>
+
+```
+<button
+  class="refresh-btn"
+  onclick="loadAlerts()"
+>
+  🔄 Янгилаш
+</button>
+```
+
+  </div>
+
+  <div class="filters">
+
+```
+<input
+  type="text"
+  id="searchInput"
+  placeholder="🔎 Ходимни қидириш..."
+  oninput="filterAlerts()"
+>
+
+<select
+  id="statusFilter"
+  onchange="filterAlerts()"
+>
+  <option value="all">Барчаси</option>
+  <option value="active">🔴 Фаол</option>
+  <option value="resolved">✅ Ёпилган</option>
+</select>
+```
+
+  </div>
+
+  <div class="stats">
+
+```
+<div class="stat">
+  <div class="stat-title">
+    Жами Alert
+  </div>
+
+  <div
+    class="stat-value"
+    id="totalCount"
+  >
+    0
+  </div>
+</div>
+
+
+<div class="stat">
+  <div class="stat-title">
+    Фаол
+  </div>
+
+  <div
+    class="stat-value active-value"
+    id="activeCount"
+  >
+    0
+  </div>
+</div>
+
+
+<div class="stat">
+  <div class="stat-title">
+    Ёпилган
+  </div>
+
+  <div
+    class="stat-value resolved-value"
+    id="resolvedCount"
+  >
+    0
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="table-box">
+
+```
+<table>
+
+  <thead>
+
+    <tr>
+      <th>Ходим</th>
+      <th>Огоҳлантириш</th>
+      <th>Яратилган вақт</th>
+      <th>Ҳолат</th>
+      <th>Ёпилган вақт</th>
+    </tr>
+
+  </thead>
+
+  <tbody id="alertsTable">
+
+    <tr>
+      <td
+        colspan="5"
+        class="empty"
+      >
+        ⏳ Юкланмоқда...
+      </td>
+    </tr>
+
+  </tbody>
+
+</table>
+```
+
+  </div>
+
+</div>
+
+<script>
+
+const API =
+  "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+
+let alertsList = [];
+
+
+/* =====================================================
+   LOAD ALERTS
+===================================================== */
+
+async function loadAlerts() {
+
+  const table =
+    document.getElementById(
+      "alertsTable"
+    );
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="5" class="empty">
+        ⏳ Юкланмоқда...
+      </td>
+    </tr>
+  `;
+
+
+  try {
+
+    const response =
+      await fetch(
+        API + "?view=alerts"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "HTTP " +
+        response.status
+      );
+
+    }
+
+
+    if (
+      data.success === false
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Alertларни олишда хато"
+      );
+
+    }
+
+
+    alertsList =
+      Array.isArray(
+        data.alerts
+      )
+        ? data.alerts
+        : [];
+
+
+    updateStats();
+
+    renderAlerts(
+      alertsList
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="error">
+          ❌ ${escapeHtml(
+            error.message
+          )}
+        </td>
+      </tr>
+    `;
+
+  }
+
+}
+
+
+/* =====================================================
+   UPDATE STATS
+===================================================== */
+
+function updateStats() {
+
+  const total =
+    alertsList.length;
+
+
+  const active =
+    alertsList.filter(
+      function(alert) {
+
+        return alert.status ===
+          "active";
+
+      }
+    ).length;
+
+
+  const resolved =
+    alertsList.filter(
+      function(alert) {
+
+        return alert.status ===
+          "resolved";
+
+      }
+    ).length;
+
+
+  document.getElementById(
+    "totalCount"
+  ).textContent =
+    total;
+
+
+  document.getElementById(
+    "activeCount"
+  ).textContent =
+    active;
+
+
+  document.getElementById(
+    "resolvedCount"
+  ).textContent =
+    resolved;
+
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+function filterAlerts() {
+
+  const search =
+    document.getElementById(
+      "searchInput"
+    ).value
+      .trim()
+      .toLowerCase();
+
+
+  const status =
+    document.getElementById(
+      "statusFilter"
+    ).value;
+
+
+  const filtered =
+    alertsList.filter(
+      function(alert) {
+
+        const employeeName =
+          String(
+            alert.employee_name ||
+            ""
+          ).toLowerCase();
+
+
+        const matchesSearch =
+          employeeName.includes(
+            search
+          );
+
+
+        const matchesStatus =
+          status === "all" ||
+          alert.status === status;
+
+
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+
+      }
+    );
+
+
+  renderAlerts(
+    filtered
+  );
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderAlerts(
+  alerts
+) {
+
+  const table =
+    document.getElementById(
+      "alertsTable"
+    );
+
+
+  table.innerHTML = "";
+
+
+  if (
+    !alerts ||
+    alerts.length === 0
+  ) {
+
+    table.innerHTML = `
+      <tr>
+        <td
+          colspan="5"
+          class="empty"
+        >
+          ✅ Ҳозирча огоҳлантиришлар йўқ
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  alerts.forEach(
+    function(alert) {
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      const employeeCell =
+        document.createElement(
+          "td"
+        );
+
+      employeeCell.textContent =
+        alert.employee_name ||
+        "Номаълум ходим";
+
+
+      const messageCell =
+        document.createElement(
+          "td"
+        );
+
+      messageCell.textContent =
+        alert.message ||
+        "";
+
+
+      const createdCell =
+        document.createElement(
+          "td"
+        );
+
+      createdCell.textContent =
+        formatDate(
+          alert.created_at
+        );
+
+
+      const statusCell =
+        document.createElement(
+          "td"
+        );
+
+
+      const status =
+        document.createElement(
+          "span"
+        );
+
+
+      status.className =
+        "status " +
+        (
+          alert.status ===
+          "active"
+            ? "status-active"
+            : "status-resolved"
+        );
+
+
+      status.textContent =
+        alert.status ===
+        "active"
+          ? "🔴 Фаол"
+          : "✅ Ёпилган";
+
+
+      statusCell.appendChild(
+        status
+      );
+
+
+      const resolvedCell =
+        document.createElement(
+          "td"
+        );
+
+      resolvedCell.textContent =
+        alert.resolved_at
+          ? formatDate(
+              alert.resolved_at
+            )
+          : "—";
+
+
+      row.appendChild(
+        employeeCell
+      );
+
+      row.appendChild(
+        messageCell
+      );
+
+      row.appendChild(
+        createdCell
+      );
+
+      row.appendChild(
+        statusCell
+      );
+
+      row.appendChild(
+        resolvedCell
+      );
+
+
+      table.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+function formatDate(
+  value
+) {
+
+  if (!value) {
+
+    return "—";
+
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return "—";
+
+  }
+
+
+  return date.toLocaleString(
+    "uz-UZ",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadAlerts();
+
+</script>
+
+</body>
+</html>
