@@ -1729,28 +1729,32 @@
         }
 
 
-        const route =
-          await response.json();
+       const route =
+  await response.json();
 
 
-        if (
-          !Array.isArray(route)
-        ) {
+if (
+  !route ||
+  !Array.isArray(route.points)
+) {
 
-          throw new Error(
-            "Marshrut ma'lumoti noto'g'ri formatda."
-          );
+  throw new Error(
+    "Marshrut ma'lumoti noto'g'ri formatda."
+  );
 
-        }
+}
 
+
+const routePoints =
+  route.points;
 
         /*
           Faqat to'g'ri GPS nuqtalarni olamiz
         */
 
-        const points =
-          route
-            .filter(
+       const points =
+  routePoints
+    .filter(
               function(item) {
 
                 const lat =
@@ -1863,11 +1867,11 @@
           function(point, index) {
 
             const time =
-              point.recorded_at
-                ? formatDate(
-                    point.recorded_at
-                  )
-                : "—";
+  point.created_at
+    ? formatDate(
+        point.created_at
+      )
+    : "—";
 
 
             const marker =
