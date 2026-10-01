@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Alerts</title>
+  <title>GPS огоҳлантиришлар</title>
 
   <style>
     * {
@@ -21,7 +19,7 @@
 
     .container {
       max-width: 1200px;
-      margin: 0 auto;
+      margin: auto;
       padding: 24px;
     }
 
@@ -29,47 +27,47 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 20px;
     }
 
     h1 {
+      font-size: 26px;
       margin: 0;
-      font-size: 28px;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 14px;
     }
 
     .refresh-btn {
-      border: none;
       background: #2563eb;
       color: white;
-      padding: 10px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    .refresh-btn:hover {
-      opacity: 0.9;
     }
 
     .filters {
       background: white;
       padding: 16px;
       border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 20px;
     }
 
     .filters input,
     .filters select {
-      padding: 10px 12px;
+      padding: 10px;
       border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: 7px;
       min-width: 220px;
     }
 
@@ -84,11 +82,10 @@
       background: white;
       border-radius: 12px;
       padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px #0000000d;
     }
 
     .stat-title {
-      font-size: 14px;
       color: #666;
       margin-bottom: 8px;
     }
@@ -110,29 +107,22 @@
       background: white;
       border-radius: 12px;
       overflow-x: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     table {
       width: 100%;
+      min-width: 850px;
       border-collapse: collapse;
-      min-width: 800px;
     }
 
-    th,
-    td {
-      padding: 14px 12px;
-      border-bottom: 1px solid #eee;
+    th, td {
+      padding: 13px 12px;
       text-align: left;
+      border-bottom: 1px solid #eee;
     }
 
     th {
       background: #f8fafc;
-      font-size: 14px;
-    }
-
-    td {
-      font-size: 14px;
     }
 
     .status {
@@ -141,6 +131,7 @@
       border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     .status-active {
@@ -153,766 +144,349 @@
       color: #15803d;
     }
 
-    .empty {
+    .empty, .error {
       text-align: center;
-      padding: 40px;
-      color: #777;
+      padding: 30px;
     }
 
     .error {
-      text-align: center;
-      padding: 30px;
       color: #b91c1c;
     }
 
+    .resolve-btn {
+      background: #16a34a;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .resolve-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     @media (max-width: 700px) {
+      .container {
+        padding: 12px;
+      }
+
       .stats {
         grid-template-columns: 1fr;
       }
 
-      .container {
-        padding: 14px;
+      h1 {
+        font-size: 22px;
+      }
+
+      .filters input,
+      .filters select {
+        width: 100%;
       }
     }
   </style>
-
 </head>
 
 <body>
-
 <div class="container">
 
   <div class="header">
     <h1>🚨 Огоҳлантиришлар</h1>
-
-```
-<button
-  class="refresh-btn"
-  onclick="loadAlerts()"
->
-  🔄 Янгилаш
-</button>
-```
-
+    <button class="refresh-btn" onclick="loadAlerts()">
+      🔄 Янгилаш
+    </button>
   </div>
 
   <div class="filters">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="🔎 Ходимни қидириш..."
+      oninput="filterAlerts()"
+    >
 
-```
-<input
-  type="text"
-  id="searchInput"
-  placeholder="🔎 Ходимни қидириш..."
-  oninput="filterAlerts()"
->
-
-<select
-  id="statusFilter"
-  onchange="filterAlerts()"
->
-  <option value="all">Барчаси</option>
-  <option value="active">🔴 Фаол</option>
-  <option value="resolved">✅ Ёпилган</option>
-</select>
-```
-
+    <select id="statusFilter" onchange="filterAlerts()">
+      <option value="all">Барчаси</option>
+      <option value="active">🔴 Фаол</option>
+      <option value="resolved">✅ Ёпилган</option>
+    </select>
   </div>
 
   <div class="stats">
+    <div class="stat">
+      <div class="stat-title">Жами Alert</div>
+      <div class="stat-value" id="totalCount">0</div>
+    </div>
 
-```
-<div class="stat">
-  <div class="stat-title">
-    Жами Alert
-  </div>
+    <div class="stat">
+      <div class="stat-title">Фаол</div>
+      <div class="stat-value active-value" id="activeCount">0</div>
+    </div>
 
-  <div
-    class="stat-value"
-    id="totalCount"
-  >
-    0
-  </div>
-</div>
-
-
-<div class="stat">
-  <div class="stat-title">
-    Фаол
-  </div>
-
-  <div
-    class="stat-value active-value"
-    id="activeCount"
-  >
-    0
-  </div>
-</div>
-
-
-<div class="stat">
-  <div class="stat-title">
-    Ёпилган
-  </div>
-
-  <div
-    class="stat-value resolved-value"
-    id="resolvedCount"
-  >
-    0
-  </div>
-</div>
-```
-
+    <div class="stat">
+      <div class="stat-title">Ёпилган</div>
+      <div class="stat-value resolved-value" id="resolvedCount">0</div>
+    </div>
   </div>
 
   <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Ходим</th>
+          <th>Огоҳлантириш</th>
+          <th>Яратилган вақт</th>
+          <th>Ҳолат</th>
+          <th>Ёпилган вақт</th>
+          <th>Амал</th>
+        </tr>
+      </thead>
 
-```
-<table>
-
-  <thead>
-
-    <tr>
-      <th>Ходим</th>
-      <th>Огоҳлантириш</th>
-      <th>Яратилган вақт</th>
-      <th>Ҳолат</th>
-      <th>Ёпилган вақт</th>
-      <th>Амал</th>
-    </tr>
-
-  </thead>
-
-  <tbody id="alertsTable">
-
-    <tr>
-      <td
-        colspan="5"
-        class="empty"
-      >
-        ⏳ Юкланмоқда...
-      </td>
-    </tr>
-
-  </tbody>
-
-</table>
-```
-
+      <tbody id="alertsTable">
+        <tr>
+          <td colspan="6" class="empty">⏳ Юкланмоқда...</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
 
 <script>
+"use strict";
 
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
 
-
 let alertsList = [];
 
-
-/* =====================================================
-   LOAD ALERTS
-===================================================== */
-
 async function loadAlerts() {
+  const table = document.getElementById("alertsTable");
 
-  const table =
-    document.getElementById(
-      "alertsTable"
-    );
-
-  table.innerHTML = `
-    <tr>
-      <td colspan="5" class="empty">
-        ⏳ Юкланмоқда...
-      </td>
-    </tr>
-  `;
-
+  table.innerHTML =
+    '<tr><td colspan="6" class="empty">⏳ Маълумот олинмоқда...</td></tr>';
 
   try {
+    const response = await fetch(
+      API + "?view=alerts&t=" + Date.now(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
 
-    const response =
-      await fetch(
-        API + "?view=alerts"
-      );
-
-
-    const data =
-      await response.json();
-
+    const data = await response.json();
 
     if (!response.ok) {
-
       throw new Error(
-        "HTTP " +
-        response.status
+        data.error || "HTTP " + response.status
       );
-
     }
 
-
-    if (
-      data.success === false
-    ) {
-
+    if (data.success !== true) {
       throw new Error(
-        data.error ||
-        "Alertларни олишда хато"
+        data.error || "API маълумотни тасдиқламади"
       );
-
     }
 
+    if (!Array.isArray(data.alerts)) {
+      throw new Error("API alerts рўйхатини қайтармади");
+    }
 
-    alertsList =
-      Array.isArray(
-        data.alerts
-      )
-        ? data.alerts
-        : [];
-
+    alertsList = data.alerts;
 
     updateStats();
-
-    renderAlerts(
-      alertsList
-    );
-
+    filterAlerts();
 
   } catch (error) {
+    console.error("LOAD ALERTS ERROR:", error);
 
-    console.error(
-      error
-    );
+    table.innerHTML = "";
 
-    table.innerHTML = `
-      <tr>
-        <td colspan="5" class="error">
-          ❌ ${escapeHtml(
-            error.message
-          )}
-        </td>
-      </tr>
-    `;
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
 
+    cell.colSpan = 6;
+    cell.className = "error";
+    cell.textContent =
+      "❌ Маълумот олинмади: " + error.message;
+
+    row.appendChild(cell);
+    table.appendChild(row);
   }
-
 }
-
-
-/* =====================================================
-   UPDATE STATS
-===================================================== */
 
 function updateStats() {
-
-  const total =
+  document.getElementById("totalCount").textContent =
     alertsList.length;
 
+  document.getElementById("activeCount").textContent =
+    alertsList.filter(a => a.status === "active").length;
 
-  const active =
-    alertsList.filter(
-      function(alert) {
-
-        return alert.status ===
-          "active";
-
-      }
-    ).length;
-
-
-  const resolved =
-    alertsList.filter(
-      function(alert) {
-
-        return alert.status ===
-          "resolved";
-
-      }
-    ).length;
-
-
-  document.getElementById(
-    "totalCount"
-  ).textContent =
-    total;
-
-
-  document.getElementById(
-    "activeCount"
-  ).textContent =
-    active;
-
-
-  document.getElementById(
-    "resolvedCount"
-  ).textContent =
-    resolved;
-
+  document.getElementById("resolvedCount").textContent =
+    alertsList.filter(a => a.status === "resolved").length;
 }
-
-
-/* =====================================================
-   FILTER
-===================================================== */
 
 function filterAlerts() {
+  const search = document.getElementById("searchInput")
+    .value.trim().toLowerCase();
 
-  const search =
-    document.getElementById(
-      "searchInput"
-    ).value
-      .trim()
-      .toLowerCase();
+  const status = document.getElementById("statusFilter").value;
 
+  const filtered = alertsList.filter(alert => {
+    const name = String(
+      alert.employee_name || ""
+    ).toLowerCase();
 
-  const status =
-    document.getElementById(
-      "statusFilter"
-    ).value;
+    const matchesName = name.includes(search);
 
+    const matchesStatus =
+      status === "all" || alert.status === status;
 
-  const filtered =
-    alertsList.filter(
-      function(alert) {
+    return matchesName && matchesStatus;
+  });
 
-        const employeeName =
-          String(
-            alert.employee_name ||
-            ""
-          ).toLowerCase();
-
-
-        const matchesSearch =
-          employeeName.includes(
-            search
-          );
-
-
-        const matchesStatus =
-          status === "all" ||
-          alert.status === status;
-
-
-        return (
-          matchesSearch &&
-          matchesStatus
-        );
-
-      }
-    );
-
-
-  renderAlerts(
-    filtered
-  );
-
+  renderAlerts(filtered);
 }
 
-
-```javascript
-/* =====================================================
-   RENDER
-===================================================== */
-
-function renderAlerts(
-  alerts
-) {
-
-  const table =
-    document.getElementById(
-      "alertsTable"
-    );
-
-
+function renderAlerts(alerts) {
+  const table = document.getElementById("alertsTable");
   table.innerHTML = "";
 
+  if (alerts.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
 
-  if (
-    !alerts ||
-    alerts.length === 0
-  ) {
+    cell.colSpan = 6;
+    cell.className = "empty";
+    cell.textContent =
+      alertsList.length === 0
+        ? "Ҳозирча огоҳлантиришлар йўқ"
+        : "🔎 Қидирувга мос маълумот топилмади";
 
-    table.innerHTML = `
-      <tr>
-        <td
-          colspan="6"
-          class="empty"
-        >
-          ✅ Ҳозирча огоҳлантиришлар йўқ
-        </td>
-      </tr>
-    `;
-
+    row.appendChild(cell);
+    table.appendChild(row);
     return;
-
   }
 
+  alerts.forEach(alert => {
+    const row = document.createElement("tr");
 
-  alerts.forEach(
-    function(alert) {
+    addCell(row, alert.employee_name || "Номаълум ходим");
+    addCell(row, alert.message || alert.alert_type || "—");
+    addCell(row, formatDate(alert.created_at));
 
-      const row =
-        document.createElement(
-          "tr"
-        );
+    const statusCell = document.createElement("td");
+    const badge = document.createElement("span");
 
+    badge.className = "status " +
+      (alert.status === "active"
+        ? "status-active"
+        : "status-resolved");
 
-      /* =====================================================
-         EMPLOYEE
-      ===================================================== */
+    badge.textContent = alert.status === "active"
+      ? "🔴 Фаол"
+      : "✅ Ёпилган";
 
-      const employeeCell =
-        document.createElement(
-          "td"
-        );
+    statusCell.appendChild(badge);
+    row.appendChild(statusCell);
 
-      employeeCell.textContent =
-        alert.employee_name ||
-        "Номаълум ходим";
+    addCell(row, formatDate(alert.resolved_at));
 
+    const actionCell = document.createElement("td");
 
-      /* =====================================================
-         MESSAGE
-      ===================================================== */
+    if (alert.status === "active") {
+      const button = document.createElement("button");
 
-      const messageCell =
-        document.createElement(
-          "td"
-        );
+      button.className = "resolve-btn";
+      button.textContent = "✅ Ёпиш";
 
-      messageCell.textContent =
-        alert.message ||
-        "";
+      button.addEventListener("click", () => {
+        resolveAlert(alert.id, button);
+      });
 
-
-      /* =====================================================
-         CREATED
-      ===================================================== */
-
-      const createdCell =
-        document.createElement(
-          "td"
-        );
-
-      createdCell.textContent =
-        formatDate(
-          alert.created_at
-        );
-
-
-      /* =====================================================
-         STATUS
-      ===================================================== */
-
-      const statusCell =
-        document.createElement(
-          "td"
-        );
-
-
-      const status =
-        document.createElement(
-          "span"
-        );
-
-
-      status.className =
-        "status " +
-        (
-          alert.status ===
-          "active"
-            ? "status-active"
-            : "status-resolved"
-        );
-
-
-      status.textContent =
-        alert.status ===
-        "active"
-          ? "🔴 Фаол"
-          : "✅ Ёпилган";
-
-
-      statusCell.appendChild(
-        status
-      );
-
-
-      /* =====================================================
-         RESOLVED TIME
-      ===================================================== */
-
-      const resolvedCell =
-        document.createElement(
-          "td"
-        );
-
-      resolvedCell.textContent =
-        alert.resolved_at
-          ? formatDate(
-              alert.resolved_at
-            )
-          : "—";
-
-
-      /* =====================================================
-         ACTION
-      ===================================================== */
-
-      const actionCell =
-        document.createElement(
-          "td"
-        );
-
-
-      if (
-        alert.status ===
-        "active"
-      ) {
-
-        const resolveButton =
-          document.createElement(
-            "button"
-          );
-
-        resolveButton.type =
-          "button";
-
-        resolveButton.textContent =
-          "✅ Ёпиш";
-
-        resolveButton.style.cursor =
-          "pointer";
-
-        resolveButton.onclick =
-          function() {
-
-            resolveAlert(
-              alert.id
-            );
-
-          };
-
-        actionCell.appendChild(
-          resolveButton
-        );
-
-      } else {
-
-        actionCell.textContent =
-          "—";
-
-      }
-
-
-      /* =====================================================
-         APPEND ROW
-      ===================================================== */
-
-      row.appendChild(
-        employeeCell
-      );
-
-      row.appendChild(
-        messageCell
-      );
-
-      row.appendChild(
-        createdCell
-      );
-
-      row.appendChild(
-        statusCell
-      );
-
-      row.appendChild(
-        resolvedCell
-      );
-
-      row.appendChild(
-        actionCell
-      );
-
-
-      table.appendChild(
-        row
-      );
-
+      actionCell.appendChild(button);
+    } else {
+      actionCell.textContent = "—";
     }
-  );
 
+    row.appendChild(actionCell);
+    table.appendChild(row);
+  });
 }
 
+function addCell(row, value) {
+  const cell = document.createElement("td");
+  cell.textContent = value == null ? "—" : String(value);
+  row.appendChild(cell);
+}
 
-/* =====================================================
-   RESOLVE ALERT
-===================================================== */
-
-async function resolveAlert(
-  alertId
-) {
-
+async function resolveAlert(alertId, button) {
   if (!alertId) {
-
-    alert(
-      "Alert ID топилмади"
-    );
-
+    window.alert("Alert ID топилмади");
     return;
-
   }
 
+  if (!window.confirm("Ушбу огоҳлантиришни ёпасизми?")) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "⏳ Кутинг...";
 
   try {
+    const response = await fetch(
+      API + "?view=alert_resolve",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: alertId })
+      }
+    );
 
-    const response =
-      await fetch(
-        API +
-        "?view=alert_resolve",
-        {
-          method: "PATCH",
+    const result = await response.json();
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-              id: alertId
-            })
-        }
-      );
-
-
-    const result =
-      await response.json();
-
-
-    if (
-      !response.ok ||
-      !result.success
-    ) {
-
+    if (!response.ok || result.success !== true) {
       throw new Error(
-        result.error ||
-        "Alertни ёпишда хато"
+        result.error || "Alertни ёпишда хато"
       );
-
     }
-
 
     await loadAlerts();
 
-
   } catch (error) {
+    console.error("RESOLVE ALERT ERROR:", error);
 
-    console.error(
-      "RESOLVE ALERT ERROR:",
-      error
+    window.alert(
+      "❌ Alertни ёпишда хато:\n" + error.message
     );
 
-
-    alert(
-      "❌ Alertни ёпишда хато:\n" +
-      error.message
-    );
-
+    button.disabled = false;
+    button.textContent = "✅ Ёпиш";
   }
-
 }
 
+function formatDate(value) {
+  if (!value) return "—";
 
-/* =====================================================
-   DATE
-===================================================== */
+  const date = new Date(value);
 
-function formatDate(
-  value
-) {
-
-  if (!value) {
-
+  if (Number.isNaN(date.getTime())) {
     return "—";
-
   }
 
-
-  const date =
-    new Date(
-      value
-    );
-
-
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-
-    return "—";
-
-  }
-
-
-  return date.toLocaleString(
-    "uz-UZ",
-    {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    }
-  );
-
+  return date.toLocaleString("uz-UZ", {
+    timeZone: "Asia/Tashkent",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
-
-
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
-
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-
-/* =====================================================
-   START
-===================================================== */
 
 loadAlerts();
-```
+</script>
 
 </body>
 </html>
