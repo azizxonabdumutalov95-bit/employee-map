@@ -1,445 +1,558 @@
 <!DOCTYPE html>
-
 <html lang="uz">
+
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
 <meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
 >
 
-  <title>Общий Dashboard — Ходимлар тизими</title>
-
-  <!-- Leaflet -->
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-      background: #f4f6f8;
-      color: #222;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    /* =========================
-       HEADER
-    ========================== */
-
-    .main-header {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    .subtitle {
-      margin-top: 7px;
-      color: #777;
-      font-size: 14px;
-    }
-
-    /* =========================
-       MAIN MENU
-    ========================== */
-
-    .main-menu {
-      display: grid;
-      grid-template-columns:
-        repeat(
-          auto-fit,
-          minmax(180px, 1fr)
-        );
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .menu-button {
-      border: none;
-      border-radius: 10px;
-      padding: 14px 12px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      background: #f1f3f5;
-      color: #333;
-      transition: 0.2s;
-    }
-
-    .menu-button:hover {
-      background: #e2e6ea;
-      transform: translateY(-1px);
-    }
-
-    .menu-button.active {
-      background: #1976d2;
-      color: white;
-    }
-
-    /* =========================
-       BUTTONS
-    ========================== */
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .btn-primary {
-      background: #1976d2;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #125ea8;
-    }
-
-    .btn-success {
-      background: #2e7d32;
-      color: white;
-    }
-
-    .btn-danger {
-      background: #c62828;
-      color: white;
-    }
-
-    .btn-secondary {
-      background: #607d8b;
-      color: white;
-    }
-
-    /* =========================
-       FILTERS
-    ========================== */
-
-    .filters {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .filters-row {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-
-    .filter-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .filter-item label {
-      font-size: 13px;
-      color: #555;
-    }
-
-    select,
-    input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 7px;
-      min-width: 180px;
-      font-size: 14px;
-    }
-
-    /* =========================
-       STATS
-    ========================== */
-
-    .stats {
-      display: grid;
-      grid-template-columns:
-        repeat(
-          auto-fit,
-          minmax(180px, 1fr)
-        );
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: white;
-      padding: 18px;
-      border-radius: 12px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .stat-title {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    /* =========================
-       TABLE
-    ========================== */
-
-    .table-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    .table-header {
-      padding: 15px 18px;
-      border-bottom: 1px solid #eee;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #f7f7f7;
-      font-size: 13px;
-    }
-
-    td {
-      font-size: 14px;
-    }
-
-    tr:hover td {
-      background: #fafafa;
-    }
-
-    /* =========================
-       STATUS
-    ========================== */
-
-    .status {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .status-online {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-
-    .status-offline {
-      background: #ffebee;
-      color: #c62828;
-    }
-
-    .status-working {
-      background: #e3f2fd;
-      color: #1565c0;
-    }
-
-    .route-button {
-      background: #1976d2;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 7px;
-    }
-
-    .route-button:hover {
-      background: #125ea8;
-    }
-
-    /* =========================
-       ROUTE
-    ========================== */
-
-    .detail {
-      display: none;
-      background: white;
-      border-radius: 12px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.08);
-      margin-top: 20px;
-      overflow: hidden;
-    }
-
-    .detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 15px 18px;
-      border-bottom: 1px solid #eee;
-      flex-wrap: wrap;
-    }
-
-    .detail-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .route-stats {
-      display: grid;
-      grid-template-columns:
-        repeat(
-          auto-fit,
-          minmax(150px, 1fr)
-        );
-      gap: 12px;
-      padding: 15px;
-    }
-
-    .route-stat {
-      background: #f5f7fa;
-      border-radius: 10px;
-      padding: 14px;
-    }
-
-    .route-stat-title {
-      color: #666;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-
-    .route-stat-value {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    #routeMap {
-      width: 100%;
-      height: 550px;
-    }
-
-    /* =========================
-       ERROR / LOADING
-    ========================== */
-
-    .loading {
-      text-align: center;
-      padding: 30px;
-      color: #666;
-    }
-
-    .error {
-      background: #ffebee;
-      color: #b71c1c;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      display: none;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 30px;
-      color: #777;
-    }
-
-    /* =========================
-       MOBILE
-    ========================== */
-
-    @media (
-      max-width: 700px
-    ) {
-
-      .container {
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      select,
-      input {
-        width: 100%;
-      }
-
-      .filter-item {
-        width: 100%;
-      }
-
-      .main-menu {
-        grid-template-columns:
-          repeat(
-            2,
-            1fr
-          );
-      }
-
-      .menu-button {
-        min-height: 65px;
-      }
-
-      #routeMap {
-        height: 450px;
-      }
-
-    }
-
-  </style>
+<title>Общий Dashboard — Ходимлар тизими</title>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+}
+
+.container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.main-header {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin-top: 7px;
+  color: #777;
+  font-size: 14px;
+}
+
+/* =====================================================
+   MAIN MENU
+===================================================== */
+
+.main-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.menu-button {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  background: #f1f3f5;
+  color: #333;
+  transition: .2s;
+}
+
+.menu-button:hover {
+  background: #e2e6ea;
+  transform: translateY(-1px);
+}
+
+.menu-button.active {
+  background: #1976d2;
+  color: white;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: #1976d2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #125ea8;
+}
+
+.btn-success {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: white;
+}
+
+.btn-secondary {
+  background: #607d8b;
+  color: white;
+}
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
+.dashboard-section {
+  display: block;
+}
+
+.dashboard-section.hidden {
+  display: none;
+}
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filters {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.filters-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item label {
+  font-size: 13px;
+  color: #555;
+}
+
+select,
+input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  min-width: 180px;
+  font-size: 14px;
+}
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.stat-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.table-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.table-header {
+  padding: 15px 18px;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f7f7f7;
+  font-size: 13px;
+}
+
+td {
+  font-size: 14px;
+}
+
+tr:hover td {
+  background: #fafafa;
+}
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-online {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-offline {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-working {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.route-button {
+  background: #1976d2;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 7px;
+}
+
+.route-button:hover {
+  background: #125ea8;
+}
+
+/* =====================================================
+   ROUTE
+===================================================== */
+
+.detail {
+  display: none;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.route-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  gap: 12px;
+  padding: 15px;
+}
+
+.route-stat {
+  background: #f5f7fa;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.route-stat-title {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.route-stat-value {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#routeMap {
+  width: 100%;
+  height: 550px;
+}
+
+/* =====================================================
+   EMPLOYEE MANAGEMENT
+===================================================== */
+
+.employee-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.employee-top h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.employee-form {
+  display: none;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.employee-form.show {
+  display: block;
+}
+
+.employee-form h3 {
+  margin-top: 0;
+}
+
+.employee-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 12px;
+}
+
+.employee-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.employee-form input,
+.employee-form select {
+  width: 100%;
+}
+
+.employee-save {
+  background: #0d6efd;
+  color: white;
+  margin-top: 15px;
+}
+
+.employee-cancel {
+  background: #6c757d;
+  color: white;
+  margin-top: 15px;
+  margin-left: 8px;
+}
+
+.employee-search {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.employee-search label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.employee-search input {
+  width: 100%;
+  max-width: 500px;
+}
+
+.employee-table-box {
+  background: white;
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.employee-table-box table {
+  min-width: 950px;
+}
+
+.employee-edit-btn {
+  background: #ffc107;
+  color: #222;
+  margin-right: 5px;
+}
+
+.employee-delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.employee-message {
+  display: none;
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.employee-message.success {
+  display: block;
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.employee-message.error {
+  display: block;
+  background: #f8d7da;
+  color: #842029;
+}
+
+.employee-loading {
+  text-align: center;
+  padding: 30px;
+}
+
+/* =====================================================
+   ERROR / EMPTY
+===================================================== */
+
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+}
+
+.error {
+  background: #ffebee;
+  color: #b71c1c;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:700px) {
+
+  .container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  select,
+  input {
+    width: 100%;
+  }
+
+  .filter-item {
+    width: 100%;
+  }
+
+  .main-menu {
+    grid-template-columns: repeat(2,1fr);
+  }
+
+  .menu-button {
+    min-height: 65px;
+  }
+
+  #routeMap {
+    height: 450px;
+  }
+
+}
+
+</style>
 
 </head>
 
@@ -447,437 +560,623 @@ content="width=device-width, initial-scale=1.0"
 
 <div class="container">
 
-  <!-- =========================
-       MAIN HEADER
-  ========================== -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-  <div class="main-header">
+<div class="main-header">
 
-```
-<div class="header-top">
+  <div class="header-top">
 
-  <div>
+    <div>
 
-    <h1>
-      🏠 Общий Dashboard
-    </h1>
+      <h1>
+        🏠 Общий Dashboard
+      </h1>
 
-    <div class="subtitle">
-      Ходимлар назорати ва бошқарув тизими
+      <div class="subtitle">
+        Ходимлар назорати ва бошқарув тизими
+      </div>
+
     </div>
 
+    <button
+      class="btn-primary"
+      type="button"
+      onclick="refreshCurrentSection()"
+    >
+      🔄 Янгилаш
+    </button>
+
   </div>
 
-  <button
-    class="btn-primary"
-    type="button"
-    onclick="loadDashboard()"
-  >
-    🔄 Янгилаш
-  </button>
+
+  <div class="main-menu">
+
+    <button
+      type="button"
+      id="menuDashboard"
+      class="menu-button active"
+      onclick="openSection('dashboard')"
+    >
+      🏠 Общий Dashboard
+    </button>
+
+    <button
+      type="button"
+      id="menuEmployees"
+      class="menu-button"
+      onclick="openSection('employees')"
+    >
+      👥 Ходимлар бошқаруви
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('branches.html')"
+    >
+      🏢 Филиал бошқаруви
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('daily-report.html')"
+    >
+      📊 Кунлик ҳисобот
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('date-range-report.html')"
+    >
+      📆 Сана оралиғи
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('branch-report.html')"
+    >
+      🏢 Филиал ҳисоботи
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('tracking.html')"
+    >
+      🗺 Ходимлар картаси
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('gps.html')"
+    >
+      📍 GPS назорати
+    </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      onclick="openExternalPage('alerts.html')"
+    >
+      🚨 Огоҳлантиришлар
+    </button>
+
+  </div>
 
 </div>
 
 
-<!-- =========================
-     MAIN MENU
-========================== -->
+<!-- =====================================================
+     DASHBOARD SECTION
+===================================================== -->
 
-<div class="main-menu">
-
-  <button
-    type="button"
-    class="menu-button active"
-    onclick="openSection('dashboard.html', this)"
-  >
-    🏠 Общий Dashboard
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('employees.html', this)"
-  >
-    👥 Ходимлар бошқаруви
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('branches.html', this)"
-  >
-    🏢 Филиал бошқаруви
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('daily-report.html', this)"
-  >
-    📊 Кунлик ҳисобот
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('date-range-report.html', this)"
-  >
-    📆 Сана оралиғи
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('branch-report.html', this)"
-  >
-    🏢 Филиал ҳисоботи
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('tracking.html', this)"
-  >
-    🗺 Ходимлар картаси
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('gps.html', this)"
-  >
-    📍 GPS назорати
-  </button>
-
-  <button
-    type="button"
-    class="menu-button"
-    onclick="openSection('alerts.html', this)"
-  >
-    🚨 Огоҳлантиришлар
-  </button>
-
-</div>
-```
-
-  </div>
-
-  <!-- =========================
-       ERROR
-  ========================== -->
+<section
+  id="dashboardSection"
+  class="dashboard-section"
+>
 
   <div
     id="errorBox"
     class="error"
   ></div>
 
-  <!-- =========================
-       FILTERS
-  ========================== -->
+
+  <!-- FILTERS -->
 
   <div class="filters">
 
-```
-<div class="filters-row">
+    <div class="filters-row">
 
-  <div class="filter-item">
+      <div class="filter-item">
 
-    <label>
-      📅 Сана
-    </label>
+        <label>
+          📅 Сана
+        </label>
 
-    <input
-      id="date"
-      type="date"
-    >
+        <input
+          id="date"
+          type="date"
+        >
 
-  </div>
-
-
-  <div class="filter-item">
-
-    <label>
-      🏢 Филиал
-    </label>
-
-    <select id="branchFilter">
-
-      <option value="">
-        Барча филиаллар
-      </option>
-
-    </select>
-
-  </div>
+      </div>
 
 
-  <div class="filter-item">
+      <div class="filter-item">
 
-    <label>
-      🔎 Ходим
-    </label>
+        <label>
+          🏢 Филиал
+        </label>
 
-    <input
-      id="employeeSearch"
-      type="text"
-      placeholder="Ходим исмини киритинг"
-    >
+        <select id="branchFilter">
 
-  </div>
+          <option value="">
+            Барча филиаллар
+          </option>
 
-</div>
-```
+        </select>
+
+      </div>
+
+
+      <div class="filter-item">
+
+        <label>
+          🔎 Ходим
+        </label>
+
+        <input
+          id="employeeSearch"
+          type="text"
+          placeholder="Ходим исмини киритинг"
+        >
+
+      </div>
+
+    </div>
 
   </div>
 
-  <!-- =========================
-       STATS
-  ========================== -->
+
+  <!-- STATS -->
 
   <div class="stats">
 
-```
-<div class="stat-card">
+    <div class="stat-card">
 
-  <div class="stat-title">
-    👥 Жами ходимлар
-  </div>
+      <div class="stat-title">
+        👥 Жами ходимлар
+      </div>
 
-  <div
-    id="totalEmployees"
-    class="stat-value"
-  >
-    0
-  </div>
+      <div
+        id="totalEmployees"
+        class="stat-value"
+      >
+        0
+      </div>
 
-</div>
-
-
-<div class="stat-card">
-
-  <div class="stat-title">
-    🟢 Ҳозир ишда
-  </div>
-
-  <div
-    id="workingEmployees"
-    class="stat-value"
-  >
-    0
-  </div>
-
-</div>
+    </div>
 
 
-<div class="stat-card">
+    <div class="stat-card">
 
-  <div class="stat-title">
-    📍 GPS бор
-  </div>
+      <div class="stat-title">
+        🟢 Ҳозир ишда
+      </div>
 
-  <div
-    id="gpsEmployees"
-    class="stat-value"
-  >
-    0
-  </div>
+      <div
+        id="workingEmployees"
+        class="stat-value"
+      >
+        0
+      </div>
 
-</div>
+    </div>
 
 
-<div class="stat-card">
+    <div class="stat-card">
 
-  <div class="stat-title">
-    🔴 GPS йўқ
-  </div>
+      <div class="stat-title">
+        📍 GPS бор
+      </div>
 
-  <div
-    id="noGpsEmployees"
-    class="stat-value"
-  >
-    0
-  </div>
+      <div
+        id="gpsEmployees"
+        class="stat-value"
+      >
+        0
+      </div>
 
-</div>
-```
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-title">
+        🔴 GPS йўқ
+      </div>
+
+      <div
+        id="noGpsEmployees"
+        class="stat-value"
+      >
+        0
+      </div>
+
+    </div>
 
   </div>
 
-  <!-- =========================
-       EMPLOYEES TABLE
-  ========================== -->
+
+  <!-- EMPLOYEES TABLE -->
 
   <div class="table-card">
 
-```
-<div class="table-header">
-  👥 Ходимлар
-</div>
+    <div class="table-header">
+      👥 Ходимлар
+    </div>
 
-<div
-  id="tableLoading"
-  class="loading"
->
-  Маълумот юкланмоқда...
-</div>
+    <div
+      id="tableLoading"
+      class="loading"
+    >
+      Маълумот юкланмоқда...
+    </div>
 
-<div
-  id="tableWrapper"
-  class="table-wrapper"
-  style="display:none;"
->
+    <div
+      id="tableWrapper"
+      class="table-wrapper"
+      style="display:none;"
+    >
 
-  <table>
+      <table>
 
-    <thead>
+        <thead>
 
-      <tr>
+          <tr>
 
-        <th>
-          ID
-        </th>
+            <th>ID</th>
 
-        <th>
-          Ходим
-        </th>
+            <th>Ходим</th>
 
-        <th>
-          Филиал
-        </th>
+            <th>Филиал</th>
 
-        <th>
-          Ҳолати
-        </th>
+            <th>Ҳолати</th>
 
-        <th>
-          GPS
-        </th>
+            <th>GPS</th>
 
-        <th>
-          Охирги GPS
-        </th>
+            <th>Охирги GPS</th>
 
-        <th>
-          Маршрут
-        </th>
+            <th>Маршрут</th>
 
-      </tr>
+          </tr>
 
-    </thead>
+        </thead>
 
-    <tbody
-      id="employeesBody"
-    ></tbody>
+        <tbody id="employeesBody"></tbody>
 
-  </table>
+      </table>
 
-</div>
+    </div>
 
-<div
-  id="emptyEmployees"
-  class="empty"
-  style="display:none;"
->
-  Ходимлар топилмади
-</div>
-```
+
+    <div
+      id="emptyEmployees"
+      class="empty"
+      style="display:none;"
+    >
+      Ходимлар топилмади
+    </div>
 
   </div>
 
-  <!-- =========================
-       ROUTE DETAIL
-  ========================== -->
+
+  <!-- ROUTE -->
 
   <div
     id="detail"
     class="detail"
   >
 
-```
-<div class="detail-header">
+    <div class="detail-header">
+
+      <div
+        id="detailTitle"
+        class="detail-title"
+      >
+        🗺 Ходим маршрути
+      </div>
+
+      <button
+        type="button"
+        class="btn-danger"
+        onclick="closeRoute()"
+      >
+        ✕ Ёпиш
+      </button>
+
+    </div>
+
+
+    <div class="route-stats">
+
+      <div class="route-stat">
+
+        <div class="route-stat-title">
+          📍 Нуқталар
+        </div>
+
+        <div
+          id="routePoints"
+          class="route-stat-value"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="route-stat">
+
+        <div class="route-stat-title">
+          📏 Масофа
+        </div>
+
+        <div
+          id="routeDistance"
+          class="route-stat-value"
+        >
+          0.00 км
+        </div>
+
+      </div>
+
+
+      <div class="route-stat">
+
+        <div class="route-stat-title">
+          ⏱ Вақт
+        </div>
+
+        <div
+          id="routeDuration"
+          class="route-stat-value"
+        >
+          00:00:00
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="routeMap"></div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     EMPLOYEE MANAGEMENT SECTION
+===================================================== -->
+
+<section
+  id="employeesSection"
+  class="dashboard-section hidden"
+>
+
+  <div class="employee-top">
+
+    <h2>
+      👥 Ходимлар бошқаруви
+    </h2>
+
+    <button
+      class="btn-success"
+      type="button"
+      onclick="openAddForm()"
+    >
+      ➕ Ходим қўшиш
+    </button>
+
+  </div>
+
 
   <div
-    id="detailTitle"
-    class="detail-title"
+    id="employeeMessage"
+    class="employee-message"
+  ></div>
+
+
+  <!-- EMPLOYEE FORM -->
+
+  <div
+    id="employeeFormBox"
+    class="employee-form"
   >
-    🗺 Ходим маршрути
+
+    <h3 id="employeeFormTitle">
+      Янги ходим қўшиш
+    </h3>
+
+
+    <input
+      id="employeeEditId"
+      type="hidden"
+    >
+
+
+    <div class="employee-form-grid">
+
+      <div>
+
+        <label>
+          Ф.И.О.
+        </label>
+
+        <input
+          id="employeeFullName"
+          type="text"
+          placeholder="Масалан: Алиев Али"
+        >
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Telegram ID
+        </label>
+
+        <input
+          id="employeeTelegramId"
+          type="number"
+          placeholder="Масалан: 123456789"
+        >
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Филиал
+        </label>
+
+        <select id="employeeBranchId">
+
+          <option value="">
+            Филиални танланг
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Роль
+        </label>
+
+        <select id="employeeRole">
+
+          <option value="employee">
+            Employee
+          </option>
+
+          <option value="admin">
+            Admin
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="employee-save"
+      type="button"
+      onclick="saveEmployee()"
+    >
+      💾 Сақлаш
+    </button>
+
+
+    <button
+      class="employee-cancel"
+      type="button"
+      onclick="closeEmployeeForm()"
+    >
+      Бекор қилиш
+    </button>
+
   </div>
 
-  <button
-    type="button"
-    class="btn-danger"
-    onclick="closeRoute()"
-  >
-    ✕ Ёпиш
-  </button>
+
+  <!-- SEARCH -->
+
+  <div class="employee-search">
+
+    <label>
+      🔎 Ходим қидириш
+    </label>
+
+    <input
+      id="employeeManagementSearch"
+      type="text"
+      placeholder="Исм, Telegram ID ёки филиал бўйича қидиринг..."
+      oninput="filterManagedEmployees()"
+    >
+
+  </div>
+
+
+  <!-- EMPLOYEE TABLE -->
+
+  <div class="employee-table-box">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ID</th>
+
+          <th>Ходим</th>
+
+          <th>Telegram ID</th>
+
+          <th>Филиал</th>
+
+          <th>Роль</th>
+
+          <th>Амаллар</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody id="employeeManagementTable">
+
+        <tr>
+
+          <td
+            colspan="6"
+            class="employee-loading"
+          >
+            Маълумотлар юкланмоқда...
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
 
 </div>
 
-
-<div class="route-stats">
-
-  <div class="route-stat">
-
-    <div class="route-stat-title">
-      📍 Нуқталар
-    </div>
-
-    <div
-      id="routePoints"
-      class="route-stat-value"
-    >
-      0
-    </div>
-
-  </div>
-
-
-  <div class="route-stat">
-
-    <div class="route-stat-title">
-      📏 Масофа
-    </div>
-
-    <div
-      id="routeDistance"
-      class="route-stat-value"
-    >
-      0.00 км
-    </div>
-
-  </div>
-
-
-  <div class="route-stat">
-
-    <div class="route-stat-title">
-      ⏱ Вақт
-    </div>
-
-    <div
-      id="routeDuration"
-      class="route-stat-value"
-    >
-      00:00:00
-    </div>
-
-  </div>
-
-</div>
-
-
-<div id="routeMap"></div>
-```
-
-  </div>
-
-</div>
-
-<!-- Leaflet JS -->
 
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 ></script>
+
 
 <script>
 
@@ -887,37 +1186,6 @@ content="width=device-width, initial-scale=1.0"
 
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
-
-
-/* =====================================================
-   MAIN MENU
-===================================================== */
-
-function openSection(
-  page,
-  button
-) {
-
-  if (
-    page ===
-    "dashboard.html"
-  ) {
-
-    window.scrollTo(
-      {
-        top: 0,
-        behavior: "smooth"
-      }
-    );
-
-    return;
-
-  }
-
-  window.location.href =
-    page;
-
-}
 
 
 /* =====================================================
@@ -935,6 +1203,134 @@ let routeLine = null;
 let routeMarkers = [];
 
 let selectedEmployee = null;
+
+
+/* EMPLOYEE MANAGEMENT */
+
+let managedEmployees = [];
+
+let employeeBranches = [];
+
+
+/* =====================================================
+   SECTION NAVIGATION
+===================================================== */
+
+function openSection(section) {
+
+  const dashboardSection =
+    document.getElementById(
+      "dashboardSection"
+    );
+
+  const employeesSection =
+    document.getElementById(
+      "employeesSection"
+    );
+
+  const dashboardButton =
+    document.getElementById(
+      "menuDashboard"
+    );
+
+  const employeesButton =
+    document.getElementById(
+      "menuEmployees"
+    );
+
+
+  if (
+    section === "employees"
+  ) {
+
+    dashboardSection.classList.add(
+      "hidden"
+    );
+
+    employeesSection.classList.remove(
+      "hidden"
+    );
+
+    dashboardButton.classList.remove(
+      "active"
+    );
+
+    employeesButton.classList.add(
+      "active"
+    );
+
+    loadEmployeeManagement();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+    return;
+
+  }
+
+
+  employeesSection.classList.add(
+    "hidden"
+  );
+
+  dashboardSection.classList.remove(
+    "hidden"
+  );
+
+  employeesButton.classList.remove(
+    "active"
+  );
+
+  dashboardButton.classList.add(
+    "active"
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+function openExternalPage(page) {
+
+  window.location.href =
+    page;
+
+}
+
+
+/* =====================================================
+   REFRESH CURRENT SECTION
+===================================================== */
+
+function refreshCurrentSection() {
+
+  const employeesSection =
+    document.getElementById(
+      "employeesSection"
+    );
+
+
+  if (
+    !employeesSection.classList.contains(
+      "hidden"
+    )
+  ) {
+
+    loadEmployeeManagement();
+
+    return;
+
+  }
+
+
+  loadDashboard();
+
+}
 
 
 /* =====================================================
@@ -980,9 +1376,7 @@ function setDefaultDate() {
    ERROR
 ===================================================== */
 
-function showError(
-  message
-) {
+function showError(message) {
 
   const box =
     document.getElementById(
@@ -1037,29 +1431,25 @@ async function loadDashboard() {
   ).style.display =
     "none";
 
+
   try {
-
-    const url =
-      API +
-      "?view=dashboard";
-
-    console.log(
-      "DASHBOARD URL:",
-      url
-    );
 
     const response =
       await fetch(
-        url
+        API +
+        "?view=dashboard"
       );
+
 
     const data =
       await response.json();
+
 
     console.log(
       "DASHBOARD DATA:",
       data
     );
+
 
     if (!response.ok) {
 
@@ -1070,6 +1460,7 @@ async function loadDashboard() {
       );
 
     }
+
 
     if (
       data.success === false
@@ -1083,8 +1474,10 @@ async function loadDashboard() {
 
     }
 
+
     dashboardData =
       data;
+
 
     if (
       !Array.isArray(
@@ -1097,16 +1490,19 @@ async function loadDashboard() {
 
     }
 
+
     buildBranchFilter();
 
     updateStats();
 
     renderEmployees();
 
+
     document.getElementById(
       "tableLoading"
     ).style.display =
       "none";
+
 
     document.getElementById(
       "tableWrapper"
@@ -1115,6 +1511,7 @@ async function loadDashboard() {
         ? "block"
         : "none";
 
+
     document.getElementById(
       "emptyEmployees"
     ).style.display =
@@ -1122,17 +1519,20 @@ async function loadDashboard() {
         ? "none"
         : "block";
 
-  } catch (error) {
+
+  } catch(error) {
 
     console.error(
       "DASHBOARD ERROR:",
       error
     );
 
+
     document.getElementById(
       "tableLoading"
     ).style.display =
       "none";
+
 
     showError(
       "Dashboard маълумотини олишда хато: " +
@@ -1155,8 +1555,10 @@ function buildBranchFilter() {
       "branchFilter"
     );
 
+
   const currentValue =
     select.value;
+
 
   const branches =
     [
@@ -1175,12 +1577,14 @@ function buildBranchFilter() {
       )
     ];
 
+
   select.innerHTML =
     `
       <option value="">
         Барча филиаллар
       </option>
     `;
+
 
   branches.forEach(
     branch => {
@@ -1203,6 +1607,7 @@ function buildBranchFilter() {
     }
   );
 
+
   if (
     branches.includes(
       currentValue
@@ -1218,7 +1623,7 @@ function buildBranchFilter() {
 
 
 /* =====================================================
-   FILTER EMPLOYEES
+   FILTER DASHBOARD EMPLOYEES
 ===================================================== */
 
 function getFilteredEmployees() {
@@ -1228,6 +1633,7 @@ function getFilteredEmployees() {
       "branchFilter"
     ).value;
 
+
   const search =
     document.getElementById(
       "employeeSearch"
@@ -1235,45 +1641,46 @@ function getFilteredEmployees() {
       .trim()
       .toLowerCase();
 
-  return dashboardData.employees
-    .filter(
-      employee => {
 
-        const employeeBranch =
-          employee.branch_name ||
-          employee.branch ||
-          "";
+  return dashboardData.employees.filter(
+    employee => {
 
-        const name =
-          (
-            employee.full_name ||
-            ""
-          ).toLowerCase();
+      const employeeBranch =
+        employee.branch_name ||
+        employee.branch ||
+        "";
 
-        const branchOk =
-          !branch ||
-          employeeBranch ===
-            branch;
 
-        const searchOk =
-          !search ||
-          name.includes(
-            search
-          );
+      const name =
+        (
+          employee.full_name ||
+          ""
+        ).toLowerCase();
 
-        return (
-          branchOk &&
-          searchOk
-        );
 
-      }
-    );
+      const branchOk =
+        !branch ||
+        employeeBranch === branch;
+
+
+      const searchOk =
+        !search ||
+        name.includes(search);
+
+
+      return (
+        branchOk &&
+        searchOk
+      );
+
+    }
+  );
 
 }
 
 
 /* =====================================================
-   GPS TIME HELPER
+   GPS TIME
 ===================================================== */
 
 function getEmployeeGpsTime(
@@ -1304,8 +1711,10 @@ function updateStats() {
   const employees =
     getFilteredEmployees();
 
+
   const total =
     employees.length;
+
 
   const working =
     employees.filter(
@@ -1315,6 +1724,7 @@ function updateStats() {
         )
     ).length;
 
+
   const gps =
     employees.filter(
       employee =>
@@ -1323,23 +1733,28 @@ function updateStats() {
         )
     ).length;
 
+
   const noGps =
     total - gps;
+
 
   document.getElementById(
     "totalEmployees"
   ).textContent =
     total;
 
+
   document.getElementById(
     "workingEmployees"
   ).textContent =
     working;
 
+
   document.getElementById(
     "gpsEmployees"
   ).textContent =
     gps;
+
 
   document.getElementById(
     "noGpsEmployees"
@@ -1350,7 +1765,7 @@ function updateStats() {
 
 
 /* =====================================================
-   EMPLOYEE WORKING STATUS
+   WORKING STATUS
 ===================================================== */
 
 function isEmployeeWorking(
@@ -1365,6 +1780,7 @@ function isEmployeeWorking(
 
   }
 
+
   if (
     employee.working === true
   ) {
@@ -1373,23 +1789,24 @@ function isEmployeeWorking(
 
   }
 
+
   if (
-    employee.status ===
-      "working"
+    employee.status === "working"
   ) {
 
     return true;
 
   }
 
+
   if (
-    employee.work_status ===
-      "working"
+    employee.work_status === "working"
   ) {
 
     return true;
 
   }
+
 
   return false;
 
@@ -1409,6 +1826,7 @@ function getGpsStatus(
       employee
     );
 
+
   if (!gpsTime) {
 
     return {
@@ -1419,10 +1837,12 @@ function getGpsStatus(
 
   }
 
+
   const last =
     new Date(
       gpsTime
     );
+
 
   if (
     Number.isNaN(
@@ -1438,27 +1858,30 @@ function getGpsStatus(
 
   }
 
+
   const diff =
     Date.now() -
     last.getTime();
+
 
   const minutes =
     Math.floor(
       diff / 60000
     );
 
+
   if (
     minutes <= 5
   ) {
 
     return {
-      text:
-        "🟢 GPS онлайн",
+      text: "🟢 GPS онлайн",
       className:
         "status status-online"
     };
 
   }
+
 
   return {
     text:
@@ -1486,10 +1909,12 @@ function formatDate(
 
   }
 
+
   const date =
     new Date(
       value
     );
+
 
   if (
     Number.isNaN(
@@ -1501,19 +1926,15 @@ function formatDate(
 
   }
 
+
   return date.toLocaleString(
     "uz-UZ",
     {
-      day:
-        "2-digit",
-      month:
-        "2-digit",
-      year:
-        "numeric",
-      hour:
-        "2-digit",
-      minute:
-        "2-digit"
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     }
   );
 
@@ -1521,7 +1942,7 @@ function formatDate(
 
 
 /* =====================================================
-   RENDER EMPLOYEES
+   RENDER DASHBOARD EMPLOYEES
 ===================================================== */
 
 function renderEmployees() {
@@ -1531,11 +1952,14 @@ function renderEmployees() {
       "employeesBody"
     );
 
+
   const employees =
     getFilteredEmployees();
 
+
   body.innerHTML =
     "";
+
 
   employees.forEach(
     employee => {
@@ -1545,26 +1969,31 @@ function renderEmployees() {
           "tr"
         );
 
+
       const employeeId =
         Number(
           employee.employee_id ??
           employee.id
         );
 
+
       const branch =
         employee.branch_name ||
         employee.branch ||
         "-";
+
 
       const working =
         isEmployeeWorking(
           employee
         );
 
+
       const gps =
         getGpsStatus(
           employee
         );
+
 
       row.innerHTML =
         `
@@ -1584,11 +2013,7 @@ function renderEmployees() {
           </td>
 
           <td>
-            ${
-              escapeHtml(
-                branch
-              )
-            }
+            ${escapeHtml(branch)}
           </td>
 
           <td>
@@ -1597,17 +2022,13 @@ function renderEmployees() {
               working
 
                 ? `
-                  <span
-                    class="status status-working"
-                  >
+                  <span class="status status-working">
                     🟢 Ишда
                   </span>
                 `
 
                 : `
-                  <span
-                    class="status status-offline"
-                  >
+                  <span class="status status-offline">
                     ⚪ Ишда эмас
                   </span>
                 `
@@ -1617,9 +2038,7 @@ function renderEmployees() {
 
           <td>
 
-            <span
-              class="${gps.className}"
-            >
+            <span class="${gps.className}">
               ${gps.text}
             </span>
 
@@ -1648,6 +2067,7 @@ function renderEmployees() {
           </td>
         `;
 
+
       body.appendChild(
         row
       );
@@ -1665,12 +2085,13 @@ function renderEmployees() {
 
         button.addEventListener(
           "click",
-          function () {
+          function() {
 
             const id =
               Number(
                 this.dataset.routeId
               );
+
 
             openEmployeeRoute(
               id
@@ -1693,35 +2114,18 @@ function escapeHtml(
   value
 ) {
 
-  return String(
-    value
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
 
 /* =====================================================
-   OPEN EMPLOYEE ROUTE
+   ROUTE
 ===================================================== */
 
 async function openEmployeeRoute(
@@ -1747,16 +2151,20 @@ async function openEmployeeRoute(
 
       : null;
 
+
   selectedEmployee =
     employee;
+
 
   const detail =
     document.getElementById(
       "detail"
     );
 
+
   detail.style.display =
     "block";
+
 
   document.getElementById(
     "detailTitle"
@@ -1768,25 +2176,30 @@ async function openEmployeeRoute(
         : "Ходим маршрути"
     );
 
+
   document.getElementById(
     "routePoints"
   ).textContent =
     "0";
+
 
   document.getElementById(
     "routeDistance"
   ).textContent =
     "0.00 км";
 
+
   document.getElementById(
     "routeDuration"
   ).textContent =
     "00:00:00";
 
+
   initRouteMap();
 
+
   setTimeout(
-    function () {
+    function() {
 
       if (
         routeMap
@@ -1800,10 +2213,12 @@ async function openEmployeeRoute(
     300
   );
 
+
   const date =
     document.getElementById(
       "date"
     ).value;
+
 
   await loadRoute(
     employeeId,
@@ -1814,7 +2229,7 @@ async function openEmployeeRoute(
 
 
 /* =====================================================
-   INIT ROUTE MAP
+   INIT MAP
 ===================================================== */
 
 function initRouteMap() {
@@ -1827,6 +2242,7 @@ function initRouteMap() {
 
   }
 
+
   routeMap =
     L.map(
       "routeMap"
@@ -1837,6 +2253,7 @@ function initRouteMap() {
       ],
       13
     );
+
 
   L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -1875,23 +2292,16 @@ async function loadRoute(
         date
       );
 
-    console.log(
-      "ROUTE URL:",
-      url
-    );
 
     const response =
       await fetch(
         url
       );
 
+
     const data =
       await response.json();
 
-    console.log(
-      "ROUTE DATA:",
-      data
-    );
 
     if (
       !response.ok
@@ -1905,6 +2315,7 @@ async function loadRoute(
 
     }
 
+
     if (
       data.success !== true
     ) {
@@ -1916,6 +2327,7 @@ async function loadRoute(
       );
 
     }
+
 
     if (
       !Array.isArray(
@@ -1929,6 +2341,7 @@ async function loadRoute(
 
     }
 
+
     const validPoints =
       data.points
         .map(
@@ -1939,10 +2352,12 @@ async function loadRoute(
                 point.latitude
               );
 
+
             const longitude =
               Number(
                 point.longitude
               );
+
 
             if (
               !Number.isFinite(
@@ -1956,6 +2371,7 @@ async function loadRoute(
               return null;
 
             }
+
 
             return {
 
@@ -1979,31 +2395,31 @@ async function loadRoute(
             point !== null
         );
 
-    console.log(
-      "VALID ROUTE POINTS:",
-      validPoints
-    );
 
     drawRoute(
       validPoints
     );
 
-  } catch (error) {
+
+  } catch(error) {
 
     console.error(
       "LOAD ROUTE ERROR:",
       error
     );
 
+
     document.getElementById(
       "routePoints"
     ).textContent =
       "Хато";
 
+
     document.getElementById(
       "routeDistance"
     ).textContent =
       "Хато";
+
 
     document.getElementById(
       "routeDuration"
@@ -2056,6 +2472,7 @@ function drawRoute(
     }
   );
 
+
   routeMarkers =
     [];
 
@@ -2075,10 +2492,12 @@ function drawRoute(
     ).textContent =
       "0.00 км";
 
+
     document.getElementById(
       "routeDuration"
     ).textContent =
       "00:00:00";
+
 
     routeMap.setView(
       [
@@ -2088,6 +2507,7 @@ function drawRoute(
       13
     );
 
+
     return;
 
   }
@@ -2095,16 +2515,16 @@ function drawRoute(
 
   const coordinates =
     points.map(
-      point =>
-        [
-          point.latitude,
-          point.longitude
-        ]
+      point => [
+        point.latitude,
+        point.longitude
+      ]
     );
 
 
   let totalDistance =
     0;
+
 
   for (
     let i = 1;
@@ -2126,18 +2546,14 @@ function drawRoute(
   document.getElementById(
     "routeDistance"
   ).textContent =
-    totalDistance.toFixed(
-      2
-    ) +
+    totalDistance.toFixed(2) +
     " км";
 
 
   if (
     points.length >= 2 &&
     points[0].recorded_at &&
-    points[
-      points.length - 1
-    ].recorded_at
+    points[points.length - 1].recorded_at
   ) {
 
     const start =
@@ -2145,16 +2561,17 @@ function drawRoute(
         points[0].recorded_at
       );
 
+
     const end =
       new Date(
-        points[
-          points.length - 1
-        ].recorded_at
+        points[points.length - 1].recorded_at
       );
+
 
     const duration =
       end.getTime() -
       start.getTime();
+
 
     document.getElementById(
       "routeDuration"
@@ -2188,14 +2605,17 @@ function drawRoute(
         "📍 GPS нуқтаси"
       );
 
+
     routeMarkers.push(
       marker
     );
+
 
     routeMap.setView(
       coordinates[0],
       16
     );
+
 
     return;
 
@@ -2259,7 +2679,7 @@ function drawRoute(
 
 
 /* =====================================================
-   HAVERSINE DISTANCE
+   DISTANCE
 ===================================================== */
 
 function calculateDistance(
@@ -2272,27 +2692,22 @@ function calculateDistance(
   const R =
     6371;
 
+
   const dLat =
-    (
-      lat2 - lat1
-    ) *
+    (lat2 - lat1) *
     Math.PI /
     180;
+
 
   const dLon =
-    (
-      lon2 - lon1
-    ) *
+    (lon2 - lon1) *
     Math.PI /
     180;
 
+
   const a =
-    Math.sin(
-      dLat / 2
-    ) *
-    Math.sin(
-      dLat / 2
-    ) +
+    Math.sin(dLat / 2) *
+    Math.sin(dLat / 2) +
 
     Math.cos(
       lat1 *
@@ -2306,21 +2721,17 @@ function calculateDistance(
       180
     ) *
 
-    Math.sin(
-      dLon / 2
-    ) *
-    Math.sin(
-      dLon / 2
-    );
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+
 
   const c =
     2 *
     Math.atan2(
       Math.sqrt(a),
-      Math.sqrt(
-        1 - a
-      )
+      Math.sqrt(1 - a)
     );
+
 
   return R * c;
 
@@ -2346,52 +2757,35 @@ function formatDuration(
 
   }
 
+
   const totalSeconds =
     Math.floor(
-      milliseconds /
-      1000
+      milliseconds / 1000
     );
+
 
   const hours =
     Math.floor(
-      totalSeconds /
-      3600
+      totalSeconds / 3600
     );
+
 
   const minutes =
     Math.floor(
-      (
-        totalSeconds %
-        3600
-      ) /
-      60
+      (totalSeconds % 3600) / 60
     );
 
+
   const seconds =
-    totalSeconds %
-    60;
+    totalSeconds % 60;
+
 
   return (
-    String(
-      hours
-    ).padStart(
-      2,
-      "0"
-    ) +
+    String(hours).padStart(2,"0") +
     ":" +
-    String(
-      minutes
-    ).padStart(
-      2,
-      "0"
-    ) +
+    String(minutes).padStart(2,"0") +
     ":" +
-    String(
-      seconds
-    ).padStart(
-      2,
-      "0"
-    )
+    String(seconds).padStart(2,"0")
   );
 
 }
@@ -2408,6 +2802,7 @@ function closeRoute() {
   ).style.display =
     "none";
 
+
   selectedEmployee =
     null;
 
@@ -2415,7 +2810,7 @@ function closeRoute() {
 
 
 /* =====================================================
-   FILTER EVENTS
+   DASHBOARD FILTER EVENTS
 ===================================================== */
 
 document
@@ -2424,7 +2819,7 @@ document
   )
   .addEventListener(
     "change",
-    function () {
+    function() {
 
       updateStats();
 
@@ -2440,7 +2835,7 @@ document
   )
   .addEventListener(
     "input",
-    function () {
+    function() {
 
       updateStats();
 
@@ -2456,7 +2851,7 @@ document
   )
   .addEventListener(
     "change",
-    async function () {
+    async function() {
 
       if (
         selectedEmployee
@@ -2468,6 +2863,7 @@ document
             selectedEmployee.id
           );
 
+
         await loadRoute(
           employeeId,
           this.value
@@ -2477,6 +2873,938 @@ document
 
     }
   );
+
+
+/* =====================================================
+   EMPLOYEE MESSAGE
+===================================================== */
+
+function showEmployeeMessage(
+  text,
+  type
+) {
+
+  const box =
+    document.getElementById(
+      "employeeMessage"
+    );
+
+
+  box.textContent =
+    text;
+
+
+  box.className =
+    "employee-message " +
+    type;
+
+
+  box.style.display =
+    "block";
+
+}
+
+
+/* =====================================================
+   OPEN ADD EMPLOYEE FORM
+===================================================== */
+
+function openAddForm() {
+
+  document.getElementById(
+    "employeeFormTitle"
+  ).textContent =
+    "Янги ходим қўшиш";
+
+
+  document.getElementById(
+    "employeeEditId"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "employeeFullName"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "employeeTelegramId"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "employeeBranchId"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "employeeRole"
+  ).value =
+    "employee";
+
+
+  document.getElementById(
+    "employeeFormBox"
+  ).classList.add(
+    "show"
+  );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =====================================================
+   CLOSE EMPLOYEE FORM
+===================================================== */
+
+function closeEmployeeForm() {
+
+  document.getElementById(
+    "employeeFormBox"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+/* =====================================================
+   LOAD EMPLOYEE MANAGEMENT
+===================================================== */
+
+async function loadEmployeeManagement() {
+
+  const table =
+    document.getElementById(
+      "employeeManagementTable"
+    );
+
+
+  table.innerHTML =
+    `
+      <tr>
+        <td
+          colspan="6"
+          class="employee-loading"
+        >
+          Маълумотлар юкланмоқда...
+        </td>
+      </tr>
+    `;
+
+
+  try {
+
+    await loadEmployeeBranches();
+
+    await loadManagedEmployees();
+
+  } catch(error) {
+
+    console.error(
+      "EMPLOYEE MANAGEMENT ERROR:",
+      error
+    );
+
+
+    table.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="6"
+            class="employee-loading"
+          >
+            Ходимларни олишда хато
+          </td>
+        </tr>
+      `;
+
+  }
+
+}
+
+
+/* =====================================================
+   LOAD EMPLOYEE BRANCHES
+===================================================== */
+
+async function loadEmployeeBranches() {
+
+  const response =
+    await fetch(
+      API +
+      "?view=branches"
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      data.error ||
+      "Филиалларни олишда хато"
+    );
+
+  }
+
+
+  employeeBranches =
+    Array.isArray(data)
+      ? data
+      : (
+        Array.isArray(
+          data.branches
+        )
+          ? data.branches
+          : []
+      );
+
+
+  const select =
+    document.getElementById(
+      "employeeBranchId"
+    );
+
+
+  select.innerHTML =
+    `
+      <option value="">
+        Филиални танланг
+      </option>
+    `;
+
+
+  employeeBranches.forEach(
+    branch => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        branch.id;
+
+
+      option.textContent =
+        branch.name;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   LOAD MANAGED EMPLOYEES
+===================================================== */
+
+async function loadManagedEmployees() {
+
+  const response =
+    await fetch(
+      API +
+      "?view=employees"
+    );
+
+
+  const data =
+    await response.json();
+
+
+  console.log(
+    "EMPLOYEES:",
+    data
+  );
+
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      data.error ||
+      "Ходимларни олишда хато"
+    );
+
+  }
+
+
+  managedEmployees =
+    Array.isArray(data)
+      ? data
+      : (
+        Array.isArray(
+          data.employees
+        )
+          ? data.employees
+          : []
+      );
+
+
+  renderManagedEmployees(
+    managedEmployees
+  );
+
+}
+
+
+/* =====================================================
+   RENDER MANAGED EMPLOYEES
+===================================================== */
+
+function renderManagedEmployees(
+  employees
+) {
+
+  const table =
+    document.getElementById(
+      "employeeManagementTable"
+    );
+
+
+  table.innerHTML =
+    "";
+
+
+  if (
+    employees.length === 0
+  ) {
+
+    table.innerHTML =
+      `
+        <tr>
+          <td
+            colspan="6"
+            class="employee-loading"
+          >
+            Ходимлар топилмади
+          </td>
+        </tr>
+      `;
+
+
+    return;
+
+  }
+
+
+  employees.forEach(
+    employee => {
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      const idCell =
+        document.createElement(
+          "td"
+        );
+
+      idCell.textContent =
+        employee.id ?? "";
+
+      row.appendChild(
+        idCell
+      );
+
+
+      const nameCell =
+        document.createElement(
+          "td"
+        );
+
+      nameCell.textContent =
+        employee.full_name ?? "";
+
+      row.appendChild(
+        nameCell
+      );
+
+
+      const telegramCell =
+        document.createElement(
+          "td"
+        );
+
+      telegramCell.textContent =
+        employee.telegram_id ?? "";
+
+      row.appendChild(
+        telegramCell
+      );
+
+
+      const branchCell =
+        document.createElement(
+          "td"
+        );
+
+      branchCell.textContent =
+        employee.branch_name ||
+        employee.branch_id ||
+        "";
+
+      row.appendChild(
+        branchCell
+      );
+
+
+      const roleCell =
+        document.createElement(
+          "td"
+        );
+
+      roleCell.textContent =
+        employee.role ||
+        "employee";
+
+      row.appendChild(
+        roleCell
+      );
+
+
+      const actionCell =
+        document.createElement(
+          "td"
+        );
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+
+      editButton.className =
+        "employee-edit-btn";
+
+
+      editButton.textContent =
+        "✏️ Таҳрир";
+
+
+      editButton.onclick =
+        function() {
+
+          editEmployee(
+            employee
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        editButton
+      );
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+
+      deleteButton.className =
+        "employee-delete-btn";
+
+
+      deleteButton.textContent =
+        "🗑 Ўчириш";
+
+
+      deleteButton.onclick =
+        function() {
+
+          deleteEmployee(
+            employee
+          );
+
+        };
+
+
+      actionCell.appendChild(
+        deleteButton
+      );
+
+
+      row.appendChild(
+        actionCell
+      );
+
+
+      table.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   FILTER MANAGED EMPLOYEES
+===================================================== */
+
+function filterManagedEmployees() {
+
+  const search =
+    document.getElementById(
+      "employeeManagementSearch"
+    ).value
+      .toLowerCase()
+      .trim();
+
+
+  if (!search) {
+
+    renderManagedEmployees(
+      managedEmployees
+    );
+
+    return;
+
+  }
+
+
+  const filtered =
+    managedEmployees.filter(
+      employee => {
+
+        const name =
+          String(
+            employee.full_name ||
+            ""
+          ).toLowerCase();
+
+
+        const telegram =
+          String(
+            employee.telegram_id ||
+            ""
+          ).toLowerCase();
+
+
+        const branch =
+          String(
+            employee.branch_name ||
+            ""
+          ).toLowerCase();
+
+
+        return (
+          name.includes(search) ||
+          telegram.includes(search) ||
+          branch.includes(search)
+        );
+
+      }
+    );
+
+
+  renderManagedEmployees(
+    filtered
+  );
+
+}
+
+
+/* =====================================================
+   EDIT EMPLOYEE
+===================================================== */
+
+function editEmployee(
+  employee
+) {
+
+  document.getElementById(
+    "employeeFormTitle"
+  ).textContent =
+    "✏️ Ходимни таҳрирлаш";
+
+
+  document.getElementById(
+    "employeeEditId"
+  ).value =
+    employee.id;
+
+
+  document.getElementById(
+    "employeeFullName"
+  ).value =
+    employee.full_name || "";
+
+
+  document.getElementById(
+    "employeeTelegramId"
+  ).value =
+    employee.telegram_id || "";
+
+
+  document.getElementById(
+    "employeeBranchId"
+  ).value =
+    employee.branch_id || "";
+
+
+  document.getElementById(
+    "employeeRole"
+  ).value =
+    employee.role || "employee";
+
+
+  document.getElementById(
+    "employeeFormBox"
+  ).classList.add(
+    "show"
+  );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =====================================================
+   SAVE EMPLOYEE
+===================================================== */
+
+async function saveEmployee() {
+
+  const editId =
+    document.getElementById(
+      "employeeEditId"
+    ).value;
+
+
+  const fullName =
+    document.getElementById(
+      "employeeFullName"
+    ).value
+      .trim();
+
+
+  const telegramId =
+    document.getElementById(
+      "employeeTelegramId"
+    ).value
+      .trim();
+
+
+  const branchId =
+    document.getElementById(
+      "employeeBranchId"
+    ).value;
+
+
+  const role =
+    document.getElementById(
+      "employeeRole"
+    ).value;
+
+
+  if (!fullName) {
+
+    showEmployeeMessage(
+      "Ф.И.О. киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!telegramId) {
+
+    showEmployeeMessage(
+      "Telegram ID киритинг",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    let response;
+
+
+    if (editId) {
+
+      response =
+        await fetch(
+          API +
+          "?view=employee_update",
+          {
+            method: "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                id:
+                  Number(
+                    editId
+                  ),
+
+                full_name:
+                  fullName,
+
+                telegram_id:
+                  Number(
+                    telegramId
+                  ),
+
+                branch_id:
+                  branchId
+                    ? Number(
+                        branchId
+                      )
+                    : null,
+
+                role:
+                  role
+              })
+          }
+        );
+
+    } else {
+
+      response =
+        await fetch(
+          API +
+          "?view=employee_add",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                full_name:
+                  fullName,
+
+                telegram_id:
+                  Number(
+                    telegramId
+                  ),
+
+                branch_id:
+                  branchId
+                    ? Number(
+                        branchId
+                      )
+                    : null,
+
+                role:
+                  role
+              })
+          }
+        );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "SAVE EMPLOYEE:",
+      data
+    );
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Маълумот сақланмади"
+      );
+
+    }
+
+
+    showEmployeeMessage(
+      editId
+        ? "✅ Ходим маълумотлари янгиланди"
+        : "✅ Ходим муваффақиятли қўшилди",
+      "success"
+    );
+
+
+    closeEmployeeForm();
+
+
+    await loadManagedEmployees();
+
+
+    /* Dashboard маълумотини ҳам янгилаймиз */
+
+    await loadDashboard();
+
+
+  } catch(error) {
+
+    console.error(
+      "SAVE ERROR:",
+      error
+    );
+
+
+    showEmployeeMessage(
+      "❌ " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE EMPLOYEE
+===================================================== */
+
+async function deleteEmployee(
+  employee
+) {
+
+  if (
+    Number(employee.id) === 1
+  ) {
+
+    showEmployeeMessage(
+      "❌ Асосий администраторни ўчириш мумкин эмас",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "⚠️ " +
+      employee.full_name +
+      "\n\nУшбу ходимни ўчиришни тасдиқлайсизми?"
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API +
+        "?view=employee_delete&id=" +
+        encodeURIComponent(
+          employee.id
+        ),
+        {
+          method: "DELETE"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "DELETE EMPLOYEE:",
+      data
+    );
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Ходим ўчирилмади"
+      );
+
+    }
+
+
+    showEmployeeMessage(
+      "✅ Ходим ўчирилди",
+      "success"
+    );
+
+
+    await loadManagedEmployees();
+
+
+    await loadDashboard();
+
+
+  } catch(error) {
+
+    console.error(
+      "DELETE ERROR:",
+      error
+    );
+
+
+    showEmployeeMessage(
+      "❌ " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
 
 
 /* =====================================================
