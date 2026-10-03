@@ -3121,11 +3121,20 @@ async function loadEmployeeBranches() {
 
 async function loadManagedEmployees() {
 
-  const response =
-    await fetch(
-      API +
-      "?view=employees"
-    );
+ const telegramUserId =
+  window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
+  new URLSearchParams(window.location.search).get("telegram_id") ||
+  "";
+
+const response =
+  await fetch(
+    API +
+    "?view=employees" +
+    "&telegram_id=" +
+    encodeURIComponent(
+      telegramUserId
+    )
+  );
 
 
   const data =
