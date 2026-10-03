@@ -3147,10 +3147,20 @@ async function loadManagedEmployees() {
   const data =
     await response.json();
 
-  console.log(
-    "EMPLOYEES:",
-    data
-  );
+console.log(
+  "EMPLOYEES URL:",
+  API +
+  "?view=employees" +
+  "&telegram_id=" +
+  encodeURIComponent(
+    telegramUserId
+  )
+);
+
+console.log(
+  "EMPLOYEES:",
+  data
+);
 
   if (
     !response.ok
