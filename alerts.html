@@ -266,7 +266,14 @@ async function loadAlerts() {
 
   try {
     const response = await fetch(
-      API + "?view=alerts&t=" + Date.now(),
+     API +
+  "?view=alerts" +
+  "&telegram_id=" +
+  encodeURIComponent(
+    window.Telegram?.WebApp?.initDataUnsafe?.user?.id || ""
+  ) +
+  "&t=" +
+  Date.now(),
       {
         method: "GET",
         cache: "no-store"
