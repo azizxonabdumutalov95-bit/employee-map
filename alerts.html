@@ -265,15 +265,18 @@ async function loadAlerts() {
     '<tr><td colspan="6" class="empty">⏳ Маълумот олинмоқда...</td></tr>';
 
   try {
-    const response = await fetch(
-     API +
-  "?view=alerts" +
-  "&telegram_id=" +
-  encodeURIComponent(
-    window.Telegram?.WebApp?.initDataUnsafe?.user?.id || ""
-  ) +
-  "&t=" +
-  Date.now(),
+   const telegramUserId =
+  window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
+  new URLSearchParams(window.location.search).get("telegram_id") ||
+  "";
+
+const response = await fetch(
+  API +
+    "?view=alerts" +
+    "&telegram_id=" +
+    encodeURIComponent(telegramUserId) +
+    "&t=" +
+    Date.now(),
       {
         method: "GET",
         cache: "no-store"
