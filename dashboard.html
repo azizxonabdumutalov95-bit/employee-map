@@ -3121,31 +3121,36 @@ async function loadEmployeeBranches() {
 
 async function loadManagedEmployees() {
 
- const telegramUserId =
-  window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
-  new URLSearchParams(window.location.search).get("telegram_id") ||
-  "";
+  const telegramUserId =
+    new URLSearchParams(
+      window.location.search
+    ).get("telegram_id") ||
+    window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
+    "";
 
-const response =
-  await fetch(
-    API +
-    "?view=employees" +
-    "&telegram_id=" +
-    encodeURIComponent(
-      telegramUserId
-    )
-  );
-
+  const response =
+    await fetch(
+      API +
+      "?view=employees" +
+      "&telegram_id=" +
+      encodeURIComponent(
+        telegramUserId
+      ) +
+      "&t=" +
+      Date.now(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
 
   const data =
     await response.json();
-
 
   console.log(
     "EMPLOYEES:",
     data
   );
-
 
   if (
     !response.ok
@@ -3158,7 +3163,6 @@ const response =
 
   }
 
-
   managedEmployees =
     Array.isArray(data)
       ? data
@@ -3170,13 +3174,11 @@ const response =
           : []
       );
 
-
   renderManagedEmployees(
     managedEmployees
   );
 
 }
-
 
 /* =====================================================
    RENDER MANAGED EMPLOYEES
