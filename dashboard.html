@@ -1409,9 +1409,16 @@ function renderEmployees() {
 
           <td>
             ${
-              formatDate(
-                employee.last_location_at
-              )
+             formatDate(
+  employee.last_location_at ||
+  (
+    employee.last_location &&
+    (
+      employee.last_location.recorded_at ||
+      employee.last_location.created_at
+    )
+  )
+)
             }
           </td>
 
