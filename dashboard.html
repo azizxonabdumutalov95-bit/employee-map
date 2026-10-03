@@ -1,17 +1,20 @@
 <!DOCTYPE html>
+
 <html lang="uz">
 <head>
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-  <title>Xodimlar Dashboard</title>
+>
+
+  <title>Общий Dashboard — Ходимлар тизими</title>
 
   <!-- Leaflet -->
+
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -39,25 +42,78 @@
       padding: 20px;
     }
 
-    h1 {
-      margin: 0 0 20px 0;
-      font-size: 28px;
+    /* =========================
+       HEADER
+    ========================== */
+
+    .main-header {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .topbar {
+    .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 15px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
     }
 
-    .top-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    h1 {
+      margin: 0;
+      font-size: 28px;
     }
+
+    .subtitle {
+      margin-top: 7px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =========================
+       MAIN MENU
+    ========================== */
+
+    .main-menu {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(180px, 1fr)
+        );
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .menu-button {
+      border: none;
+      border-radius: 10px;
+      padding: 14px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      background: #f1f3f5;
+      color: #333;
+      transition: 0.2s;
+    }
+
+    .menu-button:hover {
+      background: #e2e6ea;
+      transform: translateY(-1px);
+    }
+
+    .menu-button.active {
+      background: #1976d2;
+      color: white;
+    }
+
+    /* =========================
+       BUTTONS
+    ========================== */
 
     button {
       border: none;
@@ -90,6 +146,10 @@
       background: #607d8b;
       color: white;
     }
+
+    /* =========================
+       FILTERS
+    ========================== */
 
     .filters {
       background: white;
@@ -127,6 +187,10 @@
       font-size: 14px;
     }
 
+    /* =========================
+       STATS
+    ========================== */
+
     .stats {
       display: grid;
       grid-template-columns:
@@ -156,6 +220,10 @@
       font-size: 28px;
       font-weight: bold;
     }
+
+    /* =========================
+       TABLE
+    ========================== */
 
     .table-card {
       background: white;
@@ -203,6 +271,10 @@
       background: #fafafa;
     }
 
+    /* =========================
+       STATUS
+    ========================== */
+
     .status {
       display: inline-block;
       padding: 5px 9px;
@@ -236,6 +308,10 @@
     .route-button:hover {
       background: #125ea8;
     }
+
+    /* =========================
+       ROUTE
+    ========================== */
 
     .detail {
       display: none;
@@ -295,6 +371,10 @@
       height: 550px;
     }
 
+    /* =========================
+       ERROR / LOADING
+    ========================== */
+
     .loading {
       text-align: center;
       padding: 30px;
@@ -315,6 +395,10 @@
       padding: 30px;
       color: #777;
     }
+
+    /* =========================
+       MOBILE
+    ========================== */
 
     @media (
       max-width: 700px
@@ -337,6 +421,18 @@
         width: 100%;
       }
 
+      .main-menu {
+        grid-template-columns:
+          repeat(
+            2,
+            1fr
+          );
+      }
+
+      .menu-button {
+        min-height: 65px;
+      }
+
       #routeMap {
         height: 450px;
       }
@@ -352,39 +448,119 @@
 <div class="container">
 
   <!-- =========================
-       TOP
+       MAIN HEADER
   ========================== -->
 
-  <div class="topbar">
+  <div class="main-header">
 
-    <div>
-      <h1>
-        🖥 Ходимлар Dashboard
-      </h1>
-    </div>
+```
+<div class="header-top">
 
-    <div class="top-buttons">
+  <div>
 
-      <button
-        class="btn-primary"
-        type="button"
-        onclick="loadDashboard()"
-      >
-        🔄 Янгилаш
-      </button>
+    <h1>
+      🏠 Общий Dashboard
+    </h1>
 
-      <button
-        class="btn-secondary"
-        type="button"
-        onclick="window.location.href='alerts.html'"
-      >
-        🚨 Alertлар
-      </button>
-
+    <div class="subtitle">
+      Ходимлар назорати ва бошқарув тизими
     </div>
 
   </div>
 
+  <button
+    class="btn-primary"
+    type="button"
+    onclick="loadDashboard()"
+  >
+    🔄 Янгилаш
+  </button>
+
+</div>
+
+
+<!-- =========================
+     MAIN MENU
+========================== -->
+
+<div class="main-menu">
+
+  <button
+    type="button"
+    class="menu-button active"
+    onclick="openSection('dashboard.html', this)"
+  >
+    🏠 Общий Dashboard
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('employees.html', this)"
+  >
+    👥 Ходимлар бошқаруви
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('branches.html', this)"
+  >
+    🏢 Филиал бошқаруви
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('daily-report.html', this)"
+  >
+    📊 Кунлик ҳисобот
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('date-range-report.html', this)"
+  >
+    📆 Сана оралиғи
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('branch-report.html', this)"
+  >
+    🏢 Филиал ҳисоботи
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('tracking.html', this)"
+  >
+    🗺 Ходимлар картаси
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('gps.html', this)"
+  >
+    📍 GPS назорати
+  </button>
+
+  <button
+    type="button"
+    class="menu-button"
+    onclick="openSection('alerts.html', this)"
+  >
+    🚨 Огоҳлантиришлар
+  </button>
+
+</div>
+```
+
+  </div>
 
   <!-- =========================
        ERROR
@@ -395,64 +571,64 @@
     class="error"
   ></div>
 
-
   <!-- =========================
        FILTERS
   ========================== -->
 
   <div class="filters">
 
-    <div class="filters-row">
+```
+<div class="filters-row">
 
-      <div class="filter-item">
+  <div class="filter-item">
 
-        <label>
-          📅 Сана
-        </label>
+    <label>
+      📅 Сана
+    </label>
 
-        <input
-          id="date"
-          type="date"
-        >
-
-      </div>
-
-
-      <div class="filter-item">
-
-        <label>
-          🏢 Филиал
-        </label>
-
-        <select id="branchFilter">
-
-          <option value="">
-            Барча филиаллар
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="filter-item">
-
-        <label>
-          🔎 Ходим
-        </label>
-
-        <input
-          id="employeeSearch"
-          type="text"
-          placeholder="Ходим исмини киритинг"
-        >
-
-      </div>
-
-    </div>
+    <input
+      id="date"
+      type="date"
+    >
 
   </div>
 
+
+  <div class="filter-item">
+
+    <label>
+      🏢 Филиал
+    </label>
+
+    <select id="branchFilter">
+
+      <option value="">
+        Барча филиаллар
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="filter-item">
+
+    <label>
+      🔎 Ходим
+    </label>
+
+    <input
+      id="employeeSearch"
+      type="text"
+      placeholder="Ходим исмини киритинг"
+    >
+
+  </div>
+
+</div>
+```
+
+  </div>
 
   <!-- =========================
        STATS
@@ -460,71 +636,72 @@
 
   <div class="stats">
 
-    <div class="stat-card">
+```
+<div class="stat-card">
 
-      <div class="stat-title">
-        👥 Жами ходимлар
-      </div>
-
-      <div
-        id="totalEmployees"
-        class="stat-value"
-      >
-        0
-      </div>
-
-    </div>
-
-
-    <div class="stat-card">
-
-      <div class="stat-title">
-        🟢 Ҳозир ишда
-      </div>
-
-      <div
-        id="workingEmployees"
-        class="stat-value"
-      >
-        0
-      </div>
-
-    </div>
-
-
-    <div class="stat-card">
-
-      <div class="stat-title">
-        📍 GPS бор
-      </div>
-
-      <div
-        id="gpsEmployees"
-        class="stat-value"
-      >
-        0
-      </div>
-
-    </div>
-
-
-    <div class="stat-card">
-
-      <div class="stat-title">
-        🔴 GPS йўқ
-      </div>
-
-      <div
-        id="noGpsEmployees"
-        class="stat-value"
-      >
-        0
-      </div>
-
-    </div>
-
+  <div class="stat-title">
+    👥 Жами ходимлар
   </div>
 
+  <div
+    id="totalEmployees"
+    class="stat-value"
+  >
+    0
+  </div>
+
+</div>
+
+
+<div class="stat-card">
+
+  <div class="stat-title">
+    🟢 Ҳозир ишда
+  </div>
+
+  <div
+    id="workingEmployees"
+    class="stat-value"
+  >
+    0
+  </div>
+
+</div>
+
+
+<div class="stat-card">
+
+  <div class="stat-title">
+    📍 GPS бор
+  </div>
+
+  <div
+    id="gpsEmployees"
+    class="stat-value"
+  >
+    0
+  </div>
+
+</div>
+
+
+<div class="stat-card">
+
+  <div class="stat-title">
+    🔴 GPS йўқ
+  </div>
+
+  <div
+    id="noGpsEmployees"
+    class="stat-value"
+  >
+    0
+  </div>
+
+</div>
+```
+
+  </div>
 
   <!-- =========================
        EMPLOYEES TABLE
@@ -532,79 +709,80 @@
 
   <div class="table-card">
 
-    <div class="table-header">
-      👥 Ходимлар
-    </div>
+```
+<div class="table-header">
+  👥 Ходимлар
+</div>
 
-    <div
-      id="tableLoading"
-      class="loading"
-    >
-      Маълумот юкланмоқда...
-    </div>
+<div
+  id="tableLoading"
+  class="loading"
+>
+  Маълумот юкланмоқда...
+</div>
 
-    <div
-      id="tableWrapper"
-      class="table-wrapper"
-      style="display:none;"
-    >
+<div
+  id="tableWrapper"
+  class="table-wrapper"
+  style="display:none;"
+>
 
-      <table>
+  <table>
 
-        <thead>
+    <thead>
 
-          <tr>
+      <tr>
 
-            <th>
-              ID
-            </th>
+        <th>
+          ID
+        </th>
 
-            <th>
-              Ходим
-            </th>
+        <th>
+          Ходим
+        </th>
 
-            <th>
-              Филиал
-            </th>
+        <th>
+          Филиал
+        </th>
 
-            <th>
-              Ҳолати
-            </th>
+        <th>
+          Ҳолати
+        </th>
 
-            <th>
-              GPS
-            </th>
+        <th>
+          GPS
+        </th>
 
-            <th>
-              Охирги GPS
-            </th>
+        <th>
+          Охирги GPS
+        </th>
 
-            <th>
-              Маршрут
-            </th>
+        <th>
+          Маршрут
+        </th>
 
-          </tr>
+      </tr>
 
-        </thead>
+    </thead>
 
-        <tbody
-          id="employeesBody"
-        ></tbody>
+    <tbody
+      id="employeesBody"
+    ></tbody>
 
-      </table>
+  </table>
 
-    </div>
+</div>
 
-    <div
-      id="emptyEmployees"
-      class="empty"
-      style="display:none;"
-    >
-      Ходимлар топилмади
-    </div>
+<div
+  id="emptyEmployees"
+  class="empty"
+  style="display:none;"
+>
+  Ходимлар топилмади
+</div>
+```
 
   </div>
-
 
   <!-- =========================
        ROUTE DETAIL
@@ -615,91 +793,91 @@
     class="detail"
   >
 
-    <div class="detail-header">
+```
+<div class="detail-header">
 
-      <div
-        id="detailTitle"
-        class="detail-title"
-      >
-        🗺 Ходим маршрути
-      </div>
+  <div
+    id="detailTitle"
+    class="detail-title"
+  >
+    🗺 Ходим маршрути
+  </div>
 
-      <button
-        type="button"
-        class="btn-danger"
-        onclick="closeRoute()"
-      >
-        ✕ Ёпиш
-      </button>
+  <button
+    type="button"
+    class="btn-danger"
+    onclick="closeRoute()"
+  >
+    ✕ Ёпиш
+  </button>
 
+</div>
+
+
+<div class="route-stats">
+
+  <div class="route-stat">
+
+    <div class="route-stat-title">
+      📍 Нуқталар
     </div>
 
-
-    <div class="route-stats">
-
-      <div class="route-stat">
-
-        <div class="route-stat-title">
-          📍 Нуқталар
-        </div>
-
-        <div
-          id="routePoints"
-          class="route-stat-value"
-        >
-          0
-        </div>
-
-      </div>
-
-
-      <div class="route-stat">
-
-        <div class="route-stat-title">
-          📏 Масофа
-        </div>
-
-        <div
-          id="routeDistance"
-          class="route-stat-value"
-        >
-          0.00 км
-        </div>
-
-      </div>
-
-
-      <div class="route-stat">
-
-        <div class="route-stat-title">
-          ⏱ Вақт
-        </div>
-
-        <div
-          id="routeDuration"
-          class="route-stat-value"
-        >
-          00:00:00
-        </div>
-
-      </div>
-
+    <div
+      id="routePoints"
+      class="route-stat-value"
+    >
+      0
     </div>
 
+  </div>
 
-    <div id="routeMap"></div>
+
+  <div class="route-stat">
+
+    <div class="route-stat-title">
+      📏 Масофа
+    </div>
+
+    <div
+      id="routeDistance"
+      class="route-stat-value"
+    >
+      0.00 км
+    </div>
+
+  </div>
+
+
+  <div class="route-stat">
+
+    <div class="route-stat-title">
+      ⏱ Вақт
+    </div>
+
+    <div
+      id="routeDuration"
+      class="route-stat-value"
+    >
+      00:00:00
+    </div>
 
   </div>
 
 </div>
 
 
+<div id="routeMap"></div>
+```
+
+  </div>
+
+</div>
+
 <!-- Leaflet JS -->
 
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 ></script>
-
 
 <script>
 
@@ -709,6 +887,37 @@
 
 const API =
   "https://qyvglgcjsqifyubmpahw.supabase.co/functions/v1/smart-endpoint";
+
+
+/* =====================================================
+   MAIN MENU
+===================================================== */
+
+function openSection(
+  page,
+  button
+) {
+
+  if (
+    page ===
+    "dashboard.html"
+  ) {
+
+    window.scrollTo(
+      {
+        top: 0,
+        behavior: "smooth"
+      }
+    );
+
+    return;
+
+  }
+
+  window.location.href =
+    page;
+
+}
 
 
 /* =====================================================
@@ -1064,6 +1273,29 @@ function getFilteredEmployees() {
 
 
 /* =====================================================
+   GPS TIME HELPER
+===================================================== */
+
+function getEmployeeGpsTime(
+  employee
+) {
+
+  return (
+    employee.last_location_at ||
+    (
+      employee.last_location &&
+      (
+        employee.last_location.recorded_at ||
+        employee.last_location.created_at
+      )
+    ) ||
+    null
+  );
+
+}
+
+
+/* =====================================================
    UPDATE STATS
 ===================================================== */
 
@@ -1083,24 +1315,13 @@ function updateStats() {
         )
     ).length;
 
-const gps =
-  employees.filter(
-    employee => {
-
-      const gpsTime =
-        employee.last_location_at ||
-        (
-          employee.last_location &&
-          (
-            employee.last_location.recorded_at ||
-            employee.last_location.created_at
-          )
-        );
-
-      return !!gpsTime;
-
-    }
-  ).length;
+  const gps =
+    employees.filter(
+      employee =>
+        !!getEmployeeGpsTime(
+          employee
+        )
+    ).length;
 
   const noGps =
     total - gps;
@@ -1184,13 +1405,8 @@ function getGpsStatus(
 ) {
 
   const gpsTime =
-    employee.last_location_at ||
-    (
-      employee.last_location &&
-      (
-        employee.last_location.recorded_at ||
-        employee.last_location.created_at
-      )
+    getEmployeeGpsTime(
+      employee
     );
 
   if (!gpsTime) {
@@ -1254,6 +1470,8 @@ function getGpsStatus(
   };
 
 }
+
+
 /* =====================================================
    FORMAT DATE
 ===================================================== */
@@ -1409,16 +1627,11 @@ function renderEmployees() {
 
           <td>
             ${
-             formatDate(
-  employee.last_location_at ||
-  (
-    employee.last_location &&
-    (
-      employee.last_location.recorded_at ||
-      employee.last_location.created_at
-    )
-  )
-)
+              formatDate(
+                getEmployeeGpsTime(
+                  employee
+                )
+              )
             }
           </td>
 
@@ -1753,6 +1966,7 @@ async function loadRoute(
                 longitude,
 
               recorded_at:
+                point.recorded_at ||
                 point.created_at ||
                 null
 
@@ -1818,8 +2032,6 @@ function drawRoute(
   }
 
 
-  /* OLD LINE */
-
   if (
     routeLine
   ) {
@@ -1834,8 +2046,6 @@ function drawRoute(
   }
 
 
-  /* OLD MARKERS */
-
   routeMarkers.forEach(
     marker => {
 
@@ -1849,8 +2059,6 @@ function drawRoute(
   routeMarkers =
     [];
 
-
-  /* STATS */
 
   document.getElementById(
     "routePoints"
@@ -1885,8 +2093,6 @@ function drawRoute(
   }
 
 
-  /* COORDINATES */
-
   const coordinates =
     points.map(
       point =>
@@ -1896,8 +2102,6 @@ function drawRoute(
         ]
     );
 
-
-  /* DISTANCE */
 
   let totalDistance =
     0;
@@ -1927,8 +2131,6 @@ function drawRoute(
     ) +
     " км";
 
-
-  /* DURATION */
 
   if (
     points.length >= 2 &&
@@ -1971,8 +2173,6 @@ function drawRoute(
   }
 
 
-  /* ONE POINT */
-
   if (
     points.length === 1
   ) {
@@ -2002,8 +2202,6 @@ function drawRoute(
   }
 
 
-  /* POLYLINE */
-
   routeLine =
     L.polyline(
       coordinates,
@@ -2014,8 +2212,6 @@ function drawRoute(
       routeMap
     );
 
-
-  /* START */
 
   const startMarker =
     L.marker(
@@ -2028,8 +2224,6 @@ function drawRoute(
       "🟢 Бошланиш нуқтаси"
     );
 
-
-  /* END */
 
   const endMarker =
     L.marker(
@@ -2050,8 +2244,6 @@ function drawRoute(
     endMarker
   );
 
-
-  /* FIT MAP */
 
   routeMap.fitBounds(
     routeLine.getBounds(),
