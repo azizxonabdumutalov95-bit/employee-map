@@ -1083,11 +1083,24 @@ function updateStats() {
         )
     ).length;
 
-  const gps =
-    employees.filter(
-      employee =>
-        employee.last_location_at
-    ).length;
+const gps =
+  employees.filter(
+    employee => {
+
+      const gpsTime =
+        employee.last_location_at ||
+        (
+          employee.last_location &&
+          (
+            employee.last_location.recorded_at ||
+            employee.last_location.created_at
+          )
+        );
+
+      return !!gpsTime;
+
+    }
+  ).length;
 
   const noGps =
     total - gps;
@@ -1170,9 +1183,17 @@ function getGpsStatus(
   employee
 ) {
 
-  if (
-    !employee.last_location_at
-  ) {
+  const gpsTime =
+    employee.last_location_at ||
+    (
+      employee.last_location &&
+      (
+        employee.last_location.recorded_at ||
+        employee.last_location.created_at
+      )
+    );
+
+  if (!gpsTime) {
 
     return {
       text: "GPS йўқ",
@@ -1184,8 +1205,22 @@ function getGpsStatus(
 
   const last =
     new Date(
-      employee.last_location_at
+      gpsTime
     );
+
+  if (
+    Number.isNaN(
+      last.getTime()
+    )
+  ) {
+
+    return {
+      text: "GPS йўқ",
+      className:
+        "status status-offline"
+    };
+
+  }
 
   const diff =
     Date.now() -
@@ -1219,8 +1254,6 @@ function getGpsStatus(
   };
 
 }
-
-
 /* =====================================================
    FORMAT DATE
 ===================================================== */
