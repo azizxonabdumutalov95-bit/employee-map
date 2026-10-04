@@ -439,7 +439,6 @@ function addCell(row, value) {
   cell.textContent = value == null ? "—" : String(value);
   row.appendChild(cell);
 }
-
 async function resolveAlert(alertId, button) {
   if (!alertId) {
     window.alert("Alert ID топилмади");
@@ -461,65 +460,13 @@ async function resolveAlert(alertId, button) {
         headers: {
           "Content-Type": "application/json"
         },
-       body: JSON.stringify({
-  id: alertId,
-  telegram_id:
-    window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
-    new URLSearchParams(window.location.search).get("telegram_id") ||
-    ""
-})
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok || result.success !== true) {
-      throw new Error(
-        result.error || "Alertни ёпишда хато"
-      );
-    }
-
-    await loadAlerts();
-
-  } catch (error) {
-    console.error("RESOLVE ALERT ERROR:", error);
-
-    window.alert(
-      "❌ Alertни ёпишда хато:\n" + error.message
-    );
-
-    button.disabled = false;
-    button.textContent = "✅ Ёпиш";
-  }
-}
-async function resolveAlert(alertId, button) {
-  if (!alertId) {
-    window.alert("Alert ID топилмади");
-    return;
-  }
-
-  if (!window.confirm("Ушбу огоҳлантиришни ёпасизми?")) {
-    return;
-  }
-
-  button.disabled = true;
-  button.textContent = "⏳ Кутинг...";
-
-  try {
-    const response = await fetch(
-      API + "?view=alert_resolve",
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-       body: JSON.stringify({
-  id: alertId,
-  telegram_id:
-    window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
-    new URLSearchParams(window.location.search).get("telegram_id") ||
-    ""
-})
+        body: JSON.stringify({
+          id: alertId,
+          telegram_id:
+            window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
+            new URLSearchParams(window.location.search).get("telegram_id") ||
+            ""
+        })
       }
     );
 
@@ -545,6 +492,87 @@ async function resolveAlert(alertId, button) {
   }
 }
 
+
+/* =====================================================
+   CLOSE ALL ALERTS
+===================================================== */
+
+async function closeAllAlerts() {
+
+  if (
+    !window.confirm(
+      "Барча фаол alertларни ёпасизми?"
+    )
+  ) {
+    return;
+  }
+
+  try {
+
+    const telegramId =
+      window.Telegram?.WebApp?.initDataUnsafe?.user?.id ||
+      new URLSearchParams(
+        window.location.search
+      ).get("telegram_id") ||
+      "";
+
+    const response =
+      await fetch(
+        API +
+        "?view=alert_resolve_all",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            telegram_id:
+              telegramId
+          })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (
+      !response.ok ||
+      result.success !== true
+    ) {
+      throw new Error(
+        result.error ||
+        "Alertларни ёпишда хато"
+      );
+    }
+
+    window.alert(
+      "✅ " +
+      (result.closed || 0) +
+      " ta alert yopildi"
+    );
+
+    await loadAlerts();
+
+  } catch (error) {
+
+    console.error(
+      "CLOSE ALL ALERTS ERROR:",
+      error
+    );
+
+    window.alert(
+      "❌ Alertларни ёпишда хато:\n" +
+      error.message
+    );
+
+  }
+
+}
+
+
 function formatDate(value) {
   if (!value) return "—";
 
@@ -565,30 +593,7 @@ function formatDate(value) {
 }
 
 loadAlerts();
-</script>
 
-</body>
-</html>
-function formatDate(value) {
-  if (!value) return "—";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleString("uz-UZ", {
-    timeZone: "Asia/Tashkent",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-loadAlerts();
 </script>
 
 </body>
