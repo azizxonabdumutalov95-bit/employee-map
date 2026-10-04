@@ -188,12 +188,23 @@
 <body>
 <div class="container">
 
-  <div class="header">
-    <h1>🚨 Огоҳлантиришлар</h1>
+ <div class="header">
+  <h1>🚨 Огоҳлантиришлар</h1>
+
+  <div>
     <button class="refresh-btn" onclick="loadAlerts()">
       🔄 Янгилаш
     </button>
+
+    <button
+      class="refresh-btn"
+      onclick="closeAllAlerts()"
+      style="margin-left: 8px; background: #16a34a;"
+    >
+      ✅ Барчасини ёпиш
+    </button>
   </div>
+</div>
 
   <div class="filters">
     <input
