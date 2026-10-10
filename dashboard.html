@@ -217,130 +217,6 @@ input {
 }
 
 /* =====================================================
-   ALERTS PANEL
-===================================================== */
-
-.alerts-panel {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #fff;
-  border: 1px solid #f2d4d4;
-  border-left: 5px solid #dc3545;
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-}
-
-.alerts-panel.clear {
-  border-color: #d7eadc;
-  border-left-color: #2e7d32;
-}
-
-.alerts-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: #ffebee;
-  font-size: 27px;
-}
-
-.alerts-panel.clear .alerts-icon {
-  background: #e8f5e9;
-}
-
-.alerts-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.alerts-heading {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-
-.alerts-summary {
-  font-size: 14px;
-  color: #666;
-}
-
-.alerts-latest {
-  margin-top: 7px;
-  font-size: 13px;
-  color: #a52a2a;
-  overflow-wrap: anywhere;
-}
-
-.alerts-side {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.alert-count {
-  min-width: 42px;
-  text-align: center;
-  font-size: 27px;
-  font-weight: bold;
-  color: #c62828;
-}
-
-.alerts-panel.clear .alert-count {
-  color: #2e7d32;
-}
-
-.alerts-button {
-  white-space: nowrap;
-  background: #c62828;
-  color: white;
-  font-weight: bold;
-}
-
-.alerts-button:hover {
-  background: #a71919;
-}
-
-.alerts-panel.clear .alerts-button {
-  background: #2e7d32;
-}
-
-@media(max-width:700px) {
-  .alerts-panel {
-    align-items: flex-start;
-    gap: 11px;
-    padding: 13px;
-  }
-
-  .alerts-icon {
-    width: 42px;
-    height: 42px;
-    font-size: 22px;
-  }
-
-  .alerts-heading {
-    font-size: 16px;
-  }
-
-  .alerts-side {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 7px;
-  }
-
-  .alerts-button {
-    white-space: normal;
-    padding: 9px;
-    font-size: 12px;
-  }
-}
-
-/* =====================================================
    TABLE
 ===================================================== */
 
@@ -786,7 +662,7 @@ tr:hover td {
     <button
       type="button"
       class="menu-button"
-     onclick="openAlertsPage()"
+      onclick="openExternalPage('alerts.html')"
     >
       🚨 Огоҳлантиришлар
     </button>
@@ -936,38 +812,6 @@ tr:hover td {
 
   </div>
 
-
-<!-- ALERTS PANEL -->
-
-<div id="alertsPanel" class="alerts-panel">
-
-  <div class="alerts-icon">🚨</div>
-
-  <div class="alerts-content">
-    <div class="alerts-heading">
-      Огоҳлантиришлар
-    </div>
-
-    <div id="alertsSummary" class="alerts-summary">
-      Огоҳлантиришлар текширилмоқда...
-    </div>
-
-    <div id="alertsLatest" class="alerts-latest"></div>
-  </div>
-
-  <div class="alerts-side">
-    <div id="activeAlertCount" class="alert-count">—</div>
-
-    <button
-      type="button"
-      class="alerts-button"
-      onclick="openAlertsPage()"
-    >
-      Барча огоҳлантиришлар →
-    </button>
-  </div>
-
-</div>
 
   <!-- EMPLOYEES TABLE -->
 
@@ -1565,106 +1409,6 @@ function hideError() {
 
 
 /* =====================================================
-   DASHBOARD ALERTS
-===================================================== */
-
-function getDashboardTelegramId() {
-  return new URLSearchParams(
-    window.location.search
-  ).get("telegram_id") || "";
-}
-
-function openAlertsPage() {
-  const telegramId = getDashboardTelegramId();
-
-  if (!telegramId) {
-    alert(
-      "Dashboard'ни Telegram ботдаги админ тугмасидан очинг."
-    );
-    return;
-  }
-
-  window.location.href =
-    "alerts.html?telegram_id=" +
-    encodeURIComponent(telegramId);
-}
-
-async function loadDashboardAlerts() {
-  const panel = document.getElementById("alertsPanel");
-  const countElement = document.getElementById("activeAlertCount");
-  const summaryElement = document.getElementById("alertsSummary");
-  const latestElement = document.getElementById("alertsLatest");
-
-  const telegramId = getDashboardTelegramId();
-
-  if (!telegramId) {
-    countElement.textContent = "—";
-    summaryElement.textContent =
-      "Админ Dashboard'ни Telegram орқали очинг.";
-    latestElement.textContent = "";
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      API +
-      "?view=alerts&telegram_id=" +
-      encodeURIComponent(telegramId) +
-      "&t=" + Date.now(),
-      {
-        method: "GET",
-        cache: "no-store"
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok || data.success !== true) {
-      throw new Error(
-        data.error || "Огоҳлантиришларни олиб бўлмади"
-      );
-    }
-
-    const alerts = Array.isArray(data.alerts)
-      ? data.alerts
-      : [];
-
-    const active = alerts.filter(
-      alert => alert.status === "active"
-    );
-
-    countElement.textContent = active.length;
-
-    if (active.length === 0) {
-      panel.classList.add("clear");
-      summaryElement.textContent =
-        "Ҳозир фаол огоҳлантиришлар йўқ.";
-      latestElement.textContent = "";
-      return;
-    }
-
-    panel.classList.remove("clear");
-    summaryElement.textContent =
-      active.length + " та фаол огоҳлантириш бор.";
-
-    const latest = active[0];
-
-    latestElement.textContent =
-      "Охирги хабар: " +
-      (latest.employee_name || "Ходим") +
-      (latest.message ? " — " + latest.message : "");
-
-  } catch (error) {
-    console.error("DASHBOARD ALERTS ERROR:", error);
-
-    countElement.textContent = "!";
-    summaryElement.textContent =
-      "Огоҳлантиришларни юклашда хато. Қайта янгиланг.";
-    latestElement.textContent = "";
-  }
-}
-
-/* =====================================================
    LOAD DASHBOARD
 ===================================================== */
 
@@ -1690,24 +1434,11 @@ async function loadDashboard() {
 
   try {
 
-    
-const telegramId = getDashboardTelegramId();
-
-const response = await fetch(
-  API +
-  "?view=dashboard" +
-  (
-    telegramId
-      ? "&telegram_id=" + encodeURIComponent(telegramId)
-      : ""
-  ) +
-  "&t=" + Date.now(),
-  {
-    method: "GET",
-    cache: "no-store"
-  }
-);
-
+    const response =
+      await fetch(
+        API +
+        "?view=dashboard"
+      );
 
 
     const data =
@@ -1765,8 +1496,6 @@ const response = await fetch(
     updateStats();
 
     renderEmployees();
-    
-    loadDashboardAlerts();
 
 
     document.getElementById(
