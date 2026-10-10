@@ -1294,17 +1294,9 @@ function openSection(section) {
 
 }
 
-
-function openExternalPage(page) {
-
-  window.location.href =
-    page;
-
-}
 function openExternalPage(page) {
   window.location.href = page;
 }
-
 
 // =====================================================
 // OPEN ALERTS PAGE
@@ -1317,7 +1309,7 @@ function openAlertsPage() {
 
   if (!telegramId) {
     alert(
-      "Telegram ботдаги Dashboard тугмаси орқали киринг."
+      "Дашборд URL манзилида Telegram ID йўқ. Администратор ID билан киринг."
     );
     return;
   }
@@ -1326,7 +1318,6 @@ function openAlertsPage() {
     "alerts.html?telegram_id=" +
     encodeURIComponent(telegramId);
 }
-
 
 /* =====================================================
    REFRESH CURRENT SECTION
