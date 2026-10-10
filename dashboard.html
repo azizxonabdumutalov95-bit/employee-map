@@ -662,7 +662,7 @@ tr:hover td {
     <button
       type="button"
       class="menu-button"
-      onclick="openExternalPage('alerts.html')"
+      onclick="openAlertsPage()"
     >
       🚨 Огоҳлантиришлар
     </button>
@@ -1301,7 +1301,36 @@ function openExternalPage(page) {
     page;
 
 }
+function openExternalPage(page) {
+  window.location.href = page;
+}
 
+
+// =====================================================
+// OPEN ALERTS PAGE
+// =====================================================
+
+function openAlertsPage() {
+  const telegramId = new URLSearchParams(
+    window.location.search
+  ).get("telegram_id");
+
+  if (!telegramId) {
+    alert(
+      "Telegram ботдаги Dashboard тугмаси орқали киринг."
+    );
+    return;
+  }
+
+  window.location.href =
+    "alerts.html?telegram_id=" +
+    encodeURIComponent(telegramId);
+}
+
+
+/* =====================================================
+   REFRESH CURRENT SECTION
+===================================================== */
 
 /* =====================================================
    REFRESH CURRENT SECTION
